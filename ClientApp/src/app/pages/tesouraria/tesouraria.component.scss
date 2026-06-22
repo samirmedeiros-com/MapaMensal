@@ -1,0 +1,130 @@
+.month-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 20px;
+
+  button[mat-icon-button] { color: #1a237e; }
+  span { font-weight: 600; font-size: 1.1rem; color: #333; min-width: 160px; text-align: center; }
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e8eaf6;
+}
+
+.add-form {
+  background: #f8f9ff;
+  border: 1px solid #c5cae9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.add-form-fields {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+
+  &.grow { flex: 1; min-width: 220px; }
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+  }
+
+  input {
+    padding: 7px 10px;
+    border: 1px solid #c5cae9;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+
+    &:focus { border-color: #1a237e; }
+  }
+}
+
+.add-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.expense-table {
+  .notes-col {
+    color: #777;
+    font-size: 0.85rem;
+    min-width: 120px;
+  }
+
+  .actions {
+    text-align: center !important;
+    white-space: nowrap;
+  }
+}
+
+.cell-input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #9fa8da;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  box-sizing: border-box;
+
+  &.amount-input { max-width: 120px; }
+}
+
+.resumo-table {
+  max-width: 520px;
+
+  td:first-child { min-width: 300px; }
+}
+
+.balance-row td {
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-top: 2px solid #1a237e;
+}
+
+.accumulated-row td {
+  background: #e8eaf6;
+  font-weight: 700;
+}
+
+.positive { color: #2e7d32; }
+.negative { color: #c62828; }
+
+.sub-row td {
+  color: #555;
+  font-size: 0.85rem;
+  background: #fafafa;
+}
+
+.empty-row {
+  text-align: center !important;
+  color: #999;
+  font-style: italic;
+  padding: 16px 12px !important;
+}
+
+.loading-row {
+  padding: 16px;
+  color: #aaa;
+  text-align: center;
+}

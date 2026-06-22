@@ -1,0 +1,240 @@
+<div class="cp-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-title">Contas Pessoais</div>
+    <button mat-flat-button color="primary" (click)="openForm()">
+      <mat-icon>add</mat-icon> Nova Conta
+    </button>
+  </div>
+
+  <!-- NAVEGAÇÃO MÊS -->
+  <div class="month-selector">
+    <button mat-icon-button (click)="changeMonth(-1)"><mat-icon>chevron_left</mat-icon></button>
+    <span>{{ monthName() }} {{ year() }}</span>
+    <button mat-icon-button (click)="changeMonth(1)"><mat-icon>chevron_right</mat-icon></button>
+  </div>
+
+  <!-- CARDS RESUMO -->
+  <div class="summary-cards">
+    <div class="summary-card previsto">
+      <mat-icon>receipt_long</mat-icon>
+      <div>
+        <div class="sc-label">Total Previsto</div>
+        <div class="sc-value">{{ fmt(totalPrevisto()) }} €</div>
+      </div>
+    </div>
+    <div class="summary-card pago">
+      <mat-icon>check_circle</mat-icon>
+      <div>
+        <div class="sc-label">Total Pago</div>
+        <div class="sc-value">{{ fmt(totalPago()) }} €</div>
+      </div>
+    </div>
+    <div class="summary-card aberto">
+      <mat-icon>pending</mat-icon>
+      <div>
+        <div class="sc-label">Em Aberto</div>
+        <div class="sc-value">{{ fmt(totalAberto()) }} €</div>
+      </div>
+    </div>
+    <div class="summary-card saldo" [class.neg]="totalAberto() > 0">
+      <mat-icon>{{ totalAberto() === 0 ? 'done_all' : 'hourglass_bottom' }}</mat-icon>
+      <div>
+        <div class="sc-label">Contas</div>
+        <div class="sc-value">{{ filtered().length }} ({{ filtered().filter(c => c.pago).length }} pagas)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMULÁRIO -->
+  @if (showForm()) {
+    <div class="card form-card">
+      <div class="form-title">{{ editMode() ? 'Editar Conta' : 'Nova Conta a Pagar' }}</div>
+      <div class="form-grid">
+        <div class="form-group span2">
+          <label>Descrição *</label>
+          <input type="text" [(ngModel)]="form.descricao" placeholder="Ex: Renda, Seguro de Saúde..." />
+        </div>
+        <div class="form-group">
+          <label>Categoria *</label>
+          <select [(ngModel)]="form.categoria">
+            @for (cat of categorias; track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data de Vencimento *</label>
+          <input type="date" [(ngModel)]="form.dataVencimento" />
+        </div>
+        <div class="form-group">
+          <label>Valor Previsto (€) *</label>
+          <input type="number" [(ngModel)]="form.valorPrevisto" min="0" step="0.01" placeholder="0.00" />
+        </div>
+        @if (!editMode()) {
+          <div class="form-group">
+            <label>Recorrência (meses)</label>
+            <input type="number" [(ngModel)]="form.totalRecorrencias" min="1" max="60" step="1" />
+            @if (form.totalRecorrencias > 1) {
+              <span class="recorrencia-hint">Cria {{ form.totalRecorrencias }} contas mensais</span>
+            }
+          </div>
+        }
+      </div>
+      <div class="form-actions">
+        <button mat-flat-button color="primary" (click)="save()">
+          <mat-icon>{{ editMode() ? 'save' : 'add' }}</mat-icon>
+          {{ editMode() ? 'Guardar' : (form.totalRecorrencias > 1 ? 'Criar ' + form.totalRecorrencias + ' contas' : 'Criar Conta') }}
+        </button>
+        <button mat-button (click)="cancelForm()">Cancelar</button>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL PAGAMENTO -->
+  @if (pagarModal(); as conta) {
+    <div class="modal-overlay" (click)="pagarModal.set(null)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-title">Registar Pagamento</div>
+        <div class="modal-desc">{{ conta.descricao }}</div>
+        <div class="modal-desc cat">{{ conta.categoria }}</div>
+        <div class="form-group" style="margin-top:16px">
+          <label>Data de Pagamento</label>
+          <input type="date" [(ngModel)]="pagarForm.dataPagamento" />
+        </div>
+        <div class="form-group">
+          <label>Valor Pago (€)</label>
+          <input type="number" [(ngModel)]="pagarForm.valorPago" min="0" step="0.01" />
+          @if (pagarForm.valorPago !== conta.valorPrevisto) {
+            <span class="recorrencia-hint warn">Previsto: {{ fmt(conta.valorPrevisto) }} €</span>
+          }
+        </div>
+        <div class="modal-actions">
+          <button mat-flat-button color="primary" (click)="confirmarPagar()">
+            <mat-icon>check</mat-icon> Confirmar Pagamento
+          </button>
+          <button mat-button (click)="pagarModal.set(null)">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- FILTROS -->
+  <div class="filters-bar card">
+    <div class="filter-group">
+      <label>Categoria</label>
+      <select [ngModel]="filterCategoria()" (ngModelChange)="filterCategoria.set($event)">
+        <option value="">Todas</option>
+        @for (cat of categoriasUsadas(); track cat) {
+          <option [value]="cat">{{ cat }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Estado</label>
+      <div class="status-chips">
+        <button class="chip" [class.active]="filterStatus() === 'todos'"  (click)="filterStatus.set('todos')">Todos</button>
+        <button class="chip aberto-chip" [class.active]="filterStatus() === 'aberto'" (click)="filterStatus.set('aberto')">Em Aberto</button>
+        <button class="chip pago-chip"   [class.active]="filterStatus() === 'pago'"   (click)="filterStatus.set('pago')">Pagos</button>
+      </div>
+    </div>
+    <div class="filter-count">{{ filtered().length }} conta{{ filtered().length !== 1 ? 's' : '' }}</div>
+  </div>
+
+  <!-- TABELA DE CONTAS -->
+  <div class="card">
+    <table class="summary-table cp-table">
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Categoria</th>
+          <th>Vencimento</th>
+          <th>Previsto</th>
+          <th>Pago</th>
+          <th>Dt. Pagamento</th>
+          <th>Estado</th>
+          <th style="width:110px;text-align:center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of filtered(); track c.id) {
+          <tr [class.pago-row]="c.pago" [class.vencida-row]="isVencida(c)">
+            <td>
+              <div class="desc-cell">
+                {{ c.descricao }}
+                @if (c.totalRecorrencias > 1) {
+                  <span class="recorr-badge" [matTooltip]="'Recorrência ' + c.recorrenciaAtual + ' de ' + c.totalRecorrencias">
+                    {{ c.recorrenciaAtual }}/{{ c.totalRecorrencias }}
+                  </span>
+                }
+              </div>
+            </td>
+            <td><span class="cat-badge">{{ c.categoria }}</span></td>
+            <td [class.vencida-date]="isVencida(c)">{{ c.dataVencimento | date:'dd/MM/yyyy' }}</td>
+            <td>{{ fmt(c.valorPrevisto) }} €</td>
+            <td>{{ c.pago ? fmt(c.valorPago ?? 0) + ' €' : '—' }}</td>
+            <td>{{ c.dataPagamento ? (c.dataPagamento | date:'dd/MM/yyyy') : '—' }}</td>
+            <td>
+              @if (c.pago) {
+                <span class="status-badge pago">Pago</span>
+              } @else if (isVencida(c)) {
+                <span class="status-badge vencida">Vencida</span>
+              } @else {
+                <span class="status-badge aberto">Em Aberto</span>
+              }
+            </td>
+            <td class="acoes">
+              @if (!c.pago) {
+                <button mat-icon-button color="primary" (click)="openPagar(c)" matTooltip="Registar pagamento">
+                  <mat-icon>payments</mat-icon>
+                </button>
+              } @else {
+                <button mat-icon-button (click)="desmarcarPago(c)" matTooltip="Desmarcar pagamento">
+                  <mat-icon>undo</mat-icon>
+                </button>
+              }
+              <button mat-icon-button (click)="openEdit(c)" matTooltip="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="delete(c)" matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        }
+        @if (filtered().length === 0) {
+          <tr><td colspan="8" class="empty-row">Sem contas neste mês. Clique em "Nova Conta" para adicionar.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div class="card graficos-card">
+    <div class="graficos-header">
+      <span class="card-title" style="margin:0;border:none">Análise de Despesas {{ year() }}</span>
+      <button mat-icon-button (click)="showGraficos.update(v => !v)" [matTooltip]="showGraficos() ? 'Ocultar gráficos' : 'Mostrar gráficos'">
+        <mat-icon>{{ showGraficos() ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+    </div>
+
+    @if (showGraficos()) {
+      <div class="graficos-grid">
+        <div class="grafico-box">
+          <div class="grafico-title">Previsto vs Pago — Mensal</div>
+          <div class="canvas-wrap">
+            <canvas #barCanvas></canvas>
+          </div>
+        </div>
+        <div class="grafico-box">
+          <div class="grafico-title">Distribuição por Categoria</div>
+          <div class="canvas-wrap">
+            <canvas #pieCanvas></canvas>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

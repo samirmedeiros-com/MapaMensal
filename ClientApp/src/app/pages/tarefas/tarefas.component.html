@@ -1,0 +1,256 @@
+<div class="tarefas-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-title">Tarefas</div>
+    @if (!viewArquivados()) {
+      <button mat-flat-button color="primary" (click)="openCreate()">
+        <mat-icon>add</mat-icon> Nova Tarefa
+      </button>
+    }
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filters-bar card">
+    <div class="filter-group">
+      <label>Projeto</label>
+      <select [ngModel]="filterProjectId()"
+              (ngModelChange)="filterProjectId.set($event ? +$event : null)">
+        <option [ngValue]="null">Todos os projetos</option>
+        @for (p of projects(); track p.id) {
+          <option [ngValue]="p.id">{{ p.name }}</option>
+        }
+      </select>
+    </div>
+
+    @if (!viewArquivados()) {
+      <div class="filter-group">
+        <label>Status</label>
+        <div class="status-chips">
+          <button class="chip" [class.active]="filterStatus() === null"
+                  (click)="filterStatus.set(null)">Todos</button>
+          <button class="chip backlog" [class.active]="filterStatus() === 'Backlog'"
+                  (click)="filterStatus.set('Backlog')">Backlog</button>
+          <button class="chip progress" [class.active]="filterStatus() === 'EmProgresso'"
+                  (click)="filterStatus.set('EmProgresso')">Em Progresso</button>
+          <button class="chip done" [class.active]="filterStatus() === 'Concluido'"
+                  (click)="filterStatus.set('Concluido')">Concluído</button>
+        </div>
+      </div>
+    }
+
+    <div class="filter-count">
+      {{ filtered().length }} tarefa{{ filtered().length !== 1 ? 's' : '' }}
+    </div>
+
+    <button class="chip archive-toggle" [class.active]="viewArquivados()"
+            (click)="toggleArquivados()" style="margin-left:auto">
+      <mat-icon style="font-size:16px;width:16px;height:16px;vertical-align:middle">
+        {{ viewArquivados() ? 'unarchive' : 'inventory_2' }}
+      </mat-icon>
+      {{ viewArquivados() ? 'Ver ativas' : 'Ver arquivo' }}
+    </button>
+  </div>
+
+  <!-- FORMULÁRIO -->
+  @if (showForm()) {
+    <div class="card form-card">
+      <div class="form-title">{{ isEditing() ? 'Editar Tarefa' : 'Nova Tarefa' }}</div>
+      <div class="form-grid">
+        <div class="form-group span2">
+          <label>Título *</label>
+          <input type="text" [(ngModel)]="editingTarefa.titulo" placeholder="Título da tarefa" />
+        </div>
+        <div class="form-group">
+          <label>Projeto *</label>
+          <select [(ngModel)]="editingTarefa.projectId">
+            @for (p of projects(); track p.id) {
+              <option [ngValue]="p.id">{{ p.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="editingTarefa.status">
+            <option value="Backlog">Backlog</option>
+            <option value="EmProgresso">Em Progresso</option>
+            <option value="Concluido">Concluído</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data de Entrega</label>
+          <input type="date" [(ngModel)]="editingTarefa.dataEntrega" />
+        </div>
+        <div class="form-group">
+          <label>Horas Gastas</label>
+          <input type="number" [(ngModel)]="editingTarefa.horasGastas" min="0" step="0.5" placeholder="0" />
+        </div>
+        <div class="form-group span4">
+          <label>Descrição</label>
+          <textarea [(ngModel)]="editingTarefa.descricao" rows="3"
+                    placeholder="Descreva a tarefa..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button mat-flat-button color="primary" (click)="save()">
+          <mat-icon>{{ isEditing() ? 'save' : 'add_task' }}</mat-icon>
+          {{ isEditing() ? 'Guardar' : 'Criar Tarefa' }}
+        </button>
+        <button mat-button (click)="cancelForm()">Cancelar</button>
+      </div>
+    </div>
+  }
+
+  <!-- KANBAN BOARD (tarefas ativas) -->
+  @if (!viewArquivados()) {
+    <div class="kanban-board">
+      @for (col of columns; track col) {
+        <div class="kanban-col">
+          <div class="col-header" [class]="'col-' + col.toLowerCase()">
+            <div class="col-title">
+              <span>{{ statusLabels[col] }}</span>
+              <span class="col-count">{{ columnTasks()[col].length }}</span>
+            </div>
+            <div class="col-meta">
+              @if (totalHours(col) > 0) {
+                <span class="hours-total">{{ totalHours(col) }}h</span>
+              }
+              <button mat-icon-button (click)="openCreate(col)"
+                      [matTooltip]="'Nova tarefa em ' + statusLabels[col]">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-body">
+            @for (t of columnTasks()[col]; track t.id) {
+              <div class="task-card" [class.overdue]="isOverdue(t)">
+                <div class="task-header">
+                  <div class="task-project">{{ t.projectName }}</div>
+                  <div class="task-actions">
+                    @if (t.status === 'Concluido') {
+                      <button mat-icon-button class="archive-btn" (click)="arquivar(t)"
+                              matTooltip="Enviar para arquivo">
+                        <mat-icon>inventory_2</mat-icon>
+                      </button>
+                    }
+                    @if (canMovePrev(t.status)) {
+                      <button mat-icon-button (click)="moveStatus(t, 'prev')"
+                              [matTooltip]="'Mover para ' + statusLabels[STATUS_PREV[t.status] ?? 'Backlog']">
+                        <mat-icon>chevron_left</mat-icon>
+                      </button>
+                    }
+                    @if (canMoveNext(t.status)) {
+                      <button mat-icon-button color="primary" (click)="moveStatus(t, 'next')"
+                              [matTooltip]="'Mover para ' + statusLabels[STATUS_NEXT[t.status] ?? 'Concluido']">
+                        <mat-icon>chevron_right</mat-icon>
+                      </button>
+                    }
+                    <button mat-icon-button (click)="openEdit(t)" matTooltip="Editar">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="delete(t)" matTooltip="Eliminar">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="task-title">{{ t.titulo }}</div>
+
+                @if (t.descricao) {
+                  <div class="task-desc">{{ t.descricao }}</div>
+                }
+
+                <div class="task-dates">
+                  <span class="task-created">
+                    <mat-icon>add_circle_outline</mat-icon>
+                    Criado: {{ t.createdAt | date:'dd/MM/yyyy' }}
+                  </span>
+                  @if (t.dataEntrega) {
+                    <span class="task-date" [class.overdue-date]="isOverdue(t)">
+                      <mat-icon>event</mat-icon>
+                      Entrega: {{ t.dataEntrega | date:'dd/MM/yyyy' }}
+                    </span>
+                  }
+                </div>
+
+                <div class="task-footer">
+                  <div class="task-meta">
+                    @if (t.horasGastas > 0) {
+                      <span class="task-hours">
+                        <mat-icon>schedule</mat-icon>
+                        {{ t.horasGastas }}h
+                      </span>
+                    }
+                  </div>
+                  <mat-icon class="done-icon">check_circle</mat-icon>
+                </div>
+              </div>
+            }
+
+            @if (columnTasks()[col].length === 0) {
+              <div class="col-empty">Sem tarefas</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- LISTA ARQUIVADOS -->
+  @if (viewArquivados()) {
+    <div class="card">
+      <div class="archive-header">
+        <mat-icon>inventory_2</mat-icon>
+        <span>Tarefas Arquivadas</span>
+        <span class="col-count-plain">{{ filtered().length }}</span>
+      </div>
+
+      @if (filtered().length === 0) {
+        <div class="col-empty" style="padding:32px;text-align:center">
+          Nenhuma tarefa arquivada.
+        </div>
+      } @else {
+        <div class="archived-list">
+          @for (t of filtered(); track t.id) {
+            <div class="archived-card">
+              <div class="archived-left">
+                <div class="archived-project">{{ t.projectName }}</div>
+                <div class="archived-title">{{ t.titulo }}</div>
+                @if (t.descricao) {
+                  <div class="task-desc">{{ t.descricao }}</div>
+                }
+                <div class="task-dates" style="margin-top:6px">
+                  <span class="task-created">
+                    <mat-icon>add_circle_outline</mat-icon>
+                    Criado: {{ t.createdAt | date:'dd/MM/yyyy' }}
+                  </span>
+                  @if (t.dataEntrega) {
+                    <span class="task-date">
+                      <mat-icon>event</mat-icon>
+                      Entrega: {{ t.dataEntrega | date:'dd/MM/yyyy' }}
+                    </span>
+                  }
+                </div>
+              </div>
+              <div class="archived-right">
+                @if (t.horasGastas > 0) {
+                  <span class="task-hours">
+                    <mat-icon>schedule</mat-icon>{{ t.horasGastas }}h
+                  </span>
+                }
+                <button mat-icon-button matTooltip="Restaurar tarefa" (click)="desarquivar(t)">
+                  <mat-icon>unarchive</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Eliminar definitivamente" (click)="delete(t)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+</div>

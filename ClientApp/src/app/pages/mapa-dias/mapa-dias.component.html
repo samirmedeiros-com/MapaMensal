@@ -1,0 +1,60 @@
+<div class="page-container">
+  <div class="page-title">Mapa de Dias</div>
+
+  <!-- Navegação mês -->
+  <div class="month-nav">
+    <button mat-icon-button (click)="changeMonth(-1)"><mat-icon>chevron_left</mat-icon></button>
+    <span class="month-label">{{ monthName() }} {{ year() }}</span>
+    <button mat-icon-button (click)="changeMonth(1)"><mat-icon>chevron_right</mat-icon></button>
+  </div>
+
+  <!-- Legenda -->
+  <div class="legend">
+    <span class="leg worked">1 — Dia completo</span>
+    <span class="leg half">½ — Meio dia</span>
+    <span class="leg vacation">F — Férias</span>
+    <span class="leg weekend">Fim de semana</span>
+    <span class="leg holiday">Feriado</span>
+    <span class="leg empty">Não marcado</span>
+  </div>
+
+  <!-- Calendário -->
+  <div class="card calendar-card">
+    <div class="calendar-scroll">
+      <table class="calendar-table">
+        <thead>
+          <tr>
+            <th class="project-col">Projeto</th>
+            @for (cell of cells(); track cell.day) {
+              <th [class.weekend-header]="cell.isWeekend" [class.holiday-header]="cell.isHoliday"
+                  [matTooltip]="cell.isHoliday ? cell.holidayName! : cell.dayName">
+                <div class="day-num">{{ cell.day }}</div>
+                <div class="day-name">{{ cell.dayName }}</div>
+              </th>
+            }
+            <th class="totals-col">Dias</th>
+            <th class="totals-col">Valor</th>
+            <th class="totals-col">Férias</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (proj of projects(); track proj.id; let pi = $index) {
+            <tr [class.project-row-alt]="pi % 2 === 1">
+              <td class="project-name">{{ proj.name }}</td>
+              @for (cell of cells(); track cell.day) {
+                <td
+                  [class]="getMarkClass(cell.marks.get(proj.id), cell.isWeekend, cell.isHoliday)"
+                  [matTooltip]="cell.isHoliday ? cell.holidayName! : (cell.isWeekend ? '' : 'Clique para alternar')"
+                  (click)="cycleMark(cell, proj)"
+                >{{ getMarkLabel(cell.marks.get(proj.id)) }}</td>
+              }
+              <td class="total-cell">{{ projectTotals()[pi].workedDays }}</td>
+              <td class="total-cell">{{ formatCurrency(projectTotals()[pi].value) }} €</td>
+              <td class="total-cell">{{ projectTotals()[pi].vacationDays }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

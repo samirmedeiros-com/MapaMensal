@@ -1,0 +1,45 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.rsuser
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Ambiente e segredos
+appsettings.*.json
+!appsettings.json
+
+## Base de dados SQLite (gerada em runtime)
+*.db
+*.db-shm
+*.db-wal
+
+## Angular — dependências e output de build
+ClientApp/node_modules/
+ClientApp/.angular/
+ClientApp/dist/
+wwwroot/
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+## IDEs
+.idea/
+.vscode/settings.json
+*.swp
+*~
+
+## Logs
+*.log
+/tmp/

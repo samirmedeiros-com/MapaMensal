@@ -1,0 +1,126 @@
+<div class="page-container">
+  <div class="page-title">Utilizadores</div>
+
+  @if (editMode(); as mode) {
+    <div class="card form-card">
+      @if (mode === 'password') {
+        <div class="card-title">Redefinir Password — {{ selectedUser?.username }}</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nova Password</label>
+            <input type="password" [(ngModel)]="pwForm.newPassword" placeholder="Nova password" />
+          </div>
+          <div class="form-group">
+            <label>Confirmar Password</label>
+            <input type="password" [(ngModel)]="pwForm.confirm" placeholder="Repetir password" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button mat-flat-button color="primary" (click)="savePassword()">
+            <mat-icon>lock_reset</mat-icon> Redefinir Password
+          </button>
+          <button mat-button (click)="cancel()">Cancelar</button>
+        </div>
+      } @else {
+        <div class="card-title">{{ mode === 'create' ? 'Novo Utilizador' : 'Editar Utilizador' }}</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome de utilizador</label>
+            <input type="text" [(ngModel)]="form.username" placeholder="username" />
+          </div>
+          <div class="form-group grow">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="form.email" placeholder="email@exemplo.com" />
+          </div>
+          @if (mode === 'create') {
+            <div class="form-group">
+              <label>Password inicial</label>
+              <input type="password" [(ngModel)]="form.password" placeholder="Password" />
+            </div>
+          }
+          <div class="form-group">
+            <label>Perfil</label>
+            <select [(ngModel)]="form.role">
+              <option value="User">Utilizador</option>
+              <option value="Admin">Administrador</option>
+            </select>
+          </div>
+          @if (mode === 'edit') {
+            <div class="form-group">
+              <label>Estado</label>
+              <select [(ngModel)]="form.isActive">
+                <option [ngValue]="true">Ativo</option>
+                <option [ngValue]="false">Inativo</option>
+              </select>
+            </div>
+          }
+        </div>
+        <div class="form-actions">
+          <button mat-flat-button color="primary" (click)="save()">
+            <mat-icon>{{ mode === 'create' ? 'person_add' : 'save' }}</mat-icon>
+            {{ mode === 'create' ? 'Criar Utilizador' : 'Guardar' }}
+          </button>
+          <button mat-button (click)="cancel()">Cancelar</button>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="card">
+    <div class="card-title-row">
+      <span class="card-title" style="margin-bottom:0;border:none">Lista de Utilizadores</span>
+      <button mat-flat-button color="primary" (click)="openCreate()">
+        <mat-icon>person_add</mat-icon> Novo Utilizador
+      </button>
+    </div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Utilizador</th>
+          <th>Email</th>
+          <th>Perfil</th>
+          <th>Estado</th>
+          <th>Criado em</th>
+          <th style="text-align:center;width:120px">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of users(); track u.id) {
+          <tr [class.inactive]="!u.isActive">
+            <td>
+              <div class="user-name">
+                <mat-icon class="user-icon">{{ u.role === 'Admin' ? 'admin_panel_settings' : 'person' }}</mat-icon>
+                {{ u.username }}
+              </div>
+            </td>
+            <td>{{ u.email }}</td>
+            <td>
+              <span class="role-badge" [class.admin]="u.role === 'Admin'">
+                {{ roleLabel(u.role) }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [class.active]="u.isActive">
+                {{ u.isActive ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            <td>{{ u.createdAt | slice:0:10 }}</td>
+            <td class="actions">
+              <button mat-icon-button color="primary" (click)="openEdit(u)" title="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="openResetPassword(u)" title="Redefinir password">
+                <mat-icon>lock_reset</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="delete(u)" title="Eliminar"
+                      [disabled]="u.id === auth.currentUser()?.id">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

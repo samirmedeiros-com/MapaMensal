@@ -1,0 +1,118 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
+}
+
+.login-card {
+  background: white;
+  border-radius: 12px;
+  padding: 40px 48px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 32px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #1a237e;
+  }
+
+  h1 {
+    margin: 8px 0 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a237e;
+    letter-spacing: -0.5px;
+  }
+}
+
+.form-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .input-icon {
+    position: absolute;
+    left: 12px;
+    color: #9fa8da;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 11px 44px 11px 40px;
+    border: 1.5px solid #c5cae9;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+
+    &:focus { border-color: #1a237e; }
+  }
+
+  .toggle-pw {
+    position: absolute;
+    right: 4px;
+    color: #9fa8da;
+  }
+}
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #c62828;
+  font-size: 0.88rem;
+  background: #ffebee;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: #1a237e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 8px;
+
+  &:hover:not(:disabled) { background: #283593; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
