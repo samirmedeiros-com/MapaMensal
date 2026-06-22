@@ -128,3 +128,11 @@
   color: #aaa;
   text-align: center;
 }
+
+@media (max-width: 768px) {
+  .month-selector span { min-width: 120px; font-size: 0.95rem; }
+  .add-form-fields { flex-direction: column; }
+  .form-group { min-width: unset; width: 100%; &.grow { min-width: unset; } }
+  .resumo-table { max-width: 100%; td:first-child { min-width: unset; } }
+  .expense-table .notes-col { display: none; }
+}

@@ -1,13 +1,17 @@
 @if (auth.isLoggedIn()) {
   <mat-sidenav-container class="sidenav-container">
-    <mat-sidenav mode="side" opened class="sidenav">
+
+    <mat-sidenav #sidenav
+      [mode]="isMobile() ? 'over' : 'side'"
+      [opened]="!isMobile()"
+      class="sidenav">
       <div class="logo">
         <mat-icon>insert_chart</mat-icon>
         <span>Mapa Mensal</span>
       </div>
       <mat-nav-list>
         @for (item of navItems(); track item.path) {
-          <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link">
+          <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link" (click)="onNavClick()">
             <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
             <span matListItemTitle>{{ item.label }}</span>
           </a>
@@ -26,9 +30,19 @@
         </button>
       </div>
     </mat-sidenav>
+
     <mat-sidenav-content class="main-content">
+      @if (isMobile()) {
+        <mat-toolbar class="mobile-toolbar">
+          <button mat-icon-button (click)="sidenav.toggle()">
+            <mat-icon>menu</mat-icon>
+          </button>
+          <span class="mobile-title">Mapa Mensal</span>
+        </mat-toolbar>
+      }
       <router-outlet />
     </mat-sidenav-content>
+
   </mat-sidenav-container>
 } @else {
   <router-outlet />

@@ -35,14 +35,7 @@
       mat-icon { color: white; }
     }
   }
-}
 
-.main-content {
-  background: #f5f5f5;
-  overflow-y: auto;
-}
-
-.sidenav {
   display: flex;
   flex-direction: column;
 
@@ -88,8 +81,30 @@
     .logout-btn {
       color: rgba(255,255,255,0.7);
       flex-shrink: 0;
-
       &:hover { color: white; }
     }
+  }
+}
+
+.main-content {
+  background: #f5f5f5;
+  overflow-y: auto;
+}
+
+// --- MOBILE TOOLBAR ---
+.mobile-toolbar {
+  background: #1a237e;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+
+  button[mat-icon-button] { color: white; }
+
+  .mobile-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-left: 8px;
   }
 }

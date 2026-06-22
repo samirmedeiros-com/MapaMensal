@@ -29,3 +29,7 @@
   color: #999;
   padding: 40px;
 }
+
+@media (max-width: 768px) {
+  .iva-card .iva-item { min-width: unset; flex: 1 1 calc(50% - 10px); }
+}

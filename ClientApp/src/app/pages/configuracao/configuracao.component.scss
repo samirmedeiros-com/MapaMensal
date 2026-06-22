@@ -34,3 +34,7 @@
   cursor: pointer;
   border-radius: 4px;
 }
+
+@media (max-width: 768px) {
+  .iva-row { flex-wrap: wrap; }
+}
