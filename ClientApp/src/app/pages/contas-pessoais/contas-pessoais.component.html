@@ -59,8 +59,8 @@
         <div class="form-group">
           <label>Categoria *</label>
           <select [(ngModel)]="form.categoria">
-            @for (cat of categorias; track cat) {
-              <option [value]="cat">{{ cat }}</option>
+            @for (cat of categorias(); track cat.id) {
+              <option [value]="cat.nome">{{ cat.nome }}</option>
             }
           </select>
         </div>

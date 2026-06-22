@@ -17,3 +17,20 @@
 
 .add-row td { background: #f9f9f9; }
 .actions { white-space: nowrap; }
+
+.cat-color-dot {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  vertical-align: middle;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+.color-input {
+  width: 40px;
+  height: 32px;
+  padding: 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}

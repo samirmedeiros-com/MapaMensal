@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   Project, WorkDay, WorkDayUpsertDto, Holiday,
   Expense, AnnualSummary, TreasurySummary, Tarefa,
-  ContaPessoal, ResumoAnualContas
+  ContaPessoal, ResumoAnualContas, CategoriaContaPessoal
 } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -106,6 +106,20 @@ export class ApiService {
   }
   deleteContaPessoal(id: number, grupo = false): Observable<void> {
     return this.http.delete<void>(`${this.base}/contaspessoais/${id}?grupo=${grupo}`);
+  }
+
+  // Categorias Contas Pessoais
+  getCategoriasContasPessoais(): Observable<CategoriaContaPessoal[]> {
+    return this.http.get<CategoriaContaPessoal[]>(`${this.base}/categorias-contas-pessoais`);
+  }
+  createCategoriaContaPessoal(cat: Omit<CategoriaContaPessoal, 'id'>): Observable<CategoriaContaPessoal> {
+    return this.http.post<CategoriaContaPessoal>(`${this.base}/categorias-contas-pessoais`, cat);
+  }
+  updateCategoriaContaPessoal(cat: CategoriaContaPessoal): Observable<CategoriaContaPessoal> {
+    return this.http.put<CategoriaContaPessoal>(`${this.base}/categorias-contas-pessoais/${cat.id}`, cat);
+  }
+  deleteCategoriaContaPessoal(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/categorias-contas-pessoais/${id}`);
   }
 
   // Summary

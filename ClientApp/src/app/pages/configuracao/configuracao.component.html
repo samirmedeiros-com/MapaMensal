@@ -70,6 +70,54 @@
     </table>
   </div>
 
+  <!-- Categorias Contas Pessoais -->
+  <div class="card">
+    <div class="card-title">Categorias de Contas Pessoais</div>
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Cor</th>
+          <th>Nome</th>
+          <th>Ordem</th>
+          <th style="width:120px">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of categorias(); track c.id) {
+          <tr>
+            @if (editingCategoria?.id === c.id) {
+              <td><input class="inline-input color-input" type="color" [(ngModel)]="editingCategoria!.cor" /></td>
+              <td><input class="inline-input" [(ngModel)]="editingCategoria!.nome" /></td>
+              <td><input class="inline-input" type="number" [(ngModel)]="editingCategoria!.ordem" style="width:60px" /></td>
+              <td class="actions">
+                <button mat-icon-button color="primary" (click)="saveCategoria()" title="Guardar"><mat-icon>check</mat-icon></button>
+                <button mat-icon-button (click)="editingCategoria = null" title="Cancelar"><mat-icon>close</mat-icon></button>
+              </td>
+            } @else {
+              <td><span class="cat-color-dot" [style.background]="c.cor || '#757575'"></span></td>
+              <td>{{ c.nome }}</td>
+              <td>{{ c.ordem }}</td>
+              <td class="actions">
+                <button mat-icon-button color="primary" (click)="startEditCategoria(c)" title="Editar"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button color="warn" (click)="deleteCategoria(c.id)" title="Eliminar"><mat-icon>delete</mat-icon></button>
+              </td>
+            }
+          </tr>
+        }
+        <tr class="add-row">
+          <td><input class="inline-input color-input" type="color" [(ngModel)]="newCategoria.cor" /></td>
+          <td><input class="inline-input" [(ngModel)]="newCategoria.nome" placeholder="Nome da categoria" /></td>
+          <td><input class="inline-input" type="number" [(ngModel)]="newCategoria.ordem" placeholder="0" style="width:60px" /></td>
+          <td>
+            <button mat-flat-button color="accent" (click)="addCategoria()">
+              <mat-icon>add</mat-icon> Adicionar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <!-- Feriados -->
   <div class="card">
     <div class="card-title">

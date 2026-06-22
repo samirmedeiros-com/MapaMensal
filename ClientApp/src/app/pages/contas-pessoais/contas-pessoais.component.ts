@@ -10,7 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Chart, registerables } from 'chart.js';
 import { ApiService } from '../../services/api.service';
-import { ContaPessoal, ResumoAnualContas, CATEGORIAS_CONTA, MONTH_NAMES } from '../../models/models';
+import { ContaPessoal, ResumoAnualContas, CategoriaContaPessoal, MONTH_NAMES } from '../../models/models';
 
 Chart.register(...registerables);
 
@@ -30,7 +30,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   year   = signal(new Date().getFullYear());
   month  = signal(new Date().getMonth() + 1);
   monthNames = MONTH_NAMES;
-  categorias = CATEGORIAS_CONTA;
+  categorias = signal<CategoriaContaPessoal[]>([]);
 
   contas   = signal<ContaPessoal[]>([]);
   resumo   = signal<ResumoAnualContas | null>(null);
@@ -70,7 +70,10 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
     [...new Set(this.contas().map(c => c.categoria))].sort()
   );
 
-  ngOnInit() { this.loadAll(); }
+  ngOnInit() {
+    this.api.getCategoriasContasPessoais().subscribe(c => this.categorias.set(c));
+    this.loadAll();
+  }
 
   ngAfterViewInit() {
     this.chartsReady = true;
@@ -107,7 +110,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   openForm() {
     const today = new Date();
     const d = `${this.year()}-${String(this.month()).padStart(2,'0')}-10`;
-    this.form = { descricao: '', categoria: this.categorias[0], dataVencimento: d, valorPrevisto: 0, totalRecorrencias: 1 };
+    this.form = { descricao: '', categoria: this.categorias()[0]?.nome ?? '', dataVencimento: d, valorPrevisto: 0, totalRecorrencias: 1 };
     this.editMode.set(null);
     this.showForm.set(true);
   }

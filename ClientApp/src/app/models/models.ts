@@ -123,10 +123,12 @@ export interface ResumoAnualContas {
   porCategoria: { categoria: string; total: number }[];
 }
 
-export const CATEGORIAS_CONTA = [
-  'Habitação', 'Alimentação', 'Transporte', 'Saúde', 'Educação',
-  'Comunicações', 'Lazer', 'Seguros', 'Assinaturas', 'Outros'
-];
+export interface CategoriaContaPessoal {
+  id: number;
+  nome: string;
+  cor?: string;
+  ordem: number;
+}
 
 export interface Tarefa {
   id: number;

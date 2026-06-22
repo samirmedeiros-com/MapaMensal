@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<Tarefa> Tarefas => Set<Tarefa>();
     public DbSet<ContaPessoal> ContasPessoais => Set<ContaPessoal>();
+    public DbSet<CategoriaContaPessoal> CategoriasContasPessoais => Set<CategoriaContaPessoal>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,6 +51,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Project { Id = 1, Name = "KCSIT/FNAC", DailyRate = 220m, IsActive = true, SortOrder = 1 },
             new Project { Id = 2, Name = "CLOSER/NB", DailyRate = 242m, IsActive = true, SortOrder = 2 },
             new Project { Id = 3, Name = "Capgemini/DPD", DailyRate = 204m, IsActive = true, SortOrder = 3 }
+        );
+
+        // Categorias de contas pessoais (padrão)
+        modelBuilder.Entity<CategoriaContaPessoal>().HasData(
+            new CategoriaContaPessoal { Id = 1, Nome = "Habitação",     Cor = "#5c6bc0", Ordem = 1 },
+            new CategoriaContaPessoal { Id = 2, Nome = "Alimentação",   Cor = "#43a047", Ordem = 2 },
+            new CategoriaContaPessoal { Id = 3, Nome = "Transporte",    Cor = "#fb8c00", Ordem = 3 },
+            new CategoriaContaPessoal { Id = 4, Nome = "Saúde",         Cor = "#e53935", Ordem = 4 },
+            new CategoriaContaPessoal { Id = 5, Nome = "Educação",      Cor = "#8e24aa", Ordem = 5 },
+            new CategoriaContaPessoal { Id = 6, Nome = "Comunicações",  Cor = "#00897b", Ordem = 6 },
+            new CategoriaContaPessoal { Id = 7, Nome = "Lazer",         Cor = "#f4511e", Ordem = 7 },
+            new CategoriaContaPessoal { Id = 8, Nome = "Seguros",       Cor = "#039be5", Ordem = 8 },
+            new CategoriaContaPessoal { Id = 9, Nome = "Assinaturas",   Cor = "#6d4c41", Ordem = 9 },
+            new CategoriaContaPessoal { Id = 10, Nome = "Outros",       Cor = "#757575", Ordem = 10 }
         );
 
         // Feriados Portugal 2026 (do Excel)

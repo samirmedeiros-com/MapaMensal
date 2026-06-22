@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
-import { Project, Holiday } from '../../models/models';
+import { Project, Holiday, CategoriaContaPessoal } from '../../models/models';
 
 @Component({
   selector: 'app-configuracao',
@@ -22,12 +22,15 @@ export class ConfiguracaoComponent implements OnInit {
 
   projects = signal<Project[]>([]);
   holidays = signal<Holiday[]>([]);
+  categorias = signal<CategoriaContaPessoal[]>([]);
   ivaRate = signal('0.23');
   year = signal(new Date().getFullYear());
 
   newProject: Partial<Project> = { name: '', dailyRate: 0 };
   newHoliday: Partial<Holiday> = { date: '', name: '', isNational: true };
+  newCategoria: Partial<CategoriaContaPessoal> = { nome: '', cor: '#5c6bc0', ordem: 0 };
   editingProject: Project | null = null;
+  editingCategoria: CategoriaContaPessoal | null = null;
 
   ngOnInit() {
     this.loadAll();
@@ -37,6 +40,7 @@ export class ConfiguracaoComponent implements OnInit {
     this.api.getProjects().subscribe(p => this.projects.set(p));
     this.api.getHolidays(this.year()).subscribe(h => this.holidays.set(h));
     this.api.getConfig().subscribe(c => this.ivaRate.set(c['IvaRate'] ?? '0.23'));
+    this.api.getCategoriasContasPessoais().subscribe(c => this.categorias.set(c));
   }
 
   saveIva() {
@@ -97,5 +101,35 @@ export class ConfiguracaoComponent implements OnInit {
   changeYear(delta: number) {
     this.year.update(y => y + delta);
     this.api.getHolidays(this.year()).subscribe(h => this.holidays.set(h));
+  }
+
+  addCategoria() {
+    if (!this.newCategoria.nome?.trim()) return;
+    this.api.createCategoriaContaPessoal(this.newCategoria as Omit<CategoriaContaPessoal, 'id'>).subscribe(c => {
+      this.categorias.update(list => [...list, c]);
+      this.newCategoria = { nome: '', cor: '#5c6bc0', ordem: 0 };
+      this.snack.open('Categoria adicionada', '', { duration: 2000 });
+    });
+  }
+
+  startEditCategoria(c: CategoriaContaPessoal) {
+    this.editingCategoria = { ...c };
+  }
+
+  saveCategoria() {
+    if (!this.editingCategoria) return;
+    this.api.updateCategoriaContaPessoal(this.editingCategoria).subscribe(updated => {
+      this.categorias.update(list => list.map(c => c.id === updated.id ? updated : c));
+      this.editingCategoria = null;
+      this.snack.open('Categoria atualizada', '', { duration: 2000 });
+    });
+  }
+
+  deleteCategoria(id: number) {
+    if (!confirm('Eliminar esta categoria? As contas existentes mantêm o nome.')) return;
+    this.api.deleteCategoriaContaPessoal(id).subscribe(() => {
+      this.categorias.update(list => list.filter(c => c.id !== id));
+      this.snack.open('Categoria eliminada', '', { duration: 2000 });
+    });
   }
 }
