@@ -38,3 +38,16 @@
 @media (max-width: 768px) {
   .iva-row { flex-wrap: wrap; }
 }
+
+@media (max-width: 600px) {
+  .iva-row { gap: 10px; }
+  .iva-row .small-field { width: 100%; }
+
+  // Tabelas com scroll horizontal
+  table.summary-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+}

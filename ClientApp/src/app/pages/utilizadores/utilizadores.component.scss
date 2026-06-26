@@ -89,3 +89,22 @@
 }
 
 tr.inactive td { opacity: 0.55; }
+
+@media (max-width: 768px) {
+  .form-row { flex-direction: column; gap: 10px; }
+  .form-group { min-width: unset; width: 100%; }
+  .form-group.grow { min-width: unset; }
+
+  // Tabela de utilizadores com scroll horizontal
+  table.summary-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-title-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .form-actions { flex-wrap: wrap; }
+}

@@ -408,3 +408,26 @@
   .form-group.span2 { grid-column: span 2; }
   .form-group.span4 { grid-column: span 2; }
 }
+
+@media (max-width: 600px) {
+  .tarefas-page { padding: 10px; gap: 10px; }
+
+  .page-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+  .filters-bar { padding: 10px 12px; gap: 10px; }
+
+  .filter-group select { min-width: 120px; }
+
+  .status-chips { flex-wrap: wrap; }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    .form-group.span2,
+    .form-group.span4 { grid-column: span 1; }
+  }
+
+  // Botões de acção sempre visíveis em touch
+  .task-actions { opacity: 1; }
+
+  .archived-card { flex-direction: column; gap: 8px; }
+}

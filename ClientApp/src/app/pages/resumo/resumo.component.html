@@ -11,79 +11,83 @@
     <!-- Totais por projeto -->
     <div class="card">
       <div class="card-title">Totais por projeto — {{ year() }}</div>
-      <table class="summary-table">
-        <thead>
-          <tr>
-            <th>Projeto</th>
-            <th>Valor/dia</th>
-            <th>Dias trabalhados</th>
-            <th>Valor s/ IVA</th>
-            <th>IVA ({{ ivaPct(s.ivaRate) }})</th>
-            <th>Total c/ IVA</th>
-            <th>Dias férias</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (p of s.projects; track p.id) {
+      <div class="table-scroll">
+        <table class="summary-table">
+          <thead>
             <tr>
-              <td>{{ p.name }}</td>
-              <td>{{ fmt(p.dailyRate) }} €</td>
-              <td class="num">{{ p.workedDays | number:'1.0-1' }}</td>
-              <td class="num">{{ fmt(p.valueNoIva) }} €</td>
-              <td class="num">{{ fmt(p.iva) }} €</td>
-              <td class="num bold">{{ fmt(p.totalWithIva) }} €</td>
-              <td class="num">{{ p.vacationDays }}</td>
+              <th>Projeto</th>
+              <th>Valor/dia</th>
+              <th>Dias trabalhados</th>
+              <th>Valor s/ IVA</th>
+              <th>IVA ({{ ivaPct(s.ivaRate) }})</th>
+              <th>Total c/ IVA</th>
+              <th>Dias férias</th>
             </tr>
-          }
-          <tr class="total-row">
-            <td>TOTAL</td>
-            <td>—</td>
-            <td class="num">{{ s.totals.workedDays | number:'1.0-1' }}</td>
-            <td class="num">{{ fmt(s.totals.valueNoIva) }} €</td>
-            <td class="num">{{ fmt(s.totals.iva) }} €</td>
-            <td class="num">{{ fmt(s.totals.totalWithIva) }} €</td>
-            <td>—</td>
-          </tr>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (p of s.projects; track p.id) {
+              <tr>
+                <td>{{ p.name }}</td>
+                <td>{{ fmt(p.dailyRate) }} €</td>
+                <td class="num">{{ p.workedDays | number:'1.0-1' }}</td>
+                <td class="num">{{ fmt(p.valueNoIva) }} €</td>
+                <td class="num">{{ fmt(p.iva) }} €</td>
+                <td class="num bold">{{ fmt(p.totalWithIva) }} €</td>
+                <td class="num">{{ p.vacationDays }}</td>
+              </tr>
+            }
+            <tr class="total-row">
+              <td>TOTAL</td>
+              <td>—</td>
+              <td class="num">{{ s.totals.workedDays | number:'1.0-1' }}</td>
+              <td class="num">{{ fmt(s.totals.valueNoIva) }} €</td>
+              <td class="num">{{ fmt(s.totals.iva) }} €</td>
+              <td class="num">{{ fmt(s.totals.totalWithIva) }} €</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Detalhe por mês -->
     <div class="card">
       <div class="card-title">Detalhe por mês</div>
-      <table class="summary-table">
-        <thead>
-          <tr>
-            <th>Mês</th>
-            @for (p of s.projects; track p.id) {
-              <th>Dias {{ p.name }}</th>
-              <th>Valor {{ p.name }}</th>
-            }
-            <th>Total mês</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (md of s.monthlyDetail; track md.month) {
+      <div class="table-scroll">
+        <table class="summary-table">
+          <thead>
             <tr>
-              <td>{{ monthNames[md.month] }}</td>
+              <th>Mês</th>
               @for (p of s.projects; track p.id) {
-                @let detail = getMonthProjectDetail(md.month, p.id);
-                <td class="num">{{ detail?.days | number:'1.0-1' }}</td>
-                <td class="num">{{ detail ? fmt(detail.value) : '0,00' }} €</td>
+                <th>Dias {{ p.name }}</th>
+                <th>Valor {{ p.name }}</th>
               }
-              <td class="num bold">{{ fmt(md.totalMonth) }} €</td>
+              <th>Total mês</th>
             </tr>
-          }
-          <tr class="total-row">
-            <td>TOTAL</td>
-            @for (p of s.projects; track p.id) {
-              <td class="num">{{ p.workedDays | number:'1.0-1' }}</td>
-              <td class="num">{{ fmt(p.valueNoIva) }} €</td>
+          </thead>
+          <tbody>
+            @for (md of s.monthlyDetail; track md.month) {
+              <tr>
+                <td>{{ monthNames[md.month] }}</td>
+                @for (p of s.projects; track p.id) {
+                  @let detail = getMonthProjectDetail(md.month, p.id);
+                  <td class="num">{{ detail?.days | number:'1.0-1' }}</td>
+                  <td class="num">{{ detail ? fmt(detail.value) : '0,00' }} €</td>
+                }
+                <td class="num bold">{{ fmt(md.totalMonth) }} €</td>
+              </tr>
             }
-            <td class="num">{{ fmt(s.totals.valueNoIva) }} €</td>
-          </tr>
-        </tbody>
-      </table>
+            <tr class="total-row">
+              <td>TOTAL</td>
+              @for (p of s.projects; track p.id) {
+                <td class="num">{{ p.workedDays | number:'1.0-1' }}</td>
+                <td class="num">{{ fmt(p.valueNoIva) }} €</td>
+              }
+              <td class="num">{{ fmt(s.totals.valueNoIva) }} €</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- IVA -->

@@ -31,7 +31,7 @@
       </div>
     </mat-sidenav>
 
-    <mat-sidenav-content class="main-content">
+    <mat-sidenav-content class="main-content" [class.has-bottom-nav]="isMobile()">
       @if (isMobile()) {
         <mat-toolbar class="mobile-toolbar">
           <button mat-icon-button (click)="sidenav.toggle()">
@@ -42,6 +42,17 @@
       }
       <router-outlet />
     </mat-sidenav-content>
+
+    @if (isMobile()) {
+      <nav class="bottom-nav">
+        @for (item of bottomNavItems; track item.path) {
+          <a class="bottom-nav-item" [routerLink]="item.path" routerLinkActive="active">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </nav>
+    }
 
   </mat-sidenav-container>
 } @else {

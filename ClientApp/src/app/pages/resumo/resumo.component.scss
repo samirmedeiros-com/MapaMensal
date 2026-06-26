@@ -33,3 +33,9 @@
 @media (max-width: 768px) {
   .iva-card .iva-item { min-width: unset; flex: 1 1 calc(50% - 10px); }
 }
+
+@media (max-width: 480px) {
+  .iva-card .iva-grid { gap: 10px; }
+  .iva-card .iva-item { flex: 1 1 100%; padding: 12px; }
+  .iva-card .iva-item .iva-value { font-size: 1.1rem; }
+}

@@ -49,7 +49,14 @@
     .day-num { font-weight: 700; font-size: 0.9rem; }
     .day-name { font-size: 0.65rem; opacity: 0.8; }
 
-    &.project-col { min-width: 140px; text-align: left; padding-left: 12px; }
+    &.project-col {
+      min-width: 140px;
+      text-align: left;
+      padding-left: 12px;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
     &.totals-col { min-width: 70px; background: #283593; }
     &.weekend-header { background: #5c6bc0; }
     &.holiday-header { background: #ad1457; }
@@ -75,6 +82,9 @@
       font-weight: 500;
       background: #f5f5f5;
       white-space: nowrap;
+      position: sticky;
+      left: 0;
+      z-index: 1;
     }
     &.total-cell {
       background: #e8eaf6;
@@ -92,4 +102,10 @@
   }
 
   tr.project-row-alt td.project-name { background: #eeeeee; }
+}
+
+@media (max-width: 600px) {
+  .month-nav .month-label { font-size: 0.95rem; min-width: 140px; }
+  .legend { gap: 6px; }
+  .legend .leg { font-size: 0.72rem; padding: 2px 7px; }
 }
