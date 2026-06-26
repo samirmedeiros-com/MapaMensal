@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MapaMensal</string>
+    <string name="title_activity_main">MapaMensal</string>
+    <string name="package_name">pt.mapaemsal.app</string>
+    <string name="custom_url_scheme">pt.mapaemsal.app</string>
+</resources>

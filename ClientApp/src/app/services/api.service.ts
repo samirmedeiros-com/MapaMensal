@@ -6,11 +6,12 @@ import {
   Expense, AnnualSummary, TreasurySummary, Tarefa,
   ContaPessoal, ResumoAnualContas, CategoriaContaPessoal
 } from '../models/models';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
-  private base = '/api';
+  private base = environment.apiUrl;
 
   // Projects
   getProjects(): Observable<Project[]> {
