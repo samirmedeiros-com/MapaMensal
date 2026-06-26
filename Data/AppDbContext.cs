@@ -17,6 +17,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Project>().ToTable("mapa_projects");
+        modelBuilder.Entity<WorkDay>().ToTable("mapa_workdays");
+        modelBuilder.Entity<Holiday>().ToTable("mapa_holidays");
+        modelBuilder.Entity<Expense>().ToTable("mapa_expenses");
+        modelBuilder.Entity<AppConfig>().ToTable("mapa_appconfigs");
+        modelBuilder.Entity<User>().ToTable("mapa_users");
+        modelBuilder.Entity<Tarefa>().ToTable("mapa_tarefas");
+        modelBuilder.Entity<ContaPessoal>().ToTable("mapa_contas_pessoais");
+        modelBuilder.Entity<CategoriaContaPessoal>().ToTable("mapa_categorias_contas_pessoais");
+
         modelBuilder.Entity<WorkDay>()
             .HasIndex(w => new { w.ProjectId, w.Date })
             .IsUnique();
