@@ -30,6 +30,7 @@ export class HorariosDialogComponent implements OnInit {
   // Agenda pública config
   agendaAtiva = false;
   agendaTitulo = 'Agendar reunião';
+  agendaDuracao = 60;
 
   ngOnInit() {
     this.loading.set(true);
@@ -50,6 +51,7 @@ export class HorariosDialogComponent implements OnInit {
     this.api.getAgendaPublicaConfig().subscribe(cfg => {
       this.agendaAtiva = cfg['agenda_publica_ativa'] === 'true';
       this.agendaTitulo = cfg['agenda_publica_titulo'] ?? 'Agendar reunião';
+      this.agendaDuracao = +(cfg['agenda_publica_duracao'] ?? 60);
     });
   }
 
@@ -89,7 +91,8 @@ export class HorariosDialogComponent implements OnInit {
     const saveHorarios = this.api.saveHorarios(this.horarios());
     const saveCfg = this.api.saveAgendaPublicaConfig({
       agenda_publica_ativa: this.agendaAtiva ? 'true' : 'false',
-      agenda_publica_titulo: this.agendaTitulo
+      agenda_publica_titulo: this.agendaTitulo,
+      agenda_publica_duracao: String(this.agendaDuracao)
     });
 
     Promise.all([

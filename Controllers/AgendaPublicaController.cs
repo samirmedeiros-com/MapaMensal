@@ -53,17 +53,22 @@ public class AgendaPublicaController(AppDbContext db, IEmailService email) : Con
         if (!horarios.Any())
             return Ok(Array.Empty<SlotDto>());
 
+        // Duração global configurada (fallback: valor por horário)
+        var duracaoCfg = await db.AppConfigs.FirstOrDefaultAsync(c => c.Key == "agenda_publica_duracao");
+        int? duracaoGlobal = duracaoCfg != null && int.TryParse(duracaoCfg.Value, out var d) ? d : null;
+
         // Gera todos os slots possíveis
         var slots = new List<SlotDto>();
         foreach (var h in horarios)
         {
+            var duracao = duracaoGlobal ?? h.DuracaoSlotMinutos;
             var cur = h.HoraInicio;
-            while (cur.Add(TimeSpan.FromMinutes(h.DuracaoSlotMinutos)) <= h.HoraFim)
+            while (cur.Add(TimeSpan.FromMinutes(duracao)) <= h.HoraFim)
             {
                 var slotInicio = data.ToDateTime(TimeOnly.FromTimeSpan(cur));
-                var slotFim = slotInicio.AddMinutes(h.DuracaoSlotMinutos);
+                var slotFim = slotInicio.AddMinutes(duracao);
                 slots.Add(new SlotDto(slotInicio, slotFim));
-                cur = cur.Add(TimeSpan.FromMinutes(h.DuracaoSlotMinutos));
+                cur = cur.Add(TimeSpan.FromMinutes(duracao));
             }
         }
 
