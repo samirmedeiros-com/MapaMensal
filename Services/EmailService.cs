@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 
@@ -35,18 +36,16 @@ public class EmailService(IHttpClientFactory httpFactory, IConfiguration config,
 
         if (attachment != null && attachmentName != null)
         {
-            basePayload["attachments"] = new[]
+            basePayload["attachment"] = new Dictionary<string, string>
             {
-                new Dictionary<string, string>
-                {
-                    ["filename"]     = attachmentName,
-                    ["content"]      = Convert.ToBase64String(attachment),
-                    ["content_type"] = attachmentContentType ?? "application/octet-stream"
-                }
+                ["filename"]     = attachmentName,
+                ["content"]      = Convert.ToBase64String(attachment),
+                ["content_type"] = attachmentContentType ?? "application/octet-stream"
             };
         }
 
-        var json = JsonSerializer.Serialize(basePayload);
+        var json = JsonSerializer.Serialize(basePayload,
+            new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
         logger.LogInformation("SimplySend payload: {json}", json);
 
         var client = httpFactory.CreateClient("simplysend");

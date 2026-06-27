@@ -23,7 +23,8 @@ public class MacOsCurlHandler(ILogger<MacOsCurlHandler> logger) : DelegatingHand
         var tmpFile = Path.GetTempFileName();
         try
         {
-            await File.WriteAllTextAsync(tmpFile, body, Encoding.UTF8, cancellationToken);
+            // UTF8Encoding(false) = no BOM — Encoding.UTF8 emits BOM in .NET 10 WriteAllTextAsync
+            await File.WriteAllTextAsync(tmpFile, body, new UTF8Encoding(false), cancellationToken);
 
             var psi = new ProcessStartInfo("curl")
             {
