@@ -113,6 +113,9 @@
       <label class="check-label p-notify">
         <input type="checkbox" [(ngModel)]="p.notificar" /> Email
       </label>
+      @if (p.aceite) {
+        <span class="badge-aceite" title="Aceite em {{ p.aceiteEm | date:'dd/MM/yyyy HH:mm' }}">✓ Aceite</span>
+      }
       <button type="button" mat-icon-button class="remove-btn" (click)="removeParticipante($index)">
         <mat-icon>close</mat-icon>
       </button>
@@ -130,7 +133,14 @@
 
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
+<mat-dialog-actions>
+  @if (isEdit) {
+    <button mat-button (click)="reenviarEmail()" [disabled]="reenviarLoading()" class="btn-reenviar">
+      <mat-icon>mail</mat-icon>
+      {{ reenviarLoading() ? 'A enviar...' : reenviarOk() ? 'Email enviado!' : 'Reenviar email' }}
+    </button>
+  }
+  <span class="spacer"></span>
   <button mat-button mat-dialog-close>Cancelar</button>
   <button mat-flat-button color="primary" (click)="save()" [disabled]="loading()">
     {{ loading() ? 'A guardar...' : (isEdit ? 'Guardar' : 'Criar') }}

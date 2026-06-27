@@ -145,3 +145,29 @@ mat-dialog-content {
   padding: 10px 12px;
   border-radius: var(--radius-md);
 }
+
+.badge-aceite {
+  background: var(--teal-50);
+  color: var(--teal-800);
+  border: 1px solid var(--teal-500);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-reenviar {
+  color: var(--purple-500);
+  mat-icon { font-size: 16px; vertical-align: middle; }
+}
+
+.spacer { flex: 1; }
+
+mat-dialog-actions {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  gap: 8px;
+}

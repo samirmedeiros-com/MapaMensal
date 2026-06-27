@@ -163,6 +163,10 @@ export class ApiService {
     return this.http.delete<void>(`${this.base}/compromissos/${id}`);
   }
 
+  reenviarEmailCompromisso(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/compromissos/${id}/reenviar-email`, {});
+  }
+
   getHorarios(): Observable<HorarioDisponivel[]> {
     return this.http.get<HorarioDisponivel[]>(`${this.base}/compromissos/horarios`);
   }

@@ -31,6 +31,8 @@ export class CompromissoDialogComponent implements OnInit {
   paises = PAISES;
   loading = signal(false);
   error = signal('');
+  reenviarLoading = signal(false);
+  reenviarOk = signal(false);
   contasPendentes = signal<ContaPessoal[]>([]);
 
   titulo = '';
@@ -118,6 +120,16 @@ export class CompromissoDialogComponent implements OnInit {
     op.subscribe({
       next: () => { this.loading.set(false); this.dialogRef.close(true); },
       error: () => { this.loading.set(false); this.error.set('Erro ao guardar. Tente novamente.'); }
+    });
+  }
+
+  reenviarEmail() {
+    if (!this.data.compromisso) return;
+    this.reenviarLoading.set(true);
+    this.reenviarOk.set(false);
+    this.api.reenviarEmailCompromisso(this.data.compromisso.id).subscribe({
+      next: () => { this.reenviarLoading.set(false); this.reenviarOk.set(true); },
+      error: () => { this.reenviarLoading.set(false); this.error.set('Erro ao reenviar email.'); }
     });
   }
 

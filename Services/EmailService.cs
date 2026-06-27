@@ -67,10 +67,17 @@ public class EmailService(IHttpClientFactory httpFactory, IConfiguration config,
 
     public async Task SendConviteCompromissoAsync(string to, string nomeDestinatario,
         string tituloCompromisso, DateTime inicio, DateTime fim,
-        string local, string? descricao, byte[] icsBytes)
+        string local, string? descricao, byte[] icsBytes, string? linkAceitar = null)
     {
         var inicioStr = inicio.ToString("dd/MM/yyyy 'às' HH:mm");
         var fimStr = fim.ToString("HH:mm");
+        var btnAceitar = linkAceitar is not null
+            ? $@"<div style=""margin:20px 0"">
+    <a href=""{linkAceitar}"" style=""display:inline-block;background:#534AB7;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600"">
+      ✓ Aceitar convite
+    </a>
+  </div>"
+            : "";
         var html = $@"
 <div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto"">
   <h2 style=""color:#534AB7"">Convite para compromisso</h2>
@@ -82,12 +89,46 @@ public class EmailService(IHttpClientFactory httpFactory, IConfiguration config,
     {(string.IsNullOrEmpty(local) ? "" : $@"<p style=""margin:0 0 4px;color:#6B6A65"">📍 {local}</p>")}
     {(string.IsNullOrEmpty(descricao) ? "" : $@"<p style=""margin:8px 0 0;color:#6B6A65"">{descricao}</p>")}
   </div>
-  <p>Clique no ficheiro em anexo para adicionar este compromisso ao seu calendário.</p>
+  {btnAceitar}
+  <p style=""color:#6B6A65;font-size:13px"">O ficheiro em anexo permite adicionar este compromisso ao seu calendário.</p>
   <hr/>
   <p style=""color:#9E9D98;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
 </div>";
 
         await SendAsync(to, $"Convite: {tituloCompromisso}", html, icsBytes, "compromisso.ics", "text/calendar");
+    }
+
+    public async Task SendConviteAlteradoAsync(string to, string nomeDestinatario,
+        string tituloCompromisso, DateTime inicio, DateTime fim,
+        string local, string? descricao, byte[] icsBytes, string? linkAceitar = null)
+    {
+        var inicioStr = inicio.ToString("dd/MM/yyyy 'às' HH:mm");
+        var fimStr = fim.ToString("HH:mm");
+        var btnAceitar = linkAceitar is not null
+            ? $@"<div style=""margin:20px 0"">
+    <a href=""{linkAceitar}"" style=""display:inline-block;background:#534AB7;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600"">
+      ✓ Confirmar nova data
+    </a>
+  </div>"
+            : "";
+        var html = $@"
+<div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto"">
+  <h2 style=""color:#D85A30"">Compromisso actualizado</h2>
+  <p>Olá <strong>{nomeDestinatario}</strong>,</p>
+  <p>O seguinte compromisso foi alterado. Por favor verifique os novos detalhes:</p>
+  <div style=""background:#FAECE7;border-left:4px solid #D85A30;border-radius:6px;padding:16px 20px;margin:20px 0"">
+    <p style=""margin:0 0 8px;font-size:18px;font-weight:600;color:#854F0B"">{tituloCompromisso}</p>
+    <p style=""margin:0 0 4px;color:#6B6A65"">📅 {inicioStr} – {fimStr}</p>
+    {(string.IsNullOrEmpty(local) ? "" : $@"<p style=""margin:0 0 4px;color:#6B6A65"">📍 {local}</p>")}
+    {(string.IsNullOrEmpty(descricao) ? "" : $@"<p style=""margin:8px 0 0;color:#6B6A65"">{descricao}</p>")}
+  </div>
+  {btnAceitar}
+  <p style=""color:#6B6A65;font-size:13px"">O ficheiro em anexo actualiza o compromisso no seu calendário.</p>
+  <hr/>
+  <p style=""color:#9E9D98;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
+</div>";
+
+        await SendAsync(to, $"Actualização: {tituloCompromisso}", html, icsBytes, "compromisso.ics", "text/calendar");
     }
 
     public async Task SendConfirmacaoPublicaAsync(string to, string nomeParticipante,

@@ -184,6 +184,9 @@ export interface CompromissoParticipante {
   telefone?: string;
   codigoPais?: string;
   notificar: boolean;
+  token?: string;
+  aceite?: boolean;
+  aceiteEm?: string;
 }
 
 export interface Compromisso {
