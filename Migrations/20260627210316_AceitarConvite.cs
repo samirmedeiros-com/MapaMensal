@@ -27,8 +27,10 @@ namespace MapaMensal.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "Token",
                 table: "mapa_compromisso_participantes",
-                type: "longtext",
-                nullable: false)
+                type: "varchar(32)",
+                maxLength: 32,
+                nullable: false,
+                defaultValueSql: "(REPLACE(UUID(), '-', ''))")
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
 

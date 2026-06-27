@@ -9,6 +9,7 @@ public class CompromissoParticipante
     public string? Telefone { get; set; }
     public string? CodigoPais { get; set; }
     public bool Notificar { get; set; }
+    [System.ComponentModel.DataAnnotations.MaxLength(32)]
     public string Token { get; set; } = Guid.NewGuid().ToString("N");
     public bool Aceite { get; set; }
     public DateTime? AceiteEm { get; set; }
