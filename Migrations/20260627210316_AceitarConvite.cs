@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,43 +11,31 @@ namespace MapaMensal.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "Aceite",
-                table: "mapa_compromisso_participantes",
-                type: "tinyint(1)",
-                nullable: false,
-                defaultValue: false);
+            // IF NOT EXISTS protege contra re-execução parcial (colunas já criadas)
+            migrationBuilder.Sql(
+                "ALTER TABLE mapa_compromisso_participantes " +
+                "ADD COLUMN IF NOT EXISTS Aceite tinyint(1) NOT NULL DEFAULT FALSE");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "AceiteEm",
-                table: "mapa_compromisso_participantes",
-                type: "datetime(6)",
-                nullable: true);
+            migrationBuilder.Sql(
+                "ALTER TABLE mapa_compromisso_participantes " +
+                "ADD COLUMN IF NOT EXISTS AceiteEm datetime(6) NULL");
 
-            migrationBuilder.AddColumn<string>(
-                name: "Token",
-                table: "mapa_compromisso_participantes",
-                type: "varchar(32)",
-                maxLength: 32,
-                nullable: false,
-                defaultValueSql: "(REPLACE(UUID(), '-', ''))")
-                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.Sql(
+                "ALTER TABLE mapa_compromisso_participantes " +
+                "ADD COLUMN IF NOT EXISTS Token varchar(32) NOT NULL DEFAULT (REPLACE(UUID(), '-', ''))");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Aceite",
-                table: "mapa_compromisso_participantes");
+            migrationBuilder.Sql(
+                "ALTER TABLE mapa_compromisso_participantes DROP COLUMN IF EXISTS Token");
 
-            migrationBuilder.DropColumn(
-                name: "AceiteEm",
-                table: "mapa_compromisso_participantes");
+            migrationBuilder.Sql(
+                "ALTER TABLE mapa_compromisso_participantes DROP COLUMN IF EXISTS AceiteEm");
 
-            migrationBuilder.DropColumn(
-                name: "Token",
-                table: "mapa_compromisso_participantes");
+            migrationBuilder.Sql(
+                "ALTER TABLE mapa_compromisso_participantes DROP COLUMN IF EXISTS Aceite");
         }
     }
 }
