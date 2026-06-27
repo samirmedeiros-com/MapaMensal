@@ -41,5 +41,14 @@ export const routes: Routes = [
     path: 'utilizadores',
     canActivate: [authGuard, adminGuard],
     loadComponent: () => import('./pages/utilizadores/utilizadores.component').then(m => m.UtilizadoresComponent)
+  },
+  {
+    path: 'agenda',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/agenda/agenda.component').then(m => m.AgendaComponent)
+  },
+  {
+    path: 'p/agenda',
+    loadComponent: () => import('./pages/agenda-publica/agenda-publica.component').then(m => m.AgendaPublicaComponent)
   }
 ];

@@ -1,6 +1,7 @@
 using MapaMensal.Data;
 using MapaMensal.Helpers;
 using MapaMensal.Models;
+using MapaMensal.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -39,6 +40,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddTransient<MapaMensal.Helpers.MacOsCurlHandler>();
+builder.Services.AddHttpClient("simplysend", c => c.Timeout = TimeSpan.FromSeconds(30))
+    .AddHttpMessageHandler<MapaMensal.Helpers.MacOsCurlHandler>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddCors(opt =>
     opt.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));

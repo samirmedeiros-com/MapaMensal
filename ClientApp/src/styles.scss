@@ -1,43 +1,87 @@
 @use '@angular/material' as mat;
 
+/* ── Design tokens ── */
+:root {
+  --purple-50:  #EEEDFE;
+  --purple-200: #AFA9EC;
+  --purple-500: #534AB7;
+  --purple-600: #453DA0;
+  --purple-800: #3C3489;
+
+  --teal-50:    #E1F5EE;
+  --teal-500:   #1D9E75;
+  --teal-800:   #085041;
+
+  --coral-50:   #FAECE7;
+  --coral-500:  #D85A30;
+
+  --amber-50:   #FAEEDA;
+  --amber-800:  #854F0B;
+
+  --green-50:   #EAF3DE;
+  --green-500:  #639922;
+
+  --bg:         #F5F4F2;
+  --surface:    #FFFFFF;
+  --surface-2:  #F9F8F7;
+  --text:       #1A1A18;
+  --text-2:     #6B6A65;
+  --text-3:     #9E9D98;
+  --border:     rgba(0, 0, 0, 0.10);
+  --border-2:   rgba(0, 0, 0, 0.18);
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+}
+
+/* dark mode removido — aplicação usa sempre tema claro */
+
 html, body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
+/* ── Page layout ── */
 .page-container {
-  padding: 24px;
+  padding: 20px;
   max-width: 1400px;
 }
 
 .page-title {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #1a237e;
-  margin-bottom: 20px;
+  color: var(--text);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
 }
 
+/* ── Cards ── */
 .card {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  border: 0.5px solid var(--border);
+  margin-bottom: 14px;
 }
 
 .card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e8eaf6;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 0.5px solid var(--border);
 }
 
+/* ── Tables ── */
 .total-row {
   font-weight: 700;
-  background: #e8eaf6 !important;
+  background: var(--purple-50) !important;
 }
 
 .currency::before { content: '€ '; }
@@ -47,55 +91,66 @@ table.summary-table {
   border-collapse: collapse;
 
   th {
-    background: #1a237e;
-    color: white;
+    background: var(--purple-500);
+    color: #fff;
     padding: 8px 12px;
     text-align: right;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 500;
 
     &:first-child { text-align: left; }
   }
 
   td {
     padding: 7px 12px;
-    border-bottom: 1px solid #eee;
-    font-size: 0.9rem;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 0.875rem;
     text-align: right;
+    color: var(--text);
 
     &:first-child { text-align: left; }
   }
 
-  tr:hover td { background: #f5f5f5; }
-  tr.total-row td { background: #e8eaf6; font-weight: 700; }
+  tr:hover td { background: var(--surface-2); }
+
+  tr.total-row td {
+    background: var(--purple-50);
+    font-weight: 700;
+    color: var(--purple-800);
+  }
 }
 
+/* ── Year selector ── */
 .year-selector {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 
-  button[mat-icon-button] { color: #1a237e; }
+  button[mat-icon-button] { color: var(--purple-500); }
 
-  span { font-weight: 600; font-size: 1.1rem; color: #333; min-width: 60px; text-align: center; }
+  span {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text);
+    min-width: 60px;
+    text-align: center;
+  }
 }
 
-// ---- RESPONSIVO GLOBAL ----
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+/* ── Responsive ── */
 @media (max-width: 768px) {
-  .page-container {
-    padding: 12px;
-  }
+  .page-container { padding: 12px; }
 
   .card {
     padding: 14px;
     margin-bottom: 12px;
-    border-radius: 6px;
   }
 
   .page-title {
-    font-size: 1.2rem;
+    font-size: 1rem;
     margin-bottom: 12px;
   }
 
@@ -104,7 +159,8 @@ table.summary-table {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
-    th, td { padding: 6px 8px; font-size: 0.8rem; }
+
+    th, td { padding: 6px 8px; font-size: 0.78rem; }
   }
 
   .year-selector { margin-bottom: 12px; }
@@ -112,12 +168,8 @@ table.summary-table {
 
 @media (max-width: 480px) {
   .page-container { padding: 10px; }
-
-  .page-title { font-size: 1.1rem; margin-bottom: 10px; }
-
+  .page-title { font-size: 0.95rem; margin-bottom: 10px; }
   .card { padding: 12px; margin-bottom: 10px; }
-
-  .card-title { font-size: 0.9rem; margin-bottom: 12px; }
-
-  .year-selector span { font-size: 1rem; min-width: 48px; }
+  .card-title { font-size: 0.82rem; margin-bottom: 10px; }
+  .year-selector span { font-size: 0.92rem; min-width: 48px; }
 }

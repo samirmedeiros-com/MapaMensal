@@ -171,3 +171,50 @@ export const MONTH_NAMES = [
 ];
 
 export const DAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+// ── Agenda ────────────────────────────────────────────────────────────────
+
+export type TipoCompromisso = 0 | 1 | 2; // 0=Pessoal, 1=Publico, 2=LembreteConta
+export type StatusCompromisso = 0 | 1 | 2; // 0=Agendado, 1=Cancelado, 2=Concluido
+
+export interface CompromissoParticipante {
+  id?: number;
+  nome: string;
+  email: string;
+  telefone?: string;
+  codigoPais?: string;
+  notificar: boolean;
+}
+
+export interface Compromisso {
+  id: number;
+  titulo: string;
+  descricao?: string;
+  inicio: string;
+  fim: string;
+  projectId?: number;
+  project?: Project;
+  contaPessoalId?: number;
+  local: string;
+  online: boolean;
+  linkOnline?: string;
+  tipo: TipoCompromisso;
+  status: StatusCompromisso;
+  notificarParticipantes: boolean;
+  criadoEm: string;
+  participantes: CompromissoParticipante[];
+}
+
+export interface HorarioDisponivel {
+  id?: number;
+  diaSemana: number;
+  horaInicio: string; // "HH:mm:ss"
+  horaFim: string;
+  duracaoSlotMinutos: number;
+  ativo: boolean;
+}
+
+export interface SlotPublico {
+  inicio: string;
+  fim: string;
+}

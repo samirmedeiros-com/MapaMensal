@@ -3,54 +3,74 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
+  background: var(--bg);
 }
 
 .login-card {
-  background: white;
-  border-radius: 12px;
-  padding: 40px 48px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 36px 40px;
   width: 100%;
-  max-width: 420px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  max-width: 400px;
+  border: 0.5px solid var(--border-2);
 
   @media (max-width: 480px) {
     padding: 28px 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    border-radius: var(--radius-md);
+    max-width: 100%;
+    margin: 12px;
+    border: none;
+    box-shadow: none;
   }
 }
 
 .login-logo {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 
-  mat-icon {
-    font-size: 48px;
+  .logo-icon-wrap {
     width: 48px;
     height: 48px;
-    color: #1a237e;
+    border-radius: var(--radius-md);
+    background: var(--purple-50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+
+    mat-icon {
+      font-size: 26px;
+      width: 26px;
+      height: 26px;
+      color: var(--purple-500);
+    }
   }
 
   h1 {
-    margin: 8px 0 0;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #1a237e;
-    letter-spacing: -0.5px;
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    color: var(--text-2);
   }
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 
   label {
     display: block;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 600;
-    color: #555;
+    color: var(--text-2);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     margin-bottom: 6px;
   }
 }
@@ -62,32 +82,39 @@
 
   .input-icon {
     position: absolute;
-    left: 12px;
-    color: #9fa8da;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    left: 11px;
+    color: var(--text-3);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
     pointer-events: none;
   }
 
   input {
     width: 100%;
-    padding: 11px 44px 11px 40px;
-    border: 1.5px solid #c5cae9;
-    border-radius: 6px;
-    font-size: 0.95rem;
+    padding: 10px 42px 10px 38px;
+    border: 0.5px solid var(--border-2);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
     font-family: inherit;
     outline: none;
     box-sizing: border-box;
-    transition: border-color 0.15s;
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
 
-    &:focus { border-color: #1a237e; }
+    &:focus {
+      border-color: var(--purple-500);
+      box-shadow: 0 0 0 3px var(--purple-50);
+    }
+
+    &::placeholder { color: var(--text-3); }
   }
 
   .toggle-pw {
     position: absolute;
     right: 4px;
-    color: #9fa8da;
+    color: var(--text-3);
   }
 }
 
@@ -95,30 +122,30 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #c62828;
-  font-size: 0.88rem;
-  background: #ffebee;
-  padding: 10px 14px;
-  border-radius: 6px;
-  margin-bottom: 16px;
+  color: var(--coral-500);
+  font-size: 0.84rem;
+  background: var(--coral-50);
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 14px;
 
-  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
 }
 
 .login-btn {
   width: 100%;
-  padding: 12px;
-  background: #1a237e;
-  color: white;
+  padding: 11px;
+  background: var(--purple-500);
+  color: #fff;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s;
-  margin-top: 8px;
+  margin-top: 6px;
 
-  &:hover:not(:disabled) { background: #283593; }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &:hover:not(:disabled) { background: var(--purple-600); }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
 }

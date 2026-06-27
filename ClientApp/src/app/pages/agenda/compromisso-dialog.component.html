@@ -1,0 +1,138 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar' : 'Novo' }} Compromisso</h2>
+
+<mat-dialog-content>
+
+  @if (error()) {
+    <div class="dialog-error">{{ error() }}</div>
+  }
+
+  <!-- Tipo -->
+  <div class="field-row">
+    <label class="field-label">Tipo</label>
+    <div class="tipo-options">
+      <button class="tipo-btn" [class.active]="tipo === 0" (click)="tipo = 0; projectId = null; contaPessoalId = null">
+        <mat-icon>person</mat-icon> Pessoal
+      </button>
+      <button class="tipo-btn" [class.active]="tipo === 1" (click)="tipo = 1; projectId = null; contaPessoalId = null">
+        <mat-icon>public</mat-icon> Público
+      </button>
+      <button class="tipo-btn" [class.active]="tipo === 2" (click)="tipo = 2; projectId = null">
+        <mat-icon>notifications</mat-icon> Lembrete conta
+      </button>
+    </div>
+  </div>
+
+  <!-- Título -->
+  <div class="field-row">
+    <label class="field-label">Título *</label>
+    <input class="field-input" [(ngModel)]="titulo" placeholder="Título do compromisso" />
+  </div>
+
+  <!-- Datas -->
+  <div class="date-row">
+    <div class="field-row">
+      <label class="field-label">Início *</label>
+      <input class="field-input" type="datetime-local" [(ngModel)]="inicio" />
+    </div>
+    <div class="field-row">
+      <label class="field-label">Fim *</label>
+      <input class="field-input" type="datetime-local" [(ngModel)]="fim" />
+    </div>
+  </div>
+
+  <!-- Projeto (se tipo Pessoal) -->
+  @if (tipo === 0 && data.projetos.length) {
+    <div class="field-row">
+      <label class="field-label">Projeto (opcional)</label>
+      <select class="field-select" [(ngModel)]="projectId">
+        <option [ngValue]="null">— Nenhum —</option>
+        @for (p of data.projetos; track p.id) {
+          <option [ngValue]="p.id">{{ p.name }}</option>
+        }
+      </select>
+    </div>
+  }
+
+  <!-- Conta pendente (se tipo Lembrete) -->
+  @if (tipo === 2) {
+    <div class="field-row">
+      <label class="field-label">Conta pendente (opcional)</label>
+      <select class="field-select" [(ngModel)]="contaPessoalId">
+        <option [ngValue]="null">— Nenhuma —</option>
+        @for (c of contasPendentes(); track c.id) {
+          <option [ngValue]="c.id">{{ c.descricao }} — {{ c.valorPrevisto | number:'1.2-2' }}€</option>
+        }
+      </select>
+    </div>
+  }
+
+  <!-- Local -->
+  <div class="field-row">
+    <label class="field-label">Local</label>
+    <input class="field-input" [(ngModel)]="local" placeholder="Endereço ou nome do local" />
+  </div>
+
+  <!-- Online -->
+  <div class="check-row">
+    <label class="check-label">
+      <input type="checkbox" [(ngModel)]="online" /> Online / videochamada
+    </label>
+  </div>
+
+  @if (online) {
+    <div class="field-row">
+      <label class="field-label">Link da reunião</label>
+      <input class="field-input" [(ngModel)]="linkOnline" placeholder="https://meet.google.com/..." />
+    </div>
+  }
+
+  <!-- Descrição -->
+  <div class="field-row">
+    <label class="field-label">Descrição</label>
+    <textarea class="field-input field-textarea" [(ngModel)]="descricao" placeholder="Notas ou descrição..." rows="3"></textarea>
+  </div>
+
+  <!-- Participantes -->
+  <div class="section-label">
+    Participantes
+    <button type="button" class="add-btn" (click)="addParticipante()">
+      <mat-icon>add</mat-icon> Adicionar
+    </button>
+  </div>
+
+  @for (p of participantes; track $index) {
+    <div class="participante-row">
+      <input class="field-input p-nome" [(ngModel)]="p.nome" placeholder="Nome" />
+      <input class="field-input p-email" [(ngModel)]="p.email" placeholder="Email" type="email" />
+      <select class="field-select p-pais" [(ngModel)]="p.codigoPais">
+        @for (pais of paises; track pais.codigo) {
+          <option [value]="pais.prefixo">{{ pais.bandeira }} {{ pais.prefixo }}</option>
+        }
+      </select>
+      <input class="field-input p-tel" [(ngModel)]="p.telefone" placeholder="Telefone" />
+      <label class="check-label p-notify">
+        <input type="checkbox" [(ngModel)]="p.notificar" /> Email
+      </label>
+      <button type="button" mat-icon-button class="remove-btn" (click)="removeParticipante($index)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  @if (participantes.length > 0) {
+    <div class="check-row notify-all">
+      <label class="check-label">
+        <input type="checkbox" [(ngModel)]="notificarParticipantes" />
+        Enviar convite por email (com ficheiro .ics para adicionar ao calendário)
+      </label>
+    </div>
+  }
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-flat-button color="primary" (click)="save()" [disabled]="loading()">
+    {{ loading() ? 'A guardar...' : (isEdit ? 'Guardar' : 'Criar') }}
+  </button>
+</mat-dialog-actions>

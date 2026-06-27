@@ -14,6 +14,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Tarefa> Tarefas => Set<Tarefa>();
     public DbSet<ContaPessoal> ContasPessoais => Set<ContaPessoal>();
     public DbSet<CategoriaContaPessoal> CategoriasContasPessoais => Set<CategoriaContaPessoal>();
+    public DbSet<Compromisso> Compromissos => Set<Compromisso>();
+    public DbSet<CompromissoParticipante> CompromissoParticipantes => Set<CompromissoParticipante>();
+    public DbSet<HorarioDisponivel> HorariosDisponiveis => Set<HorarioDisponivel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,6 +29,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Tarefa>().ToTable("mapa_tarefas");
         modelBuilder.Entity<ContaPessoal>().ToTable("mapa_contas_pessoais");
         modelBuilder.Entity<CategoriaContaPessoal>().ToTable("mapa_categorias_contas_pessoais");
+        modelBuilder.Entity<Compromisso>().ToTable("mapa_compromissos");
+        modelBuilder.Entity<CompromissoParticipante>().ToTable("mapa_compromisso_participantes");
+        modelBuilder.Entity<HorarioDisponivel>().ToTable("mapa_horarios_disponiveis");
+
+        modelBuilder.Entity<Compromisso>()
+            .HasMany(c => c.Participantes)
+            .WithOne()
+            .HasForeignKey(p => p.CompromissoId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<WorkDay>()
             .HasIndex(w => new { w.ProjectId, w.Date })

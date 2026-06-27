@@ -1,0 +1,108 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div class="page-title">Agenda</div>
+    <div class="header-actions">
+      <button mat-stroked-button class="btn-url" (click)="openPublicPage()" matTooltip="Abrir página pública">
+        <mat-icon>open_in_new</mat-icon> Página pública
+      </button>
+      <button mat-stroked-button (click)="openHorarios()">
+        <mat-icon>schedule</mat-icon> Horários
+      </button>
+      <button mat-flat-button color="primary" (click)="openCreate()">
+        <mat-icon>add</mat-icon> Novo compromisso
+      </button>
+    </div>
+  </div>
+
+  <!-- Navegação mês -->
+  <div class="month-nav">
+    <button mat-icon-button (click)="changeMonth(-1)"><mat-icon>chevron_left</mat-icon></button>
+    <span class="month-label">{{ mesNome() }} {{ ano() }}</span>
+    <button mat-icon-button (click)="changeMonth(1)"><mat-icon>chevron_right</mat-icon></button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">A carregar...</div>
+  } @else if (compromissos().length === 0) {
+    <div class="empty-state">
+      <mat-icon>event_available</mat-icon>
+      <p>Nenhum compromisso em {{ mesNome() }} {{ ano() }}</p>
+      <button mat-flat-button color="primary" (click)="openCreate()">Criar compromisso</button>
+    </div>
+  } @else {
+    <div class="compromissos-list">
+      @for (c of compromissos(); track c.id) {
+        <div class="compromisso-card" [class.cancelado]="c.status === 1" [class.concluido]="c.status === 2">
+
+          <div class="card-time">
+            <div class="date-label">{{ formatDate(c.inicio) }}</div>
+            <div class="time-range">{{ formatHour(c.inicio) }} – {{ formatHour(c.fim) }}</div>
+          </div>
+
+          <div class="card-body">
+            <div class="card-titulo">{{ c.titulo }}</div>
+            <div class="card-meta">
+              @if (c.local) {
+                <span><mat-icon class="meta-icon">place</mat-icon>{{ c.local }}</span>
+              }
+              @if (c.online) {
+                <span class="badge badge-online"><mat-icon class="meta-icon">videocam</mat-icon>Online</span>
+              }
+              @if (c.project) {
+                <span class="badge badge-proj"><mat-icon class="meta-icon">work</mat-icon>{{ c.project.name }}</span>
+              }
+              @if (c.tipo === 2) {
+                <span class="badge badge-lembrete"><mat-icon class="meta-icon">notifications</mat-icon>Lembrete conta</span>
+              }
+              @if (c.tipo === 1) {
+                <span class="badge badge-publico"><mat-icon class="meta-icon">public</mat-icon>Marcação pública</span>
+              }
+            </div>
+            @if (c.participantes?.length) {
+              <div class="participantes">
+                <mat-icon class="meta-icon">people</mat-icon>
+                {{ c.participantes.length }} participante(s)
+              </div>
+            }
+          </div>
+
+          <div class="card-right">
+            <span class="status-badge {{ statusClass[c.status] }}">{{ statusLabel[c.status] }}</span>
+
+            <div class="card-actions">
+              <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="Opções">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openEdit(c)">
+                  <mat-icon>edit</mat-icon> Editar
+                </button>
+                @if (c.status !== 2) {
+                  <button mat-menu-item (click)="updateStatus(c, 2)">
+                    <mat-icon>check_circle</mat-icon> Marcar concluído
+                  </button>
+                }
+                @if (c.status !== 1) {
+                  <button mat-menu-item (click)="updateStatus(c, 1)">
+                    <mat-icon>cancel</mat-icon> Cancelar
+                  </button>
+                }
+                @if (c.status !== 0) {
+                  <button mat-menu-item (click)="updateStatus(c, 0)">
+                    <mat-icon>restore</mat-icon> Reagendar
+                  </button>
+                }
+                <button mat-menu-item class="danger" (click)="delete(c)">
+                  <mat-icon>delete</mat-icon> Eliminar
+                </button>
+              </mat-menu>
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

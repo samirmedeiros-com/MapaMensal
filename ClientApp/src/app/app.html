@@ -1,25 +1,39 @@
-@if (auth.isLoggedIn()) {
+@if (isPublicRoute()) {
+  <router-outlet />
+} @else if (auth.isLoggedIn()) {
   <mat-sidenav-container class="sidenav-container">
 
     <mat-sidenav #sidenav
       [mode]="isMobile() ? 'over' : 'side'"
       [opened]="!isMobile()"
       class="sidenav">
-      <div class="logo">
-        <mat-icon>insert_chart</mat-icon>
-        <span>Mapa Mensal</span>
+
+      <div class="sidebar-logo">
+        <div class="logo-icon-wrap">
+          <mat-icon>insert_chart</mat-icon>
+        </div>
+        <div class="logo-info">
+          <span class="logo-name">Mapa Mensal</span>
+        </div>
       </div>
-      <mat-nav-list>
-        @for (item of navItems(); track item.path) {
-          <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link" (click)="onNavClick()">
-            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-            <span matListItemTitle>{{ item.label }}</span>
-          </a>
+
+      <nav class="sidebar-nav">
+        @for (section of navSections(); track section.label) {
+          <div class="nav-section">
+            <div class="nav-section-label">{{ section.label }}</div>
+            @for (item of section.items; track item.path) {
+              <a class="nav-item" [routerLink]="item.path" routerLinkActive="active" (click)="onNavClick()">
+                <mat-icon>{{ item.icon }}</mat-icon>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </div>
         }
-      </mat-nav-list>
-      <div class="sidenav-footer">
-        <div class="user-info">
-          <mat-icon>account_circle</mat-icon>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="avatar-circle">{{ usernameInitial() }}</div>
           <div class="user-details">
             <span class="user-name">{{ auth.currentUser()?.username }}</span>
             <span class="user-role">{{ auth.currentUser()?.role === 'Admin' ? 'Administrador' : 'Utilizador' }}</span>
@@ -29,16 +43,17 @@
           <mat-icon>logout</mat-icon>
         </button>
       </div>
+
     </mat-sidenav>
 
     <mat-sidenav-content class="main-content" [class.has-bottom-nav]="isMobile()">
       @if (isMobile()) {
-        <mat-toolbar class="mobile-toolbar">
+        <div class="mobile-toolbar">
           <button mat-icon-button (click)="sidenav.toggle()">
             <mat-icon>menu</mat-icon>
           </button>
           <span class="mobile-title">Mapa Mensal</span>
-        </mat-toolbar>
+        </div>
       }
       <router-outlet />
     </mat-sidenav-content>

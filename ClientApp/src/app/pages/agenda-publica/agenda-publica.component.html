@@ -1,0 +1,164 @@
+<div class="pub-page">
+
+  <div class="pub-header">
+    <div class="pub-logo">
+      <span class="logo-icon">📅</span>
+      <span class="logo-name">Mapa Mensal</span>
+    </div>
+  </div>
+
+  <div class="pub-card">
+
+    @if (loadingStatus()) {
+      <div class="pub-loading">A carregar...</div>
+
+    } @else if (!agendaAtiva()) {
+      <div class="pub-unavailable">
+        <div class="unavail-icon">🔒</div>
+        <h2>Agenda não disponível</h2>
+        <p>De momento não estão a ser aceites marcações. Tente mais tarde.</p>
+      </div>
+
+    } @else if (step() === 'confirmado') {
+      <div class="pub-success">
+        <div class="success-icon">✅</div>
+        <h2>Marcação confirmada!</h2>
+        <p>Receberá um email de confirmação com o convite para adicionar ao seu calendário.</p>
+        <div class="slot-summary">
+          <strong>{{ formatData(slotSeleccionado()!.inicio) }}</strong><br>
+          {{ formatHora(slotSeleccionado()!.inicio) }} – {{ formatHora(slotSeleccionado()!.fim) }}
+        </div>
+        <button class="pub-btn primary" (click)="step.set('data'); nome=''; email=''; telefone=''">
+          Nova marcação
+        </button>
+      </div>
+
+    } @else {
+      <h1 class="pub-title">{{ titulo() }}</h1>
+
+      <!-- Steps indicator -->
+      <div class="steps">
+        <div class="step" [class.active]="step() === 'data'" [class.done]="step() !== 'data'">
+          <span class="step-num">1</span> Data
+        </div>
+        <div class="step-line"></div>
+        <div class="step" [class.active]="step() === 'hora'" [class.done]="step() === 'dados'">
+          <span class="step-num">2</span> Hora
+        </div>
+        <div class="step-line"></div>
+        <div class="step" [class.active]="step() === 'dados'">
+          <span class="step-num">3</span> Dados
+        </div>
+      </div>
+
+      <!-- STEP 1: Escolher data -->
+      @if (step() === 'data') {
+        <div class="step-content">
+          <h3 class="step-title">Escolhe uma data</h3>
+          <div class="dates-grid">
+            @for (d of datasDisponiveis(); track d) {
+              <button class="date-btn" [class.selected]="dataSeleccionada() === d" (click)="selectData(d)">
+                <span class="date-dow">{{ formatDataCurta(d).split(',')[0] }}</span>
+                <span class="date-num">{{ formatDataCurta(d).split(',')[1]?.trim() }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- STEP 2: Escolher hora -->
+      @if (step() === 'hora') {
+        <div class="step-content">
+          <button class="back-btn" (click)="back()">← Voltar</button>
+          <h3 class="step-title">{{ formatData(dataSeleccionada()) }}</h3>
+          @if (loadingSlots()) {
+            <p class="pub-loading">A carregar horários...</p>
+          } @else if (!slots().length) {
+            <div class="no-slots">
+              <p>Não há horários disponíveis neste dia.</p>
+              <button class="pub-btn secondary" (click)="back()">Escolher outra data</button>
+            </div>
+          } @else {
+            <div class="slots-grid">
+              @for (s of slots(); track s.inicio) {
+                <button class="slot-btn" [class.selected]="slotSeleccionado()?.inicio === s.inicio"
+                  (click)="selectSlot(s)">
+                  {{ formatHora(s.inicio) }} – {{ formatHora(s.fim) }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- STEP 3: Preencher dados -->
+      @if (step() === 'dados') {
+        <div class="step-content">
+          <button class="back-btn" (click)="back()">← Voltar</button>
+          <h3 class="step-title">Os teus dados</h3>
+
+          <div class="slot-pill">
+            📅 {{ formatData(dataSeleccionada()) }} &nbsp;·&nbsp;
+            {{ formatHora(slotSeleccionado()!.inicio) }} – {{ formatHora(slotSeleccionado()!.fim) }}
+          </div>
+
+          @if (submitError()) {
+            <div class="pub-error">{{ submitError() }}</div>
+          }
+
+          <div class="form-fields">
+
+            <div class="field-group">
+              <label>Nome *</label>
+              <input [(ngModel)]="nome" placeholder="O teu nome completo" />
+            </div>
+
+            <div class="field-group">
+              <label>Email *</label>
+              <input [(ngModel)]="email" type="email" placeholder="email@exemplo.com" />
+            </div>
+
+            <div class="field-group">
+              <label>Telefone (opcional)</label>
+              <div class="phone-row">
+                <!-- País dropdown -->
+                <div class="pais-selector" (click)="showPaisesList = !showPaisesList">
+                  <span class="pais-flag">{{ paisSeleccionado.bandeira }}</span>
+                  <span class="pais-prefixo">{{ paisSeleccionado.prefixo }}</span>
+                  <span class="pais-arrow">▾</span>
+                  @if (showPaisesList) {
+                    <div class="pais-dropdown" (click)="$event.stopPropagation()">
+                      <input class="pais-search" [(ngModel)]="paisBusca"
+                        placeholder="Pesquisar país..." (click)="$event.stopPropagation()" />
+                      <div class="pais-list">
+                        @for (p of paisFiltrado(); track p.codigo) {
+                          <div class="pais-option" (click)="selectPais(p)">
+                            <span>{{ p.bandeira }}</span>
+                            <span class="pais-nome">{{ p.nome }}</span>
+                            <span class="pais-pref">{{ p.prefixo }}</span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+                <input [(ngModel)]="telefone" placeholder="Número de telefone" type="tel" />
+              </div>
+            </div>
+
+          </div>
+
+          <button class="pub-btn primary" (click)="confirmar()" [disabled]="submitting()">
+            {{ submitting() ? 'A confirmar...' : 'Confirmar marcação' }}
+          </button>
+
+          <p class="pub-disclaimer">
+            Os teus dados serão usados apenas para gerir esta marcação.
+          </p>
+        </div>
+      }
+
+    }
+  </div>
+
+</div>

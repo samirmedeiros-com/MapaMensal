@@ -1,0 +1,86 @@
+<h2 mat-dialog-title>Configurar agenda pública</h2>
+
+<mat-dialog-content>
+
+  @if (error()) {
+    <div class="dialog-error">{{ error() }}</div>
+  }
+
+  <!-- Ativar agenda pública -->
+  <div class="section">
+    <div class="section-title">Agenda pública</div>
+    <label class="check-label toggle-label">
+      <input type="checkbox" [(ngModel)]="agendaAtiva" />
+      Permitir marcações públicas
+    </label>
+    <div class="field-row" style="margin-top:10px">
+      <label class="field-label">Título da página pública</label>
+      <input class="field-input" [(ngModel)]="agendaTitulo" placeholder="ex: Agendar reunião" />
+    </div>
+    @if (agendaAtiva) {
+      <div class="public-url">
+        <mat-icon>link</mat-icon>
+        Link: <strong>{{ '{origin}' }}/p/agenda</strong>
+      </div>
+    }
+  </div>
+
+  <!-- Horários disponíveis -->
+  <div class="section">
+    <div class="section-title-row">
+      <span class="section-title">Horários disponíveis</span>
+      <button type="button" class="add-btn" (click)="addHorario()">
+        <mat-icon>add</mat-icon> Adicionar
+      </button>
+    </div>
+
+    @if (loading()) {
+      <p class="loading-text">A carregar...</p>
+    } @else {
+      @for (h of horarios(); track $index) {
+        <div class="horario-row" [class.inativo]="!h.ativo">
+          <select class="field-select sm" [ngModel]="h.diaSemana" (ngModelChange)="updateField($index, 'diaSemana', +$event)">
+            @for (d of diaLabels; track $index) {
+              <option [value]="$index">{{ d }}</option>
+            }
+          </select>
+
+          <input class="field-input sm" type="time" [ngModel]="toTimeInput(h.horaInicio)"
+            (change)="updateHora($index, 'horaInicio', $any($event.target).value)" />
+          <span class="sep">–</span>
+          <input class="field-input sm" type="time" [ngModel]="toTimeInput(h.horaFim)"
+            (change)="updateHora($index, 'horaFim', $any($event.target).value)" />
+
+          <select class="field-select sm" [ngModel]="h.duracaoSlotMinutos" (ngModelChange)="updateField($index, 'duracaoSlotMinutos', +$event)">
+            <option [value]="30">30 min</option>
+            <option [value]="45">45 min</option>
+            <option [value]="60">1 hora</option>
+            <option [value]="90">1h30</option>
+            <option [value]="120">2 horas</option>
+          </select>
+
+          <label class="check-label">
+            <input type="checkbox" [ngModel]="h.ativo" (ngModelChange)="updateField($index, 'ativo', $event)" />
+            Ativo
+          </label>
+
+          <button type="button" mat-icon-button class="remove-btn" (click)="removeHorario($index)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      }
+
+      @if (!horarios().length) {
+        <p class="empty-hint">Nenhum horário configurado. Adicione pelo menos um para receber marcações.</p>
+      }
+    }
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">
+    {{ saving() ? 'A guardar...' : 'Guardar' }}
+  </button>
+</mat-dialog-actions>

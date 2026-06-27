@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import {
   Project, WorkDay, WorkDayUpsertDto, Holiday,
   Expense, AnnualSummary, TreasurySummary, Tarefa,
-  ContaPessoal, ResumoAnualContas, CategoriaContaPessoal
+  ContaPessoal, ResumoAnualContas, CategoriaContaPessoal,
+  Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso
 } from '../models/models';
 import { environment } from '../../environments/environment';
 
@@ -135,5 +136,61 @@ export class ApiService {
   }
   setConfig(values: Record<string, string>): Observable<void> {
     return this.http.post<void>(`${this.base}/summary/config`, values);
+  }
+
+  // ── Agenda ──────────────────────────────────────────────────────────────
+
+  getCompromissos(ano?: number, mes?: number): Observable<Compromisso[]> {
+    const params: Record<string, string> = {};
+    if (ano) params['ano'] = String(ano);
+    if (mes) params['mes'] = String(mes);
+    return this.http.get<Compromisso[]>(`${this.base}/compromissos`, { params });
+  }
+
+  createCompromisso(dto: Omit<Compromisso, 'id' | 'criadoEm' | 'project'>): Observable<Compromisso> {
+    return this.http.post<Compromisso>(`${this.base}/compromissos`, dto);
+  }
+
+  updateCompromisso(id: number, dto: Omit<Compromisso, 'id' | 'criadoEm' | 'project'>): Observable<void> {
+    return this.http.put<void>(`${this.base}/compromissos/${id}`, dto);
+  }
+
+  updateStatusCompromisso(id: number, status: StatusCompromisso): Observable<void> {
+    return this.http.patch<void>(`${this.base}/compromissos/${id}/status`, { status });
+  }
+
+  deleteCompromisso(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/compromissos/${id}`);
+  }
+
+  getHorarios(): Observable<HorarioDisponivel[]> {
+    return this.http.get<HorarioDisponivel[]>(`${this.base}/compromissos/horarios`);
+  }
+
+  saveHorarios(horarios: HorarioDisponivel[]): Observable<void> {
+    return this.http.put<void>(`${this.base}/compromissos/horarios`, horarios);
+  }
+
+  getAgendaPublicaConfig(): Observable<Record<string, string>> {
+    return this.http.get<Record<string, string>>(`${this.base}/agenda-publica/config`);
+  }
+
+  saveAgendaPublicaConfig(valores: Record<string, string>): Observable<void> {
+    return this.http.put<void>(`${this.base}/agenda-publica/config`, valores);
+  }
+
+  getSlotsPublicos(date: string): Observable<SlotPublico[]> {
+    return this.http.get<SlotPublico[]>(`${this.base}/agenda-publica/slots`, { params: { date } });
+  }
+
+  getAgendaPublicaStatus(): Observable<{ ativa: boolean; titulo: string }> {
+    return this.http.get<{ ativa: boolean; titulo: string }>(`${this.base}/agenda-publica/status`);
+  }
+
+  reservarSlotPublico(dto: {
+    nome: string; email: string; telefone?: string; codigoPais: string;
+    inicio: string; fim: string;
+  }): Observable<{ id: number; message: string }> {
+    return this.http.post<{ id: number; message: string }>(`${this.base}/agenda-publica/reservar`, dto);
   }
 }
