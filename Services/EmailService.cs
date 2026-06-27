@@ -5,10 +5,8 @@ using Microsoft.Extensions.Configuration;
 
 namespace MapaMensal.Services;
 
-public class EmailService(IHttpClientFactory httpFactory, IConfiguration config) : IEmailService
+public class EmailService(IHttpClientFactory httpFactory, IConfiguration config, ILogger<EmailService> logger) : IEmailService
 {
-    private static readonly JsonSerializerOptions _json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-
     private string ApiKey => config["SimplySend:ApiKey"] ?? "";
     private string AccountId => config["SimplySend:AccountId"] ?? "";
     private string From => config["SimplySend:From"] ?? "";
@@ -25,18 +23,31 @@ public class EmailService(IHttpClientFactory httpFactory, IConfiguration config)
 {{unsubscribe_email_html}} &nbsp;|&nbsp; {{report_abuse_email_html}}
 </p>";
 
-        object payload = attachment != null && attachmentName != null
-            ? new
+        // Build payload — attachments as array (SimplySend format)
+        var basePayload = new Dictionary<string, object>
+        {
+            ["to"]        = to,
+            ["from"]      = From,
+            ["from_name"] = SenderName,
+            ["subject"]   = subject,
+            ["html"]      = html
+        };
+
+        if (attachment != null && attachmentName != null)
+        {
+            basePayload["attachments"] = new[]
             {
-                to, from = From, from_name = SenderName, subject, html,
-                attachment = new
+                new Dictionary<string, string>
                 {
-                    filename = attachmentName,
-                    content = Convert.ToBase64String(attachment),
-                    content_type = attachmentContentType ?? "application/octet-stream"
+                    ["filename"]     = attachmentName,
+                    ["content"]      = Convert.ToBase64String(attachment),
+                    ["content_type"] = attachmentContentType ?? "application/octet-stream"
                 }
-            }
-            : new { to, from = From, from_name = SenderName, subject, html };
+            };
+        }
+
+        var json = JsonSerializer.Serialize(basePayload);
+        logger.LogInformation("SimplySend payload: {json}", json);
 
         var client = httpFactory.CreateClient("simplysend");
         client.DefaultRequestHeaders.Clear();
@@ -44,14 +55,14 @@ public class EmailService(IHttpClientFactory httpFactory, IConfiguration config)
         client.DefaultRequestHeaders.Add("X-Id", AccountId);
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        var content = new StringContent(JsonSerializer.Serialize(payload, _json), Encoding.UTF8, "application/json");
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await client.PostAsync($"{BaseUrl.TrimEnd('/')}/send", content);
 
+        var responseBody = await response.Content.ReadAsStringAsync();
+        logger.LogInformation("SimplySend response {status}: {body}", (int)response.StatusCode, responseBody);
+
         if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync();
-            throw new InvalidOperationException($"SimplySend: erro {(int)response.StatusCode} — {body}");
-        }
+            throw new InvalidOperationException($"SimplySend: erro {(int)response.StatusCode} — {responseBody}");
     }
 
     public async Task SendConviteCompromissoAsync(string to, string nomeDestinatario,
