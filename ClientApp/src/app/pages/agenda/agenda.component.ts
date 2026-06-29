@@ -10,7 +10,7 @@ import { combineLatest } from 'rxjs';
 import { ApiService } from '../../services/api.service';
 import {
   Compromisso, Project,
-  TipoCompromisso, StatusCompromisso, MONTH_NAMES
+  TipoCompromisso, StatusCompromisso, MONTH_NAMES, CategoriaCompromisso
 } from '../../models/models';
 import { CompromissoDialogComponent } from './compromisso-dialog.component';
 import { HorariosDialogComponent } from './horarios-dialog.component';
@@ -38,7 +38,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   compromissos = signal<Compromisso[]>([]);
   projetos = signal<Project[]>([]);
+  todasCategorias = signal<CategoriaCompromisso[]>([]);
+  filtroCategoriaId = signal<number | null>(null);
   loading = signal(false);
+
+  categoriasDisponiveis = computed(() => this.todasCategorias());
 
   view = signal<CalView>('semana');
   dataAtual = signal(new Date());
@@ -115,9 +119,15 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     return days;
   });
 
+  compromissosFiltrados = computed(() => {
+    const id = this.filtroCategoriaId();
+    if (!id) return this.compromissos();
+    return this.compromissos().filter(c => c.categoriaId === id);
+  });
+
   compromissosPorDia = computed(() => {
     const map = new Map<string, Compromisso[]>();
-    for (const c of this.compromissos()) {
+    for (const c of this.compromissosFiltrados()) {
       const k = this.dKey(new Date(c.inicio));
       const arr = map.get(k) ?? [];
       arr.push(c);
@@ -145,6 +155,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.load();
     this.api.getProjects().subscribe(p => this.projetos.set(p));
+    this.api.getCategoriasCompromisso().subscribe(c => this.todasCategorias.set(c));
   }
 
   ngAfterViewInit() {

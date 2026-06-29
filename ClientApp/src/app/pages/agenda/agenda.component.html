@@ -7,9 +7,6 @@
       <button mat-stroked-button class="btn-url" (click)="openPublicPage()" matTooltip="Abrir página pública">
         <mat-icon>open_in_new</mat-icon> Página pública
       </button>
-      <button mat-stroked-button (click)="openCategorias()">
-        <mat-icon>label</mat-icon> Categorias
-      </button>
       <button mat-stroked-button (click)="openHorarios()">
         <mat-icon>schedule</mat-icon> Horários
       </button>
@@ -30,6 +27,17 @@
         <mat-icon>chevron_right</mat-icon>
       </button>
       <span class="nav-label">{{ navLabel() }}</span>
+    </div>
+
+    <div class="cal-filters">
+      <select class="cat-filter"
+        [ngModel]="filtroCategoriaId()"
+        (ngModelChange)="filtroCategoriaId.set($event)">
+        <option [ngValue]="null">Todas as categorias</option>
+        @for (c of categoriasDisponiveis(); track c.id) {
+          <option [ngValue]="c.id">{{ c.nome }}</option>
+        }
+      </select>
     </div>
 
     <div class="view-switch">
@@ -165,7 +173,7 @@
          VISTA: LISTA
          ══════════════════════════════════════════════════════════ -->
     @if (view() === 'lista') {
-      @if (compromissos().length === 0) {
+      @if (compromissosFiltrados().length === 0) {
         <div class="empty-state">
           <mat-icon>event_available</mat-icon>
           <p>Nenhum compromisso em {{ mesNome() }} {{ ano() }}</p>
@@ -173,7 +181,7 @@
         </div>
       } @else {
         <div class="compromissos-list">
-          @for (c of compromissos(); track c.id) {
+          @for (c of compromissosFiltrados(); track c.id) {
             <div class="compromisso-card" [class.cancelado]="c.status === 1" [class.concluido]="c.status === 2">
 
               <div class="card-time">

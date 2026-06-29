@@ -35,6 +35,26 @@
   border-radius: 4px;
 }
 
+.swatch-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.swatch-mini {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform .1s, border-color .1s;
+  padding: 0;
+
+  &:hover { transform: scale(1.2); }
+  &.selected { border-color: #333; transform: scale(1.1); }
+}
+
 @media (max-width: 768px) {
   .iva-row { flex-wrap: wrap; }
 }

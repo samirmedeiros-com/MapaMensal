@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
-import { Project, Holiday, CategoriaContaPessoal } from '../../models/models';
+import { Project, Holiday, CategoriaContaPessoal, CategoriaCompromisso, CORES_PALETA } from '../../models/models';
 
 @Component({
   selector: 'app-configuracao',
@@ -23,14 +23,19 @@ export class ConfiguracaoComponent implements OnInit {
   projects = signal<Project[]>([]);
   holidays = signal<Holiday[]>([]);
   categorias = signal<CategoriaContaPessoal[]>([]);
+  categoriasAgenda = signal<CategoriaCompromisso[]>([]);
   ivaRate = signal('0.23');
   year = signal(new Date().getFullYear());
 
   newProject: Partial<Project> = { name: '', dailyRate: 0 };
   newHoliday: Partial<Holiday> = { date: '', name: '', isNational: true };
   newCategoria: Partial<CategoriaContaPessoal> = { nome: '', cor: '#5c6bc0', ordem: 0 };
+  newCategoriaAgenda: { nome: string; cor: string } = { nome: '', cor: '#534AB7' };
   editingProject: Project | null = null;
   editingCategoria: CategoriaContaPessoal | null = null;
+  editingCategoriaAgenda: CategoriaCompromisso | null = null;
+
+  readonly CORES_AGENDA = CORES_PALETA;
 
   ngOnInit() {
     this.loadAll();
@@ -41,6 +46,7 @@ export class ConfiguracaoComponent implements OnInit {
     this.api.getHolidays(this.year()).subscribe(h => this.holidays.set(h));
     this.api.getConfig().subscribe(c => this.ivaRate.set(c['IvaRate'] ?? '0.23'));
     this.api.getCategoriasContasPessoais().subscribe(c => this.categorias.set(c));
+    this.api.getCategoriasCompromisso().subscribe(c => this.categoriasAgenda.set(c));
   }
 
   saveIva() {
@@ -129,6 +135,40 @@ export class ConfiguracaoComponent implements OnInit {
     if (!confirm('Eliminar esta categoria? As contas existentes mantêm o nome.')) return;
     this.api.deleteCategoriaContaPessoal(id).subscribe(() => {
       this.categorias.update(list => list.filter(c => c.id !== id));
+      this.snack.open('Categoria eliminada', '', { duration: 2000 });
+    });
+  }
+
+  // ── Categorias de Agenda ─────────────────────────────────────────────────
+  addCategoriaAgenda() {
+    if (!this.newCategoriaAgenda.nome.trim()) return;
+    this.api.createCategoriaCompromisso(this.newCategoriaAgenda).subscribe(c => {
+      this.categoriasAgenda.update(list => [...list, c]);
+      this.newCategoriaAgenda = { nome: '', cor: '#534AB7' };
+      this.snack.open('Categoria criada', '', { duration: 2000 });
+    });
+  }
+
+  startEditCategoriaAgenda(c: CategoriaCompromisso) {
+    this.editingCategoriaAgenda = { ...c };
+  }
+
+  saveCategoriaAgenda() {
+    if (!this.editingCategoriaAgenda) return;
+    this.api.updateCategoriaCompromisso(this.editingCategoriaAgenda.id, {
+      nome: this.editingCategoriaAgenda.nome,
+      cor: this.editingCategoriaAgenda.cor
+    }).subscribe(updated => {
+      this.categoriasAgenda.update(list => list.map(c => c.id === updated.id ? updated : c));
+      this.editingCategoriaAgenda = null;
+      this.snack.open('Categoria actualizada', '', { duration: 2000 });
+    });
+  }
+
+  deleteCategoriaAgenda(id: number) {
+    if (!confirm('Eliminar esta categoria? Os eventos ligados ficam sem categoria.')) return;
+    this.api.deleteCategoriaCompromisso(id).subscribe(() => {
+      this.categoriasAgenda.update(list => list.filter(c => c.id !== id));
       this.snack.open('Categoria eliminada', '', { duration: 2000 });
     });
   }

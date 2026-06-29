@@ -57,6 +57,27 @@
 }
 
 // ── Switcher de vista ────────────────────────────────────────────────────
+.cal-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-filter {
+  padding: 6px 10px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  cursor: pointer;
+  min-width: 160px;
+
+  &:focus { border-color: var(--purple-500); }
+}
+
 .view-switch {
   display: flex;
   border: 1px solid var(--border-2);

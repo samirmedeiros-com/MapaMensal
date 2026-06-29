@@ -118,6 +118,72 @@
     </table>
   </div>
 
+  <!-- Categorias Agenda -->
+  <div class="card">
+    <div class="card-title">Categorias de Agenda</div>
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th style="width:48px">Cor</th>
+          <th>Nome</th>
+          <th style="width:120px">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of categoriasAgenda(); track c.id) {
+          <tr>
+            @if (editingCategoriaAgenda?.id === c.id) {
+              <td>
+                <div class="swatch-picker">
+                  @for (cor of CORES_AGENDA; track cor.hex) {
+                    <button type="button" class="swatch-mini"
+                      [style.background]="cor.hex"
+                      [class.selected]="editingCategoriaAgenda!.cor === cor.hex"
+                      (click)="editingCategoriaAgenda!.cor = cor.hex"
+                      [title]="cor.label">
+                    </button>
+                  }
+                </div>
+              </td>
+              <td><input class="inline-input" [(ngModel)]="editingCategoriaAgenda!.nome" /></td>
+              <td class="actions">
+                <button mat-icon-button color="primary" (click)="saveCategoriaAgenda()" title="Guardar"><mat-icon>check</mat-icon></button>
+                <button mat-icon-button (click)="editingCategoriaAgenda = null" title="Cancelar"><mat-icon>close</mat-icon></button>
+              </td>
+            } @else {
+              <td><span class="cat-color-dot" [style.background]="c.cor"></span></td>
+              <td>{{ c.nome }}</td>
+              <td class="actions">
+                <button mat-icon-button color="primary" (click)="startEditCategoriaAgenda(c)" title="Editar"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button color="warn" (click)="deleteCategoriaAgenda(c.id)" title="Eliminar"><mat-icon>delete</mat-icon></button>
+              </td>
+            }
+          </tr>
+        }
+        <tr class="add-row">
+          <td>
+            <div class="swatch-picker">
+              @for (cor of CORES_AGENDA; track cor.hex) {
+                <button type="button" class="swatch-mini"
+                  [style.background]="cor.hex"
+                  [class.selected]="newCategoriaAgenda.cor === cor.hex"
+                  (click)="newCategoriaAgenda.cor = cor.hex"
+                  [title]="cor.label">
+                </button>
+              }
+            </div>
+          </td>
+          <td><input class="inline-input" [(ngModel)]="newCategoriaAgenda.nome" placeholder="Nome da categoria" /></td>
+          <td>
+            <button mat-flat-button color="accent" (click)="addCategoriaAgenda()">
+              <mat-icon>add</mat-icon> Adicionar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <!-- Feriados -->
   <div class="card">
     <div class="card-title">
