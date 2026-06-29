@@ -169,13 +169,14 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       const now = new Date();
       const offset = (now.getHours() + now.getMinutes() / 60 - this.HORA_INI) * this.ALT_HORA;
       el.scrollTop = Math.max(0, offset - 120);
-    }, 50);
+    }, 80);
   }
 
   // ── Data loading ────────────────────────────────────────────────────────
 
   load() {
     this.loading.set(true);
+    const scrollAfter = this.view() === 'semana' || this.view() === 'dia';
 
     if (this.view() === 'semana') {
       const dias = this.diasSemana();
@@ -195,6 +196,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
                 if (!seen.has(c.id)) { seen.add(c.id); all.push(c); }
             this.compromissos.set(all);
             this.loading.set(false);
+            if (scrollAfter) this.scrollToNow();
           },
           error: () => this.loading.set(false)
         });
@@ -203,7 +205,11 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     }
 
     this.api.getCompromissos(this.ano(), this.mes()).subscribe({
-      next: c => { this.compromissos.set(c); this.loading.set(false); },
+      next: c => {
+        this.compromissos.set(c);
+        this.loading.set(false);
+        if (scrollAfter) this.scrollToNow();
+      },
       error: () => this.loading.set(false)
     });
   }
@@ -237,7 +243,7 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     this.ano.set(d.getFullYear());
     this.mes.set(d.getMonth() + 1);
     this.view.set('dia');
-    this.load();
+    this.load(); // scrollToNow called inside load() after data arrives
   }
 
   setView(v: CalView) {
