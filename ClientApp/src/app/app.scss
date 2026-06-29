@@ -26,18 +26,12 @@
   width: 34px;
   height: 34px;
   border-radius: var(--radius-md);
-  background: var(--purple-50);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    color: var(--purple-500);
-  }
+  svg { display: block; border-radius: 6px; }
 }
 
 .logo-info {
