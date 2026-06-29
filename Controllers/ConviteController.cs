@@ -1,4 +1,5 @@
 using MapaMensal.Data;
+using MapaMensal.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,20 @@ public class ConviteController : ControllerBase
     public ConviteController(AppDbContext db)
     {
         _db = db;
+    }
+
+    [HttpGet("ics/{token}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> DownloadIcs(string token)
+    {
+        var p = await _db.CompromissoParticipantes.FirstOrDefaultAsync(x => x.Token == token);
+        if (p is null) return NotFound();
+
+        var c = await _db.Compromissos.FindAsync(p.CompromissoId);
+        if (c is null) return NotFound();
+
+        var ics = IcsHelper.Gerar(c.Titulo, c.Descricao, c.Inicio, c.Fim, c.Local, c.Id.ToString());
+        return File(ics, "text/calendar; charset=utf-8", "compromisso.ics");
     }
 
     [HttpGet("aceitar/{token}")]

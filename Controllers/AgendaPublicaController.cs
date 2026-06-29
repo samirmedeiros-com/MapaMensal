@@ -1,5 +1,4 @@
 using MapaMensal.Data;
-using MapaMensal.Helpers;
 using MapaMensal.Models;
 using MapaMensal.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -140,14 +139,9 @@ public class AgendaPublicaController(AppDbContext db, IEmailService email) : Con
         // Envia confirmação ao participante
         try
         {
-            var ics = IcsHelper.Gerar(
-                compromisso.Titulo, null,
-                compromisso.Inicio, compromisso.Fim,
-                "", compromisso.Id.ToString());
-
             await email.SendConfirmacaoPublicaAsync(
                 dto.Email, dto.Nome, titulo,
-                dto.Inicio, dto.Fim, "", ics);
+                dto.Inicio, dto.Fim, "");
         }
         catch { /* não falha a reserva por erro de email */ }
 

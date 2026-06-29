@@ -4,7 +4,6 @@ using MapaMensal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MapaMensal.Helpers;
 
 namespace MapaMensal.Controllers;
 
@@ -124,15 +123,12 @@ public class CompromissosController : ControllerBase
         {
             try
             {
-                var ics = IcsHelper.Gerar(compromisso.Titulo, compromisso.Descricao,
-                    compromisso.Inicio, compromisso.Fim, compromisso.Local, compromisso.Id.ToString());
-
                 await Task.WhenAll(compromisso.Participantes
                     .Where(p => p.Notificar && !string.IsNullOrEmpty(p.Email))
                     .Select(p => _email.SendConviteCompromissoAsync(
                         p.Email, p.Nome, compromisso.Titulo,
                         compromisso.Inicio, compromisso.Fim,
-                        compromisso.Local, compromisso.Descricao, ics,
+                        compromisso.Local, compromisso.Descricao,
                         _baseUrl + "/api/compromissos/aceitar/" + p.Token)));
             }
             catch { /* não falha a criação por erro de email */ }
@@ -189,15 +185,12 @@ public class CompromissosController : ControllerBase
         {
             try
             {
-                var ics = IcsHelper.Gerar(compromisso.Titulo, compromisso.Descricao,
-                    compromisso.Inicio, compromisso.Fim, compromisso.Local, id.ToString());
-
                 await Task.WhenAll(compromisso.Participantes
                     .Where(p => p.Notificar && !string.IsNullOrEmpty(p.Email))
                     .Select(p => _email.SendConviteAlteradoAsync(
                         p.Email, p.Nome, compromisso.Titulo,
                         compromisso.Inicio, compromisso.Fim,
-                        compromisso.Local, compromisso.Descricao, ics,
+                        compromisso.Local, compromisso.Descricao,
                         _baseUrl + "/api/compromissos/aceitar/" + p.Token)));
             }
             catch { /* não falha a actualização por erro de email */ }
@@ -237,15 +230,12 @@ public class CompromissosController : ControllerBase
 
         try
         {
-            var ics = IcsHelper.Gerar(compromisso.Titulo, compromisso.Descricao,
-                compromisso.Inicio, compromisso.Fim, compromisso.Local, id.ToString());
-
             await Task.WhenAll(compromisso.Participantes
                 .Where(p => p.Notificar && !string.IsNullOrEmpty(p.Email))
                 .Select(p => _email.SendConviteCompromissoAsync(
                     p.Email, p.Nome, compromisso.Titulo,
                     compromisso.Inicio, compromisso.Fim,
-                    compromisso.Local, compromisso.Descricao, ics,
+                    compromisso.Local, compromisso.Descricao,
                     _baseUrl + "/api/compromissos/aceitar/" + p.Token)));
         }
         catch (Exception ex)
