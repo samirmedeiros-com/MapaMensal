@@ -1,5 +1,6 @@
 using MapaMensal.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MapaMensal.Data;
 
@@ -18,6 +19,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CompromissoParticipante> CompromissoParticipantes => Set<CompromissoParticipante>();
     public DbSet<HorarioDisponivel> HorariosDisponiveis => Set<HorarioDisponivel>();
     public DbSet<CategoriaCompromisso> CategoriasCompromisso => Set<CategoriaCompromisso>();
+
+    // Garante que todos os DateTime lidos do MySQL ficam com Kind=Utc.
+    // Sem isto, o Pomelo devolve Kind=Unspecified e o System.Text.Json serializa
+    // com o offset local do servidor Azure, causando desfasamento horário no browser.
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>().HaveConversion<NullableUtcDateTimeConverter>();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,6 +74,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     }
 
     private static void SeedData(ModelBuilder modelBuilder)
+
     {
         // Configuração IVA
         modelBuilder.Entity<AppConfig>().HasData(
@@ -104,3 +115,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         );
     }
 }
+
+internal sealed class UtcDateTimeConverter() : ValueConverter<DateTime, DateTime>(
+    v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+    v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+internal sealed class NullableUtcDateTimeConverter() : ValueConverter<DateTime?, DateTime?>(
+    v => v == null ? null : v.Value.Kind == DateTimeKind.Utc ? v : v.Value.ToUniversalTime(),
+    v => v == null ? null : DateTime.SpecifyKind(v.Value, DateTimeKind.Utc));
