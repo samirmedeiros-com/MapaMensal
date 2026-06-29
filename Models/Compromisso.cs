@@ -21,5 +21,8 @@ public class Compromisso
     public bool NotificarParticipantes { get; set; }
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
     public string? RecorrenciaId { get; set; }
+    public string? Cor { get; set; }
+    public int? CategoriaId { get; set; }
+    public CategoriaCompromisso? Categoria { get; set; }
     public List<CompromissoParticipante> Participantes { get; set; } = new();
 }

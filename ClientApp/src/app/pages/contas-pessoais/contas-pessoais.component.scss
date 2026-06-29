@@ -145,6 +145,30 @@
   }
 
   .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+  .metodo-opts {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+
+  .metodo-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 7px 12px;
+    border: 1.5px solid var(--border-2);
+    border-radius: var(--radius-md);
+    background: transparent;
+    font-size: 13px; font-family: inherit;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all .12s;
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    &:hover { background: var(--surface-2); color: var(--text); }
+    &.active {
+      border-color: var(--purple-500);
+      background: var(--purple-50);
+      color: var(--purple-800);
+    }
+  }
 }
 
 // --- FILTROS ---
@@ -231,6 +255,20 @@
     &.vencida { background: #ffebee; color: #c62828; }
     &.aberto  { background: #fff3e0; color: #e65100; }
   }
+
+  .metodo-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.78rem; font-weight: 600;
+    white-space: nowrap;
+
+    mat-icon { font-size: 14px; width: 14px; height: 14px; }
+    &.metodo-dinheiro { background: #e8f5e9; color: #2e7d32; }
+    &.metodo-cartao   { background: #e3f2fd; color: #1565c0; }
+  }
+
+  .text-muted { color: #999; }
 
   .acoes {
     text-align: center !important;

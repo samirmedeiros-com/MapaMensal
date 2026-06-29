@@ -10,7 +10,8 @@ import { MatInputModule } from '@angular/material/input';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../services/api.service';
 import {
-  Compromisso, CompromissoParticipante, Project, TipoCompromisso, ContaPessoal, RecorrenciaDto
+  Compromisso, CompromissoParticipante, Project, TipoCompromisso, ContaPessoal,
+  RecorrenciaDto, CategoriaCompromisso, CORES_PALETA
 } from '../../models/models';
 import { PAISES } from '../../shared/paises';
 
@@ -50,6 +51,11 @@ export class CompromissoDialogComponent implements OnInit {
   contaPessoalId: number | null = null;
   notificarParticipantes = false;
   participantes: CompromissoParticipante[] = [];
+  cor: string | null = null;
+  categoriaId: number | null = null;
+
+  categorias = signal<CategoriaCompromisso[]>([]);
+  readonly CORES = CORES_PALETA;
 
   // ── Recorrência ─────────────────────────────────────────────────────────
   recorrente = false;
@@ -114,6 +120,8 @@ export class CompromissoDialogComponent implements OnInit {
       this.contaPessoalId = c.contaPessoalId ?? null;
       this.notificarParticipantes = c.notificarParticipantes;
       this.participantes = c.participantes.map(p => ({ ...p }));
+      this.cor = c.cor ?? null;
+      this.categoriaId = c.categoriaId ?? null;
     } else {
       const now = new Date();
       now.setMinutes(0, 0, 0);
@@ -129,6 +137,7 @@ export class CompromissoDialogComponent implements OnInit {
     this.api.getContasPessoais(new Date().getFullYear()).subscribe(contas => {
       this.contasPendentes.set(contas.filter(c => !c.pago));
     });
+    this.api.getCategoriasCompromisso().subscribe(cs => this.categorias.set(cs));
   }
 
   toggleDiaSemana(d: number) {
@@ -168,6 +177,8 @@ export class CompromissoDialogComponent implements OnInit {
       tipo: this.tipo,
       notificarParticipantes: this.notificarParticipantes,
       participantes: this.participantes,
+      cor: this.cor ?? undefined,
+      categoriaId: this.categoriaId ?? undefined,
     };
 
     if (!this.isEdit && this.recorrente) {

@@ -44,7 +44,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   editMode   = signal<ContaPessoal | null>(null);
 
   form = { descricao: '', categoria: '', dataVencimento: '', valorPrevisto: 0, totalRecorrencias: 1 };
-  pagarForm = { valorPago: 0, dataPagamento: '' };
+  pagarForm = { valorPago: 0, dataPagamento: '', metodoPagamento: '' };
 
   private barChart?: Chart;
   private pieChart?: Chart;
@@ -155,7 +155,8 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   openPagar(c: ContaPessoal) {
     this.pagarForm = {
       valorPago: c.valorPago ?? c.valorPrevisto,
-      dataPagamento: c.dataPagamento ?? new Date().toISOString().substring(0, 10)
+      dataPagamento: c.dataPagamento ?? new Date().toISOString().substring(0, 10),
+      metodoPagamento: c.metodoPagamento ?? ''
     };
     this.pagarModal.set(c);
   }
@@ -163,7 +164,12 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   confirmarPagar() {
     const c = this.pagarModal();
     if (!c) return;
-    this.api.pagarConta(c.id, { pago: true, valorPago: this.pagarForm.valorPago, dataPagamento: this.pagarForm.dataPagamento }).subscribe(updated => {
+    this.api.pagarConta(c.id, {
+      pago: true,
+      valorPago: this.pagarForm.valorPago,
+      dataPagamento: this.pagarForm.dataPagamento,
+      metodoPagamento: this.pagarForm.metodoPagamento || undefined
+    }).subscribe(updated => {
       this.contas.update(list => list.map(x => x.id === updated.id ? updated : x));
       this.pagarModal.set(null);
       this.refreshResumo();

@@ -103,7 +103,7 @@ export class ApiService {
   updateContaPessoal(id: number, dto: { descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number }): Observable<ContaPessoal> {
     return this.http.put<ContaPessoal>(`${this.base}/contaspessoais/${id}`, dto);
   }
-  pagarConta(id: number, dto: { pago: boolean; valorPago?: number; dataPagamento?: string }): Observable<ContaPessoal> {
+  pagarConta(id: number, dto: { pago: boolean; valorPago?: number; dataPagamento?: string; metodoPagamento?: string }): Observable<ContaPessoal> {
     return this.http.patch<ContaPessoal>(`${this.base}/contaspessoais/${id}/pagar`, dto);
   }
   deleteContaPessoal(id: number, grupo = false): Observable<void> {
@@ -145,6 +145,20 @@ export class ApiService {
     if (ano) params['ano'] = String(ano);
     if (mes) params['mes'] = String(mes);
     return this.http.get<Compromisso[]>(`${this.base}/compromissos`, { params });
+  }
+
+  // Categorias de compromisso
+  getCategoriasCompromisso(): Observable<import('../models/models').CategoriaCompromisso[]> {
+    return this.http.get<import('../models/models').CategoriaCompromisso[]>(`${this.base}/agenda/categorias`);
+  }
+  createCategoriaCompromisso(dto: {nome: string; cor: string}): Observable<import('../models/models').CategoriaCompromisso> {
+    return this.http.post<import('../models/models').CategoriaCompromisso>(`${this.base}/agenda/categorias`, dto);
+  }
+  updateCategoriaCompromisso(id: number, dto: {nome: string; cor: string}): Observable<import('../models/models').CategoriaCompromisso> {
+    return this.http.put<import('../models/models').CategoriaCompromisso>(`${this.base}/agenda/categorias/${id}`, dto);
+  }
+  deleteCategoriaCompromisso(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/agenda/categorias/${id}`);
   }
 
   createCompromisso(dto: object): Observable<Compromisso> {

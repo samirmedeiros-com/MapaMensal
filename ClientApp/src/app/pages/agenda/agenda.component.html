@@ -7,6 +7,9 @@
       <button mat-stroked-button class="btn-url" (click)="openPublicPage()" matTooltip="Abrir página pública">
         <mat-icon>open_in_new</mat-icon> Página pública
       </button>
+      <button mat-stroked-button (click)="openCategorias()">
+        <mat-icon>label</mat-icon> Categorias
+      </button>
       <button mat-stroked-button (click)="openHorarios()">
         <mat-icon>schedule</mat-icon> Horários
       </button>
@@ -99,6 +102,7 @@
                       [style.height.px]="item.height"
                       [style.left]="item.left"
                       [style.width]="item.width"
+                      [ngStyle]="getEventStyle(item.c)"
                       (click)="openEdit(item.c)"
                       [matTooltip]="item.c.titulo + ' · ' + formatHour(item.c.inicio) + ' – ' + formatHour(item.c.fim)">
                       <div class="evt-titulo">{{ item.c.titulo }}</div>
@@ -139,6 +143,7 @@
               <span class="mes-num" [class.hoje-circle]="isHoje(dia)">{{ dia.getDate() }}</span>
               @for (c of compromissosDoDia(dia).slice(0, 3); track c.id) {
                 <div class="mes-evt tipo-{{ c.tipo }} s-{{ c.status }}"
+                  [ngStyle]="getEventStyle(c)"
                   (click)="openEdit(c); $event.stopPropagation()"
                   [matTooltip]="c.titulo">
                   <span class="mes-evt-hora">{{ formatHour(c.inicio) }}</span>

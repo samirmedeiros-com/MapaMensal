@@ -15,6 +15,7 @@ import {
 import { CompromissoDialogComponent } from './compromisso-dialog.component';
 import { HorariosDialogComponent } from './horarios-dialog.component';
 import { DeleteConfirmDialogComponent, DeleteDialogResult } from './delete-confirm-dialog.component';
+import { CategoriasDialogComponent } from './categorias-dialog.component';
 
 export type CalView = 'lista' | 'mes' | 'semana' | 'dia';
 
@@ -344,6 +345,10 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     this.dialog.open(HorariosDialogComponent, { width: '560px', maxWidth: '96vw' });
   }
 
+  openCategorias() {
+    this.dialog.open(CategoriasDialogComponent, { width: '480px', maxWidth: '96vw' });
+  }
+
   updateStatus(c: Compromisso, status: StatusCompromisso) {
     this.api.updateStatusCompromisso(c.id, status).subscribe(() => this.load());
   }
@@ -358,6 +363,16 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       if (!result) return;
       this.api.deleteCompromisso(c.id, result.escopo).subscribe(() => this.load());
     });
+  }
+
+  getEventStyle(c: Compromisso): Record<string, string> {
+    const cor = c.cor ?? c.categoria?.cor ?? null;
+    if (!cor) return {};
+    return {
+      'background-color': cor + '22',  // 13% opacity fill
+      'border-left-color': cor,
+      'color': cor,
+    };
   }
 
   formatHour(iso: string): string {

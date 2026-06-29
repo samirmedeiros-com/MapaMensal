@@ -26,7 +26,7 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
                 c.Id, c.Descricao, c.Categoria,
                 DataVencimento  = c.DataVencimento.ToString("yyyy-MM-dd"),
                 DataPagamento   = c.DataPagamento.HasValue ? c.DataPagamento.Value.ToString("yyyy-MM-dd") : null,
-                c.ValorPrevisto, c.ValorPago, c.Pago,
+                c.ValorPrevisto, c.ValorPago, c.Pago, c.MetodoPagamento,
                 GrupoRecorrencia = c.GrupoRecorrencia.HasValue ? c.GrupoRecorrencia.Value.ToString() : null,
                 c.RecorrenciaAtual, c.TotalRecorrencias,
                 CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd")
@@ -105,11 +105,12 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
         var c = await db.ContasPessoais.FindAsync(id);
         if (c is null) return NotFound();
 
-        c.Pago           = dto.Pago;
-        c.ValorPago      = dto.Pago ? dto.ValorPago : null;
-        c.DataPagamento  = dto.Pago && dto.DataPagamento is not null
+        c.Pago            = dto.Pago;
+        c.ValorPago       = dto.Pago ? dto.ValorPago : null;
+        c.DataPagamento   = dto.Pago && dto.DataPagamento is not null
             ? DateOnly.Parse(dto.DataPagamento)
             : null;
+        c.MetodoPagamento = dto.Pago ? dto.MetodoPagamento : null;
         await db.SaveChangesAsync();
         return Ok(ToDto(c));
     }
@@ -140,7 +141,7 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
         c.Id, c.Descricao, c.Categoria,
         DataVencimento   = c.DataVencimento.ToString("yyyy-MM-dd"),
         DataPagamento    = c.DataPagamento?.ToString("yyyy-MM-dd"),
-        c.ValorPrevisto, c.ValorPago, c.Pago,
+        c.ValorPrevisto, c.ValorPago, c.Pago, c.MetodoPagamento,
         GrupoRecorrencia = c.GrupoRecorrencia?.ToString(),
         c.RecorrenciaAtual, c.TotalRecorrencias,
         CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd")
@@ -152,4 +153,4 @@ public record ContaPessoalDto(
     decimal ValorPrevisto, int TotalRecorrencias
 );
 
-public record PagarDto(bool Pago, decimal? ValorPago, string? DataPagamento);
+public record PagarDto(bool Pago, decimal? ValorPago, string? DataPagamento, string? MetodoPagamento = null);

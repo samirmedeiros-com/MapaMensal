@@ -10,6 +10,7 @@ public class ContaPessoal
     public decimal ValorPrevisto { get; set; }
     public decimal? ValorPago { get; set; }
     public bool Pago { get; set; } = false;
+    public string? MetodoPagamento { get; set; }  // "Dinheiro" | "Cartão" | null
     public Guid? GrupoRecorrencia { get; set; }
     public int RecorrenciaAtual { get; set; } = 1;
     public int TotalRecorrencias { get; set; } = 1;

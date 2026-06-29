@@ -195,6 +195,55 @@
     <textarea class="field-input field-textarea" [(ngModel)]="descricao" placeholder="Notas ou descrição..." rows="3"></textarea>
   </div>
 
+  <!-- ── Cor & Categoria ────────────────────────────────────────────────── -->
+  <div class="cor-section">
+    <!-- Categoria -->
+    @if (categorias().length) {
+      <div class="field-row">
+        <label class="field-label">Categoria</label>
+        <div class="cat-picker">
+          <button type="button" class="cat-opt"
+            [class.active]="categoriaId === null"
+            (click)="categoriaId = null">
+            Nenhuma
+          </button>
+          @for (c of categorias(); track c.id) {
+            <button type="button" class="cat-opt"
+              [class.active]="categoriaId === c.id"
+              [style.--cat-cor]="c.cor"
+              (click)="categoriaId = c.id; cor = null">
+              <span class="cat-dot" [style.background]="c.cor"></span>
+              {{ c.nome }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Cor personalizada (só quando sem categoria) -->
+    <div class="field-row">
+      <label class="field-label">Cor {{ categoriaId ? '(definida pela categoria)' : 'do evento' }}</label>
+      <div class="swatch-row">
+        <button type="button" class="swatch swatch-none"
+          [class.selected]="!cor && !categoriaId"
+          (click)="cor = null"
+          [disabled]="!!categoriaId"
+          title="Automática">
+          <mat-icon>block</mat-icon>
+        </button>
+        @for (c of CORES; track c.hex) {
+          <button type="button" class="swatch"
+            [style.background]="c.hex"
+            [class.selected]="cor === c.hex && !categoriaId"
+            [disabled]="!!categoriaId"
+            (click)="cor = c.hex; categoriaId = null"
+            [title]="c.label">
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
   <!-- Participantes -->
   <div class="section-label">
     Participantes

@@ -43,7 +43,9 @@ public class CompromissosController : ControllerBase
         TipoCompromisso Tipo,
         bool NotificarParticipantes,
         List<ParticipanteDto> Participantes,
-        RecorrenciaDto? Recorrencia = null);
+        RecorrenciaDto? Recorrencia = null,
+        string? Cor = null,
+        int? CategoriaId = null);
 
     public record CompromissoUpdateStatusDto(StatusCompromisso Status);
 
@@ -144,6 +146,7 @@ public class CompromissosController : ControllerBase
         var q = _db.Compromissos
             .Include(c => c.Participantes)
             .Include(c => c.Project)
+            .Include(c => c.Categoria)
             .AsQueryable();
 
         if (ano.HasValue) q = q.Where(c => c.Inicio.Year == ano.Value);
@@ -158,6 +161,7 @@ public class CompromissosController : ControllerBase
         var c = await _db.Compromissos
             .Include(c => c.Participantes)
             .Include(c => c.Project)
+            .Include(c => c.Categoria)
             .FirstOrDefaultAsync(c => c.Id == id);
         return c is null ? NotFound() : Ok(c);
     }
@@ -189,6 +193,8 @@ public class CompromissosController : ControllerBase
                     NotificarParticipantes = dto.NotificarParticipantes,
                     CriadoEm = DateTime.UtcNow,
                     RecorrenciaId = recId,
+                    Cor = dto.Cor,
+                    CategoriaId = dto.CategoriaId,
                     Participantes = dto.Participantes.Select(p => MapParticipante(p)).ToList()
                 };
                 _db.Compromissos.Add(c);
@@ -232,6 +238,8 @@ public class CompromissosController : ControllerBase
             Status = StatusCompromisso.Agendado,
             NotificarParticipantes = dto.NotificarParticipantes,
             CriadoEm = DateTime.UtcNow,
+            Cor = dto.Cor,
+            CategoriaId = dto.CategoriaId,
             Participantes = dto.Participantes.Select(p => MapParticipante(p)).ToList()
         };
 
@@ -287,6 +295,8 @@ public class CompromissosController : ControllerBase
                 c.ProjectId = dto.ProjectId;
                 c.ContaPessoalId = dto.ContaPessoalId;
                 c.NotificarParticipantes = dto.NotificarParticipantes;
+                c.Cor = dto.Cor;
+                c.CategoriaId = dto.CategoriaId;
                 // Hora do dia actualizada, data mantém-se
                 var offset = dto.Fim - dto.Inicio;
                 c.Inicio = c.Inicio.Date + dto.Inicio.TimeOfDay;
@@ -326,6 +336,8 @@ public class CompromissosController : ControllerBase
         compromisso.LinkOnline = dto.LinkOnline;
         compromisso.Tipo = dto.Tipo;
         compromisso.NotificarParticipantes = dto.NotificarParticipantes;
+        compromisso.Cor = dto.Cor;
+        compromisso.CategoriaId = dto.CategoriaId;
 
         _db.CompromissoParticipantes.RemoveRange(compromisso.Participantes.ToList());
         compromisso.Participantes = dto.Participantes.Select(p =>

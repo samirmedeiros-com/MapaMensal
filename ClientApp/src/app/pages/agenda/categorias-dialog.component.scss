@@ -1,0 +1,92 @@
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 24px !important;
+  min-width: 380px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.cat-error {
+  background: var(--coral-50); color: #D85A30;
+  border-radius: 6px; padding: 8px 12px; font-size: 13px;
+}
+
+.cat-empty { color: var(--text-3); font-size: 13px; }
+
+.cat-list { display: flex; flex-direction: column; gap: 4px; }
+
+.cat-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background 0.1s;
+
+  &:hover { background: var(--surface-2); }
+}
+
+.color-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cat-nome { flex: 1; font-size: 14px; color: var(--text); }
+
+.cat-actions {
+  display: flex; gap: 2px;
+  button[mat-icon-button] { width: 32px; height: 32px; color: var(--text-3); }
+}
+
+.btn-del mat-icon { color: #D85A30 !important; }
+
+// Formulário edição / criação
+.cat-edit-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+
+.cat-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--border-2);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+
+  &:focus { border-color: var(--purple-500); }
+}
+
+.swatch-row {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+}
+
+.swatch {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+
+  &:hover { transform: scale(1.15); }
+  &.selected { border-color: var(--text); transform: scale(1.1); }
+}
+
+.cat-edit-actions { display: flex; gap: 6px; margin-top: 4px; }
+
+// Nova categoria
+.cat-nova {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.cat-nova-titulo {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em;
+  color: var(--text-2); margin: 0 0 8px;
+}
+
+.spacer { flex: 1; }

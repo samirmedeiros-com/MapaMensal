@@ -112,6 +112,7 @@ export interface ContaPessoal {
   valorPrevisto: number;
   valorPago?: number;
   pago: boolean;
+  metodoPagamento?: 'Dinheiro' | 'Cartão' | null;
   grupoRecorrencia?: string;
   recorrenciaAtual: number;
   totalRecorrencias: number;
@@ -174,6 +175,27 @@ export const DAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 // ── Agenda ────────────────────────────────────────────────────────────────
 
+export const CORES_PALETA = [
+  { hex: '#534AB7', label: 'Roxo'      },
+  { hex: '#1D9E75', label: 'Verde'     },
+  { hex: '#D85A30', label: 'Coral'     },
+  { hex: '#D97706', label: 'Âmbar'     },
+  { hex: '#2563EB', label: 'Azul'      },
+  { hex: '#DC2626', label: 'Vermelho'  },
+  { hex: '#16A34A', label: 'Esmeralda' },
+  { hex: '#7C3AED', label: 'Violeta'   },
+  { hex: '#DB2777', label: 'Rosa'      },
+  { hex: '#0891B2', label: 'Ciano'     },
+  { hex: '#65A30D', label: 'Lima'      },
+  { hex: '#6B7280', label: 'Cinzento'  },
+] as const;
+
+export interface CategoriaCompromisso {
+  id: number;
+  nome: string;
+  cor: string;
+}
+
 export type TipoCompromisso = 0 | 1 | 2; // 0=Pessoal, 1=Publico, 2=LembreteConta
 export type StatusCompromisso = 0 | 1 | 2; // 0=Agendado, 1=Cancelado, 2=Concluido
 
@@ -215,6 +237,9 @@ export interface Compromisso {
   notificarParticipantes: boolean;
   criadoEm: string;
   recorrenciaId?: string;
+  cor?: string;
+  categoriaId?: number;
+  categoria?: CategoriaCompromisso;
   participantes: CompromissoParticipante[];
 }
 

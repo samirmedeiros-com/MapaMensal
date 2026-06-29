@@ -1,0 +1,83 @@
+<h2 mat-dialog-title>Categorias de agenda</h2>
+
+<mat-dialog-content>
+
+  @if (error()) {
+    <div class="cat-error">{{ error() }}</div>
+  }
+
+  <!-- Lista de categorias existentes -->
+  @if (categorias().length === 0) {
+    <p class="cat-empty">Nenhuma categoria criada ainda.</p>
+  }
+
+  <div class="cat-list">
+    @for (c of categorias(); track c.id) {
+      @if (editandoId === c.id) {
+        <!-- Linha em edição -->
+        <div class="cat-edit-row">
+          <div class="color-dot" [style.background]="novaCor"></div>
+          <input class="cat-input" [(ngModel)]="novoNome" placeholder="Nome da categoria" />
+          <div class="swatch-row">
+            @for (cor of CORES; track cor.hex) {
+              <button type="button" class="swatch"
+                [style.background]="cor.hex"
+                [class.selected]="novaCor === cor.hex"
+                (click)="novaCor = cor.hex"
+                [title]="cor.label">
+              </button>
+            }
+          </div>
+          <div class="cat-edit-actions">
+            <button mat-flat-button color="primary" (click)="salvar()" [disabled]="loading()">Guardar</button>
+            <button mat-button (click)="cancelarEdicao()">Cancelar</button>
+          </div>
+        </div>
+      } @else {
+        <!-- Linha normal -->
+        <div class="cat-row">
+          <span class="color-dot" [style.background]="c.cor"></span>
+          <span class="cat-nome">{{ c.nome }}</span>
+          <div class="cat-actions">
+            <button mat-icon-button (click)="iniciarEdicao(c)" title="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="btn-del" (click)="eliminar(c)" title="Eliminar">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Formulário de nova categoria -->
+  @if (editandoId === null) {
+    <div class="cat-nova">
+      <p class="cat-nova-titulo">Nova categoria</p>
+      <div class="cat-edit-row">
+        <div class="color-dot" [style.background]="novaCor"></div>
+        <input class="cat-input" [(ngModel)]="novoNome" placeholder="Ex: Trabalho, Ginásio, Família…" />
+      </div>
+      <div class="swatch-row">
+        @for (cor of CORES; track cor.hex) {
+          <button type="button" class="swatch"
+            [style.background]="cor.hex"
+            [class.selected]="novaCor === cor.hex"
+            (click)="novaCor = cor.hex"
+            [title]="cor.label">
+          </button>
+        }
+      </div>
+      <button mat-flat-button color="primary" (click)="salvar()" [disabled]="loading() || !novoNome.trim()">
+        <mat-icon>add</mat-icon> Criar categoria
+      </button>
+    </div>
+  }
+
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <span class="spacer"></span>
+  <button mat-button mat-dialog-close>Fechar</button>
+</mat-dialog-actions>

@@ -17,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Compromisso> Compromissos => Set<Compromisso>();
     public DbSet<CompromissoParticipante> CompromissoParticipantes => Set<CompromissoParticipante>();
     public DbSet<HorarioDisponivel> HorariosDisponiveis => Set<HorarioDisponivel>();
+    public DbSet<CategoriaCompromisso> CategoriasCompromisso => Set<CategoriaCompromisso>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +33,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Compromisso>().ToTable("mapa_compromissos");
         modelBuilder.Entity<CompromissoParticipante>().ToTable("mapa_compromisso_participantes");
         modelBuilder.Entity<HorarioDisponivel>().ToTable("mapa_horarios_disponiveis");
+        modelBuilder.Entity<CategoriaCompromisso>().ToTable("mapa_categorias_compromisso");
 
         modelBuilder.Entity<Compromisso>()
             .HasMany(c => c.Participantes)

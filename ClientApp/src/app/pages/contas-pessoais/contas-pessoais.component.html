@@ -110,6 +110,26 @@
             <span class="recorrencia-hint warn">Previsto: {{ fmt(conta.valorPrevisto) }} €</span>
           }
         </div>
+        <div class="form-group">
+          <label>Método de Pagamento</label>
+          <div class="metodo-opts">
+            <button type="button" class="metodo-btn"
+              [class.active]="pagarForm.metodoPagamento === ''"
+              (click)="pagarForm.metodoPagamento = ''">
+              <mat-icon>help_outline</mat-icon> Não especificado
+            </button>
+            <button type="button" class="metodo-btn"
+              [class.active]="pagarForm.metodoPagamento === 'Dinheiro'"
+              (click)="pagarForm.metodoPagamento = 'Dinheiro'">
+              <mat-icon>payments</mat-icon> Dinheiro
+            </button>
+            <button type="button" class="metodo-btn"
+              [class.active]="pagarForm.metodoPagamento === 'Cartão'"
+              (click)="pagarForm.metodoPagamento = 'Cartão'">
+              <mat-icon>credit_card</mat-icon> Cartão
+            </button>
+          </div>
+        </div>
         <div class="modal-actions">
           <button mat-flat-button color="primary" (click)="confirmarPagar()">
             <mat-icon>check</mat-icon> Confirmar Pagamento
@@ -153,6 +173,7 @@
           <th>Previsto</th>
           <th>Pago</th>
           <th>Dt. Pagamento</th>
+          <th>Método</th>
           <th>Estado</th>
           <th style="width:110px;text-align:center">Ações</th>
         </tr>
@@ -175,6 +196,16 @@
             <td>{{ fmt(c.valorPrevisto) }} €</td>
             <td>{{ c.pago ? fmt(c.valorPago ?? 0) + ' €' : '—' }}</td>
             <td>{{ c.dataPagamento ? (c.dataPagamento | date:'dd/MM/yyyy') : '—' }}</td>
+            <td>
+              @if (c.pago && c.metodoPagamento) {
+                <span class="metodo-badge metodo-{{ c.metodoPagamento === 'Dinheiro' ? 'dinheiro' : 'cartao' }}">
+                  <mat-icon>{{ c.metodoPagamento === 'Dinheiro' ? 'payments' : 'credit_card' }}</mat-icon>
+                  {{ c.metodoPagamento }}
+                </span>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
             <td>
               @if (c.pago) {
                 <span class="status-badge pago">Pago</span>

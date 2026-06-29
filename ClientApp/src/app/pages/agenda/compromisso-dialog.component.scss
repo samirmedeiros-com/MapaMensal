@@ -203,6 +203,63 @@ mat-dialog-actions {
   input[type="radio"] { accent-color: var(--purple-500); }
 }
 
+// ── Cor & Categoria ──────────────────────────────────────────────────────
+.cor-section {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.cat-picker {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+
+.cat-opt {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  border: 1.5px solid var(--border-2);
+  border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-2);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all .12s;
+
+  &:hover { border-color: var(--cat-cor, var(--purple-500)); color: var(--text); }
+  &.active {
+    border-color: var(--cat-cor, var(--purple-500));
+    background: color-mix(in srgb, var(--cat-cor, var(--purple-500)) 12%, transparent);
+    color: var(--text);
+  }
+}
+
+.cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.swatch-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.swatch {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform .1s, border-color .1s;
+
+  &:hover { transform: scale(1.18); }
+  &.selected { border-color: var(--text); transform: scale(1.1); }
+  &:disabled { opacity: .3; cursor: not-allowed; transform: none; }
+}
+
+.swatch-none {
+  background: var(--surface) !important;
+  border-color: var(--border-2);
+  display: flex; align-items: center; justify-content: center;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; color: var(--text-3); }
+  &.selected { border-color: var(--purple-500); }
+}
+
 // ── Toggle de recorrência ─────────────────────────────────────────────────
 .rec-toggle-row {
   display: flex;
