@@ -62,9 +62,12 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
     return list;
   });
 
-  totalPrevisto = computed(() => this.filtered().reduce((s, c) => s + c.valorPrevisto, 0));
-  totalPago     = computed(() => this.filtered().filter(c => c.pago).reduce((s, c) => s + (c.valorPago ?? 0), 0));
-  totalAberto   = computed(() => this.filtered().filter(c => !c.pago).reduce((s, c) => s + c.valorPrevisto, 0));
+  totalPrevisto  = computed(() => this.filtered().reduce((s, c) => s + c.valorPrevisto, 0));
+  totalPago      = computed(() => this.filtered().filter(c => c.pago).reduce((s, c) => s + (c.valorPago ?? 0), 0));
+  totalAberto    = computed(() => this.filtered().filter(c => !c.pago).reduce((s, c) => s + c.valorPrevisto, 0));
+  totalDinheiro  = computed(() => this.filtered().filter(c => c.pago && c.metodoPagamento === 'Dinheiro').reduce((s, c) => s + (c.valorPago ?? 0), 0));
+  totalCartao    = computed(() => this.filtered().filter(c => c.pago && c.metodoPagamento === 'Cartão').reduce((s, c) => s + (c.valorPago ?? 0), 0));
+  totalSemMetodo = computed(() => this.filtered().filter(c => c.pago && !c.metodoPagamento).reduce((s, c) => s + (c.valorPago ?? 0), 0));
 
   categoriasUsadas = computed(() =>
     [...new Set(this.contas().map(c => c.categoria))].sort()

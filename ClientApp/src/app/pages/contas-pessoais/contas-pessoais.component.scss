@@ -51,6 +51,74 @@
   &.saldo    { border-color: #00897b; mat-icon { color: #00897b; } &.neg mat-icon { color: #e65100; } }
 }
 
+// --- CARD MÉTODO DE PAGAMENTO ---
+.metodo-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.metodo-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 14px;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; color: #888; }
+}
+
+.metodo-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metodo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; flex-shrink: 0; }
+  .metodo-nome { flex: 1; font-weight: 500; color: #444; }
+  .metodo-valor { font-weight: 700; min-width: 80px; text-align: right; }
+  .metodo-pct {
+    min-width: 38px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+  }
+
+  &.dinheiro mat-icon { color: #2e7d32; }
+  &.cartao   mat-icon { color: #1565c0; }
+  &.sem-metodo mat-icon { color: #999; }
+}
+
+.metodo-bar {
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.metodo-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+
+  &.dinheiro-fill { background: #43a047; }
+  &.cartao-fill   { background: #1e88e5; }
+  &.sem-fill      { background: #bdbdbd; }
+}
+
 // --- FORM ---
 .form-card { padding: 20px; }
 

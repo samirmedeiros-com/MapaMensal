@@ -47,6 +47,59 @@
     </div>
   </div>
 
+  <!-- Card método de pagamento -->
+  @if (totalPago() > 0) {
+    <div class="metodo-card">
+      <div class="metodo-card-title">
+        <mat-icon>payments</mat-icon>
+        Pagamentos por método
+      </div>
+      <div class="metodo-rows">
+        <div class="metodo-row dinheiro">
+          <mat-icon>payments</mat-icon>
+          <span class="metodo-nome">Dinheiro</span>
+          <span class="metodo-valor">{{ fmt(totalDinheiro()) }} €</span>
+          @if (totalPago() > 0) {
+            <span class="metodo-pct">{{ (totalDinheiro() / totalPago() * 100) | number:'1.0-0' }}%</span>
+          }
+        </div>
+        <div class="metodo-bar">
+          <div class="metodo-bar-fill dinheiro-fill"
+            [style.width.%]="totalPago() > 0 ? (totalDinheiro() / totalPago() * 100) : 0">
+          </div>
+        </div>
+
+        <div class="metodo-row cartao">
+          <mat-icon>credit_card</mat-icon>
+          <span class="metodo-nome">Cartão</span>
+          <span class="metodo-valor">{{ fmt(totalCartao()) }} €</span>
+          @if (totalPago() > 0) {
+            <span class="metodo-pct">{{ (totalCartao() / totalPago() * 100) | number:'1.0-0' }}%</span>
+          }
+        </div>
+        <div class="metodo-bar">
+          <div class="metodo-bar-fill cartao-fill"
+            [style.width.%]="totalPago() > 0 ? (totalCartao() / totalPago() * 100) : 0">
+          </div>
+        </div>
+
+        @if (totalSemMetodo() > 0) {
+          <div class="metodo-row sem-metodo">
+            <mat-icon>help_outline</mat-icon>
+            <span class="metodo-nome">Não especificado</span>
+            <span class="metodo-valor">{{ fmt(totalSemMetodo()) }} €</span>
+            <span class="metodo-pct">{{ (totalSemMetodo() / totalPago() * 100) | number:'1.0-0' }}%</span>
+          </div>
+          <div class="metodo-bar">
+            <div class="metodo-bar-fill sem-fill"
+              [style.width.%]="totalPago() > 0 ? (totalSemMetodo() / totalPago() * 100) : 0">
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <!-- FORMULÁRIO -->
   @if (showForm()) {
     <div class="card form-card">
