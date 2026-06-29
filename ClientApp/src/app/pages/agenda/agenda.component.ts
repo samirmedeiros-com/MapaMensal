@@ -48,12 +48,16 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   mesNome = computed(() => MONTH_NAMES[this.mes()]);
 
   // Time grid constants
-  readonly HORA_INI = 7;
-  readonly HORA_FIM = 22;
+  readonly HORA_INI = 0;
+  readonly HORA_FIM = 24;
   readonly ALT_HORA = 64; // px per hour
 
   horas = Array.from({ length: this.HORA_FIM - this.HORA_INI }, (_, i) => i + this.HORA_INI);
-  // [7, 8, ..., 21]  → 15 slots, grid shows 7:00 → 22:00
+  // [0, 1, ..., 23]
+
+  horaLabel(h: number): string {
+    return h.toString().padStart(2, '0') + ':00';
+  }
 
   readonly DIAS_LABELS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 

@@ -203,8 +203,9 @@
   color: var(--text-3);
   text-align: right;
   padding-right: 8px;
-  transform: translateY(-8px);
+  padding-top: 4px;
   user-select: none;
+  box-sizing: border-box;
 }
 
 .cal-day-cols {
