@@ -147,20 +147,20 @@ export class ApiService {
     return this.http.get<Compromisso[]>(`${this.base}/compromissos`, { params });
   }
 
-  createCompromisso(dto: Omit<Compromisso, 'id' | 'criadoEm' | 'project'>): Observable<Compromisso> {
+  createCompromisso(dto: object): Observable<Compromisso> {
     return this.http.post<Compromisso>(`${this.base}/compromissos`, dto);
   }
 
-  updateCompromisso(id: number, dto: Omit<Compromisso, 'id' | 'criadoEm' | 'project'>): Observable<void> {
-    return this.http.put<void>(`${this.base}/compromissos/${id}`, dto);
+  updateCompromisso(id: number, dto: object, escopo: 'este' | 'todos' = 'este'): Observable<void> {
+    return this.http.put<void>(`${this.base}/compromissos/${id}?escopo=${escopo}`, dto);
   }
 
   updateStatusCompromisso(id: number, status: StatusCompromisso): Observable<void> {
     return this.http.patch<void>(`${this.base}/compromissos/${id}/status`, { status });
   }
 
-  deleteCompromisso(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/compromissos/${id}`);
+  deleteCompromisso(id: number, escopo: 'este' | 'todos' = 'este'): Observable<void> {
+    return this.http.delete<void>(`${this.base}/compromissos/${id}?escopo=${escopo}`);
   }
 
   reenviarEmailCompromisso(id: number): Observable<void> {

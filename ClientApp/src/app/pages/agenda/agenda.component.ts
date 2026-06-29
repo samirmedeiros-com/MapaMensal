@@ -348,8 +348,15 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   }
 
   delete(c: Compromisso) {
-    if (!confirm(`Eliminar "${c.titulo}"?`)) return;
-    this.api.deleteCompromisso(c.id).subscribe(() => this.load());
+    if (c.recorrenciaId) {
+      const escopo = confirm(
+        `"${c.titulo}" é um evento recorrente.\n\nOK → Eliminar TODOS os eventos da série\nCancelar → Eliminar só este`
+      ) ? 'todos' : 'este';
+      this.api.deleteCompromisso(c.id, escopo).subscribe(() => this.load());
+    } else {
+      if (!confirm(`Eliminar "${c.titulo}"?`)) return;
+      this.api.deleteCompromisso(c.id).subscribe(() => this.load());
+    }
   }
 
   formatHour(iso: string): string {

@@ -189,6 +189,15 @@ export interface CompromissoParticipante {
   aceiteEm?: string;
 }
 
+export interface RecorrenciaDto {
+  frequencia: 'diaria' | 'semanal' | 'mensal' | 'anual';
+  intervalo: number;
+  diasSemana?: number[]; // 1=Seg..7=Dom
+  fim: 'nunca' | 'data' | 'ocorrencias';
+  fimData?: string;       // ISO date
+  fimOcorrencias?: number;
+}
+
 export interface Compromisso {
   id: number;
   titulo: string;
@@ -205,6 +214,7 @@ export interface Compromisso {
   status: StatusCompromisso;
   notificarParticipantes: boolean;
   criadoEm: string;
+  recorrenciaId?: string;
   participantes: CompromissoParticipante[];
 }
 

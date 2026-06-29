@@ -6,6 +6,22 @@
     <div class="dialog-error">{{ error() }}</div>
   }
 
+  <!-- Escopo de edição para eventos de série -->
+  @if (isEdit && isSerie) {
+    <div class="serie-banner">
+      <mat-icon class="serie-icon">repeat</mat-icon>
+      <span>Evento recorrente — alterar:</span>
+      <label class="serie-opt">
+        <input type="radio" name="escopo" value="este" [(ngModel)]="escopoEdicao" />
+        Só este
+      </label>
+      <label class="serie-opt">
+        <input type="radio" name="escopo" value="todos" [(ngModel)]="escopoEdicao" />
+        Todos da série
+      </label>
+    </div>
+  }
+
   <!-- Tipo -->
   <div class="field-row">
     <label class="field-label">Tipo</label>
@@ -39,6 +55,93 @@
       <input class="field-input" type="datetime-local" [(ngModel)]="fim" />
     </div>
   </div>
+
+  <!-- ══ RECORRÊNCIA ═══════════════════════════════════════════════════════ -->
+  @if (!isEdit) {
+    <div class="rec-toggle-row">
+      <label class="check-label">
+        <input type="checkbox" [(ngModel)]="recorrente" />
+        <mat-icon class="rec-icon">repeat</mat-icon>
+        Repetir
+      </label>
+    </div>
+
+    @if (recorrente) {
+      <div class="rec-box">
+
+        <!-- Frequência + Intervalo -->
+        <div class="rec-row">
+          <span class="rec-label">A cada</span>
+          <input class="rec-num" type="number" min="1" max="99" [(ngModel)]="recIntervalo" />
+          <select class="field-select rec-freq" [(ngModel)]="recFreq">
+            <option value="diaria">dia(s)</option>
+            <option value="semanal">semana(s)</option>
+            <option value="mensal">mês(es)</option>
+            <option value="anual">ano(s)</option>
+          </select>
+        </div>
+
+        <!-- Dias da semana (só para semanal) -->
+        @if (recFreq === 'semanal') {
+          <div class="rec-row">
+            <span class="rec-label">Dias</span>
+            <div class="dias-semana">
+              @for (d of DIAS_REC; track d.val) {
+                <button type="button"
+                  class="dia-btn"
+                  [class.active]="isDiaSelected(d.val)"
+                  (click)="toggleDiaSemana(d.val)"
+                  [title]="d.nome">
+                  {{ d.label }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Termina -->
+        <div class="rec-row rec-fim-row">
+          <span class="rec-label">Termina</span>
+          <div class="rec-fim-opts">
+
+            <label class="rec-fim-opt">
+              <input type="radio" name="recFim" value="nunca" [(ngModel)]="recFim" />
+              Nunca
+            </label>
+
+            <label class="rec-fim-opt">
+              <input type="radio" name="recFim" value="data" [(ngModel)]="recFim" />
+              Em
+              <input class="field-input rec-date"
+                type="date" [(ngModel)]="recFimData"
+                [disabled]="recFim !== 'data'"
+                (focus)="recFim = 'data'" />
+            </label>
+
+            <label class="rec-fim-opt">
+              <input type="radio" name="recFim" value="ocorrencias" [(ngModel)]="recFim" />
+              Após
+              <input class="rec-num"
+                type="number" min="1" max="365" [(ngModel)]="recFimOcorrencias"
+                [disabled]="recFim !== 'ocorrencias'"
+                (focus)="recFim = 'ocorrencias'" />
+              ocorrência(s)
+            </label>
+
+          </div>
+        </div>
+
+        <!-- Resumo -->
+        @if (resumoRecorrencia()) {
+          <div class="rec-resumo">
+            <mat-icon>info</mat-icon> {{ resumoRecorrencia() }}
+          </div>
+        }
+
+      </div>
+    }
+  }
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
 
   <!-- Projeto (se tipo Pessoal) -->
   @if (tipo === 0 && data.projetos.length) {
@@ -126,7 +229,7 @@
     <div class="check-row notify-all">
       <label class="check-label">
         <input type="checkbox" [(ngModel)]="notificarParticipantes" />
-        Enviar convite por email (com ficheiro .ics para adicionar ao calendário)
+        Enviar convite por email
       </label>
     </div>
   }

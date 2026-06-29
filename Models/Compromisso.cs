@@ -20,5 +20,6 @@ public class Compromisso
     public StatusCompromisso Status { get; set; }
     public bool NotificarParticipantes { get; set; }
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
+    public string? RecorrenciaId { get; set; }
     public List<CompromissoParticipante> Participantes { get; set; } = new();
 }
