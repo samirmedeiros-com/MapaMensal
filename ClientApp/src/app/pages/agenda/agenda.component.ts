@@ -14,6 +14,7 @@ import {
 } from '../../models/models';
 import { CompromissoDialogComponent } from './compromisso-dialog.component';
 import { HorariosDialogComponent } from './horarios-dialog.component';
+import { DeleteConfirmDialogComponent, DeleteDialogResult } from './delete-confirm-dialog.component';
 
 export type CalView = 'lista' | 'mes' | 'semana' | 'dia';
 
@@ -348,15 +349,15 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   }
 
   delete(c: Compromisso) {
-    if (c.recorrenciaId) {
-      const escopo = confirm(
-        `"${c.titulo}" é um evento recorrente.\n\nOK → Eliminar TODOS os eventos da série\nCancelar → Eliminar só este`
-      ) ? 'todos' : 'este';
-      this.api.deleteCompromisso(c.id, escopo).subscribe(() => this.load());
-    } else {
-      if (!confirm(`Eliminar "${c.titulo}"?`)) return;
-      this.api.deleteCompromisso(c.id).subscribe(() => this.load());
-    }
+    const ref = this.dialog.open(DeleteConfirmDialogComponent, {
+      width: '420px',
+      maxWidth: '95vw',
+      data: { titulo: c.titulo, isSerie: !!c.recorrenciaId }
+    });
+    ref.afterClosed().subscribe((result?: DeleteDialogResult) => {
+      if (!result) return;
+      this.api.deleteCompromisso(c.id, result.escopo).subscribe(() => this.load());
+    });
   }
 
   formatHour(iso: string): string {
