@@ -1,0 +1,12 @@
+samirdev_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g8fc5bc85da4012_samirdev_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+samirdev_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g8fc5bc85da4012_samirdev_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+samirdev_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g8fc5bc85da4012_samirdev_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+samirdev_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g8fc5bc85da4012_samirdev_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+samirdev_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=g8fc5bc85da4012_samirdev_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+

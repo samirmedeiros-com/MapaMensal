@@ -14,6 +14,16 @@ artifacts/
 ## Ambiente e segredos
 appsettings.*.json
 !appsettings.json
+migrate_mysql_to_oracle.py
+
+## Oracle Wallet — ficheiros sensíveis, não vão para o git
+## São injectados no CI/CD via GitHub Secret ORACLE_WALLET_B64
+Oracle/cwallet.sso
+Oracle/ewallet.p12
+Oracle/ewallet.pem
+Oracle/keystore.jks
+Oracle/truststore.jks
+Oracle/ojdbc.properties
 
 ## Base de dados SQLite (gerada em runtime)
 *.db
