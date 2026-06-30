@@ -13,7 +13,7 @@ public class Compromisso
     public int? ProjectId { get; set; }
     public Project? Project { get; set; }
     public int? ContaPessoalId { get; set; }
-    public string Local { get; set; } = "";
+    public string? Local { get; set; }
     public bool Online { get; set; }
     public string? LinkOnline { get; set; }
     public TipoCompromisso Tipo { get; set; }
