@@ -39,9 +39,11 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Restaurar Oracle Wallet (ficheiros sensíveis via secret)
+        env:
+          ORACLE_WALLET_B64: ${{ secrets.ORACLE_WALLET_B64 }}
         run: |
           mkdir -p Oracle
-          echo "${{ secrets.ORACLE_WALLET_B64 }}" | base64 -d > /tmp/oracle_wallet.zip
+          echo "$ORACLE_WALLET_B64" | base64 -d > /tmp/oracle_wallet.zip
           unzip -o /tmp/oracle_wallet.zip -d Oracle
 
       - name: dotnet publish
