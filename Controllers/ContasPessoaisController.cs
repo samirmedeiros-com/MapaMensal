@@ -14,9 +14,18 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int year, [FromQuery] int? month)
     {
-        var query = db.ContasPessoais.Where(c => c.DataVencimento.Year == year);
+        DateOnly start, end;
         if (month.HasValue)
-            query = query.Where(c => c.DataVencimento.Month == month.Value);
+        {
+            start = new DateOnly(year, month.Value, 1);
+            end   = new DateOnly(year, month.Value, DateTime.DaysInMonth(year, month.Value));
+        }
+        else
+        {
+            start = new DateOnly(year, 1, 1);
+            end   = new DateOnly(year, 12, 31);
+        }
+        var query = db.ContasPessoais.Where(c => c.DataVencimento >= start && c.DataVencimento <= end);
 
         var result = await query
             .OrderBy(c => c.DataVencimento)
@@ -39,8 +48,10 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
     [HttpGet("resumo-anual")]
     public async Task<IActionResult> ResumoAnual([FromQuery] int year)
     {
+        var anoStart = new DateOnly(year, 1, 1);
+        var anoEnd   = new DateOnly(year, 12, 31);
         var contas = await db.ContasPessoais
-            .Where(c => c.DataVencimento.Year == year)
+            .Where(c => c.DataVencimento >= anoStart && c.DataVencimento <= anoEnd)
             .ToListAsync();
 
         var porMes = Enumerable.Range(1, 12).Select(m => new

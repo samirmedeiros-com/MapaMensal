@@ -21,9 +21,11 @@ public class SummaryController(AppDbContext db) : ControllerBase
 
         var projects = await db.Projects.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToListAsync();
 
+        var yearStart = new DateOnly(year, 1, 1);
+        var yearEnd   = new DateOnly(year, 12, 31);
         var workDays = await db.WorkDays
             .Include(w => w.Project)
-            .Where(w => w.Date.Year == year && w.Project.IsActive)
+            .Where(w => w.Date >= yearStart && w.Date <= yearEnd && w.Project.IsActive)
             .ToListAsync();
 
         var projectSummaries = projects.Select(p =>
@@ -86,9 +88,11 @@ public class SummaryController(AppDbContext db) : ControllerBase
         var ivaRate = decimal.Parse(ivaRateStr, System.Globalization.CultureInfo.InvariantCulture);
 
         var projects = await db.Projects.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToListAsync();
+        var tYearStart = new DateOnly(year, 1, 1);
+        var tYearEnd   = new DateOnly(year, 12, 31);
         var workDays = await db.WorkDays
             .Include(w => w.Project)
-            .Where(w => w.Date.Year == year && w.Project.IsActive)
+            .Where(w => w.Date >= tYearStart && w.Date <= tYearEnd && w.Project.IsActive)
             .ToListAsync();
         var expenses = await db.Expenses.Where(e => e.Year == year).ToListAsync();
 

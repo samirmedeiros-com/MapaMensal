@@ -16,7 +16,11 @@ public class HolidaysController(AppDbContext db) : ControllerBase
     {
         var query = db.Holidays.AsQueryable();
         if (year.HasValue)
-            query = query.Where(h => h.Date.Year == year.Value);
+        {
+            var start = new DateOnly(year.Value, 1, 1);
+            var end   = new DateOnly(year.Value, 12, 31);
+            query = query.Where(h => h.Date >= start && h.Date <= end);
+        }
         return Ok(await query.OrderBy(h => h.Date).ToListAsync());
     }
 
