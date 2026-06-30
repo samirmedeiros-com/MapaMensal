@@ -170,22 +170,21 @@
     }
 
     <!-- ══════════════════════════════════════════════════════════
-         VISTA: LISTA
+         VISTA: LISTA (por dia)
          ══════════════════════════════════════════════════════════ -->
     @if (view() === 'lista') {
-      @if (compromissosFiltrados().length === 0) {
+      @if (listaCompromissos().length === 0) {
         <div class="empty-state">
           <mat-icon>event_available</mat-icon>
-          <p>Nenhum compromisso em {{ mesNome() }} {{ ano() }}</p>
+          <p>Nenhum compromisso neste dia</p>
           <button mat-flat-button color="primary" (click)="openCreate()">Criar compromisso</button>
         </div>
       } @else {
         <div class="compromissos-list">
-          @for (c of compromissosFiltrados(); track c.id) {
+          @for (c of listaCompromissos(); track c.id) {
             <div class="compromisso-card" [class.cancelado]="c.status === 1" [class.concluido]="c.status === 2">
 
               <div class="card-time">
-                <div class="date-label">{{ formatDate(c.inicio) }}</div>
                 <div class="time-range">{{ formatHour(c.inicio) }} – {{ formatHour(c.fim) }}</div>
               </div>
 

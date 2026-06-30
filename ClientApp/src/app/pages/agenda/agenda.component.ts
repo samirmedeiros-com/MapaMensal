@@ -138,8 +138,8 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   navLabel = computed(() => {
     const v = this.view();
-    if (v === 'lista' || v === 'mes') return `${this.mesNome()} ${this.ano()}`;
-    if (v === 'dia') {
+    if (v === 'mes') return `${this.mesNome()} ${this.ano()}`;
+    if (v === 'dia' || v === 'lista') {
       return this.dataAtual().toLocaleDateString('pt-PT', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
       });
@@ -149,6 +149,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
     const fim = dias[6].toLocaleDateString('pt-PT', { day: 'numeric', month: 'short', year: 'numeric' });
     return `${ini} – ${fim}`;
   });
+
+  listaCompromissos = computed(() =>
+    this.compromissosDoDia(this.dataAtual())
+      .slice()
+      .sort((a, b) => new Date(a.inicio).getTime() - new Date(b.inicio).getTime())
+  );
 
   // ── Lifecycle ───────────────────────────────────────────────────────────
 
@@ -218,11 +224,10 @@ export class AgendaComponent implements OnInit, AfterViewInit {
 
   navegar(delta: number) {
     const v = this.view();
-    if (v === 'lista') { this.stepMonth(delta); return; }
+    if (v === 'mes') { this.stepMonth(delta); return; }
     const d = new Date(this.dataAtual());
-    if (v === 'dia')    d.setDate(d.getDate() + delta);
-    if (v === 'semana') d.setDate(d.getDate() + 7 * delta);
-    if (v === 'mes')    d.setMonth(d.getMonth() + delta);
+    if (v === 'dia' || v === 'lista') d.setDate(d.getDate() + delta);
+    if (v === 'semana')               d.setDate(d.getDate() + 7 * delta);
     this.dataAtual.set(new Date(d));
     this.ano.set(d.getFullYear());
     this.mes.set(d.getMonth() + 1);
@@ -249,11 +254,12 @@ export class AgendaComponent implements OnInit, AfterViewInit {
   setView(v: CalView) {
     const prev = this.view();
     this.view.set(v);
-    // Sync dataAtual ↔ ano/mes when switching views
-    if ((prev === 'mes' || prev === 'lista') && (v === 'semana' || v === 'dia')) {
+    // mes → qualquer outra: fixar dataAtual no 1º do mês exibido
+    if (prev === 'mes' && v !== 'mes') {
       this.dataAtual.set(new Date(this.ano(), this.mes() - 1, 1));
     }
-    if ((prev === 'semana' || prev === 'dia') && (v === 'mes' || v === 'lista')) {
+    // semana/dia → mes: sincronizar ano/mes com o dia actual
+    if ((prev === 'semana' || prev === 'dia') && v === 'mes') {
       const d = this.dataAtual();
       this.ano.set(d.getFullYear());
       this.mes.set(d.getMonth() + 1);
