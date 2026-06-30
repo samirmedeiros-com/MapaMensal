@@ -112,7 +112,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
 
   openForm() {
     const today = new Date();
-    const d = `${this.year()}-${String(this.month()).padStart(2,'0')}-10`;
+    const d = today.toISOString().substring(0, 10);
     this.form = { descricao: '', categoria: this.categorias()[0]?.nome ?? '', dataVencimento: d, valorPrevisto: 0, totalRecorrencias: 1 };
     this.editMode.set(null);
     this.showForm.set(true);
