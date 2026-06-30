@@ -306,13 +306,16 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       (a, b) => new Date(a.inicio).getTime() - new Date(b.inicio).getTime()
     );
 
+    const times = sorted.map(c => ({
+      ini: new Date(c.inicio).getTime(),
+      fim: new Date(c.fim).getTime(),
+    }));
+
     // Greedy column assignment
     const colFins: number[] = [];
     const cols: number[] = [];
 
-    for (const c of sorted) {
-      const ini = new Date(c.inicio).getTime();
-      const fim = new Date(c.fim).getTime();
+    for (const { ini, fim } of times) {
       let placed = false;
       for (let i = 0; i < colFins.length; i++) {
         if (colFins[i] <= ini) { colFins[i] = fim; cols.push(i); placed = true; break; }
@@ -320,14 +323,25 @@ export class AgendaComponent implements OnInit, AfterViewInit {
       if (!placed) { cols.push(colFins.length); colFins.push(fim); }
     }
 
-    const total = colFins.length;
-    return sorted.map((c, i) => ({
-      c,
-      top:    this.evtTop(c),
-      height: this.evtHeight(c),
-      left:   `calc(${(cols[i] / total) * 100}% + 1px)`,
-      width:  `calc(${(1 / total) * 100}% - 3px)`,
-    }));
+    // Each event uses its own local total: max columns active during its time window.
+    // Events outside that window don't influence its width.
+    return sorted.map((c, i) => {
+      const { ini: iniI, fim: fimI } = times[i];
+      let localTotal = 1;
+      for (let j = 0; j < sorted.length; j++) {
+        const { ini: iniJ, fim: fimJ } = times[j];
+        if (iniJ < fimI && iniI < fimJ) {
+          localTotal = Math.max(localTotal, cols[j] + 1);
+        }
+      }
+      return {
+        c,
+        top:    this.evtTop(c),
+        height: this.evtHeight(c),
+        left:   `calc(${(cols[i] / localTotal) * 100}% + 1px)`,
+        width:  `calc(${(1 / localTotal) * 100}% - 3px)`,
+      };
+    });
   }
 
   // Current-time indicator position
