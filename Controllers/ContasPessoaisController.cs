@@ -98,10 +98,13 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
         var c = await db.ContasPessoais.FindAsync(id);
         if (c is null) return NotFound();
 
+        var vencimento = DateOnly.Parse(dto.DataVencimento);
         c.Descricao      = dto.Descricao;
         c.Categoria      = dto.Categoria;
-        c.DataVencimento = DateOnly.Parse(dto.DataVencimento);
+        c.DataVencimento = vencimento;
         c.ValorPrevisto  = dto.ValorPrevisto;
+        c.MesReferencia  = dto.MesReferencia ?? c.MesReferencia;
+        c.AnoReferencia  = dto.AnoReferencia ?? c.AnoReferencia;
         await db.SaveChangesAsync();
         return Ok(ToDto(c));
     }

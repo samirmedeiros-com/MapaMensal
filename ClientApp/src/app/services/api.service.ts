@@ -100,7 +100,7 @@ export class ApiService {
   createContaPessoal(dto: { descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; mesReferencia: number; anoReferencia: number }): Observable<ContaPessoal[]> {
     return this.http.post<ContaPessoal[]>(`${this.base}/contaspessoais`, dto);
   }
-  updateContaPessoal(id: number, dto: { descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number }): Observable<ContaPessoal> {
+  updateContaPessoal(id: number, dto: { descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; mesReferencia: number; anoReferencia: number }): Observable<ContaPessoal> {
     return this.http.put<ContaPessoal>(`${this.base}/contaspessoais/${id}`, dto);
   }
   pagarConta(id: number, dto: { pago: boolean; valorPago?: number; dataPagamento?: string; metodoPagamento?: string }): Observable<ContaPessoal> {
