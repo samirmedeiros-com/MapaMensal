@@ -61,7 +61,17 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    var startupLogger = scope.ServiceProvider.GetRequiredService<ILogger<AppDbContext>>();
+    try
+    {
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        startupLogger.LogCritical(ex, "Migration falhou no startup: {Msg} | Inner: {Inner}",
+            ex.Message, ex.InnerException?.Message);
+        throw;
+    }
 
     if (!db.Users.Any())
     {
