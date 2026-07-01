@@ -119,7 +119,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   openEdit(c: ContaPessoal) {
-    this.form = { descricao: c.descricao, categoria: c.categoria, dataVencimento: c.dataVencimento, valorPrevisto: c.valorPrevisto, totalRecorrencias: 1 };
+    this.form = { descricao: c.descricao, categoria: c.categoria, dataVencimento: c.dataVencimento, valorPrevisto: c.valorPrevisto, totalRecorrencias: 1, mesReferencia: c.mesReferencia ?? this.month(), anoReferencia: c.anoReferencia ?? this.year() };
     this.editMode.set(c);
     this.showForm.set(true);
   }
