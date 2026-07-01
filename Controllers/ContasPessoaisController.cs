@@ -41,17 +41,15 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
     [HttpGet("resumo-anual")]
     public async Task<IActionResult> ResumoAnual([FromQuery] int year)
     {
-        var anoStart = new DateOnly(year, 1, 1);
-        var anoEnd   = new DateOnly(year, 12, 31);
         var contas = await db.ContasPessoais
-            .Where(c => c.DataVencimento >= anoStart && c.DataVencimento <= anoEnd)
+            .Where(c => c.AnoReferencia == year)
             .ToListAsync();
 
         var porMes = Enumerable.Range(1, 12).Select(m => new
         {
             Mes = m,
-            Previsto = contas.Where(c => c.DataVencimento.Month == m).Sum(c => c.ValorPrevisto),
-            Pago     = contas.Where(c => c.DataVencimento.Month == m && c.Pago).Sum(c => c.ValorPago ?? 0)
+            Previsto = contas.Where(c => c.MesReferencia == m).Sum(c => c.ValorPrevisto),
+            Pago     = contas.Where(c => c.MesReferencia == m && c.Pago).Sum(c => c.ValorPago ?? 0)
         });
 
         var porCategoria = contas
