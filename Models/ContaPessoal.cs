@@ -14,5 +14,7 @@ public class ContaPessoal
     public Guid? GrupoRecorrencia { get; set; }
     public int RecorrenciaAtual { get; set; } = 1;
     public int TotalRecorrencias { get; set; } = 1;
+    public int MesReferencia { get; set; }
+    public int AnoReferencia { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

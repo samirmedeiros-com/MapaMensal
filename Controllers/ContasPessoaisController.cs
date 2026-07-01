@@ -14,18 +14,11 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int year, [FromQuery] int? month)
     {
-        DateOnly start, end;
+        IQueryable<ContaPessoal> query;
         if (month.HasValue)
-        {
-            start = new DateOnly(year, month.Value, 1);
-            end   = new DateOnly(year, month.Value, DateTime.DaysInMonth(year, month.Value));
-        }
+            query = db.ContasPessoais.Where(c => c.AnoReferencia == year && c.MesReferencia == month.Value);
         else
-        {
-            start = new DateOnly(year, 1, 1);
-            end   = new DateOnly(year, 12, 31);
-        }
-        var query = db.ContasPessoais.Where(c => c.DataVencimento >= start && c.DataVencimento <= end);
+            query = db.ContasPessoais.Where(c => c.AnoReferencia == year);
 
         var result = await query
             .OrderBy(c => c.DataVencimento)
@@ -74,10 +67,13 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
     {
         var vencimento = DateOnly.Parse(dto.DataVencimento);
         var grupo = dto.TotalRecorrencias > 1 ? (Guid?)Guid.NewGuid() : null;
+        var mesRef = dto.MesReferencia ?? vencimento.Month;
+        var anoRef = dto.AnoReferencia ?? vencimento.Year;
 
         var criadas = new List<ContaPessoal>();
         for (int i = 0; i < dto.TotalRecorrencias; i++)
         {
+            var refDate = new DateOnly(anoRef, mesRef, 1).AddMonths(i);
             var c = new ContaPessoal
             {
                 Descricao         = dto.Descricao,
@@ -87,6 +83,8 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
                 GrupoRecorrencia  = grupo,
                 RecorrenciaAtual  = i + 1,
                 TotalRecorrencias = dto.TotalRecorrencias,
+                MesReferencia     = refDate.Month,
+                AnoReferencia     = refDate.Year,
                 CreatedAt         = DateTime.UtcNow
             };
             db.ContasPessoais.Add(c);
@@ -155,13 +153,15 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
         c.ValorPrevisto, c.ValorPago, c.Pago, c.MetodoPagamento,
         GrupoRecorrencia = c.GrupoRecorrencia?.ToString(),
         c.RecorrenciaAtual, c.TotalRecorrencias,
+        c.MesReferencia, c.AnoReferencia,
         CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd")
     };
 }
 
 public record ContaPessoalDto(
     string Descricao, string Categoria, string DataVencimento,
-    decimal ValorPrevisto, int TotalRecorrencias
+    decimal ValorPrevisto, int TotalRecorrencias,
+    int? MesReferencia = null, int? AnoReferencia = null
 );
 
 public record PagarDto(bool Pago, decimal? ValorPago, string? DataPagamento, string? MetodoPagamento = null);
