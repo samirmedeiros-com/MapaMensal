@@ -8,21 +8,24 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from './services/auth.service';
+import { LoadingService } from './services/loading.service';
 
 @Component({
   selector: 'app-root',
   imports: [
     RouterOutlet, RouterLink, RouterLinkActive,
     MatToolbarModule, MatSidenavModule, MatListModule,
-    MatIconModule, MatButtonModule, MatTooltipModule
+    MatIconModule, MatButtonModule, MatTooltipModule, MatProgressBarModule
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
   readonly auth = inject(AuthService);
+  readonly loading = inject(LoadingService);
   private bp = inject(BreakpointObserver);
   private router = inject(Router);
 

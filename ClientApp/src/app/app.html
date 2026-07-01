@@ -52,6 +52,11 @@
     </mat-sidenav>
 
     <mat-sidenav-content class="main-content" [class.has-bottom-nav]="isMobile()">
+      <div class="global-progress-bar-wrap">
+        @if (loading.isLoading()) {
+          <mat-progress-bar mode="indeterminate" class="global-progress-bar"></mat-progress-bar>
+        }
+      </div>
       @if (isMobile()) {
         <div class="mobile-toolbar">
           <button mat-icon-button (click)="sidenav.toggle()">
