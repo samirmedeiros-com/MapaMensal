@@ -97,7 +97,7 @@ export class ApiService {
   getResumoAnualContas(year: number): Observable<ResumoAnualContas> {
     return this.http.get<ResumoAnualContas>(`${this.base}/contaspessoais/resumo-anual?year=${year}`);
   }
-  createContaPessoal(dto: { descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number }): Observable<ContaPessoal[]> {
+  createContaPessoal(dto: { descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; mesReferencia: number; anoReferencia: number }): Observable<ContaPessoal[]> {
     return this.http.post<ContaPessoal[]>(`${this.base}/contaspessoais`, dto);
   }
   updateContaPessoal(id: number, dto: { descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number }): Observable<ContaPessoal> {

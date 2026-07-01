@@ -43,7 +43,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   pagarModal = signal<ContaPessoal | null>(null);
   editMode   = signal<ContaPessoal | null>(null);
 
-  form = { descricao: '', categoria: '', dataVencimento: '', valorPrevisto: 0, totalRecorrencias: 1 };
+  form = { descricao: '', categoria: '', dataVencimento: '', valorPrevisto: 0, totalRecorrencias: 1, mesReferencia: 0, anoReferencia: 0 };
   pagarForm = { valorPago: 0, dataPagamento: '', metodoPagamento: '' };
 
   private barChart?: Chart;
@@ -113,7 +113,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   openForm() {
     const today = new Date();
     const d = today.toISOString().substring(0, 10);
-    this.form = { descricao: '', categoria: this.categorias()[0]?.nome ?? '', dataVencimento: d, valorPrevisto: 0, totalRecorrencias: 1 };
+    this.form = { descricao: '', categoria: this.categorias()[0]?.nome ?? '', dataVencimento: d, valorPrevisto: 0, totalRecorrencias: 1, mesReferencia: this.month(), anoReferencia: this.year() };
     this.editMode.set(null);
     this.showForm.set(true);
   }
@@ -139,11 +139,9 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
       });
     } else {
       this.api.createContaPessoal(this.form).subscribe(created => {
-        // Only the first one (same month) goes into the current list
-        const inMonth = created.filter(c => {
-          const d = new Date(c.dataVencimento + 'T00:00:00');
-          return d.getFullYear() === this.year() && d.getMonth() + 1 === this.month();
-        });
+        const inMonth = created.filter(c =>
+          (c.mesReferencia ?? 0) === this.month() && (c.anoReferencia ?? 0) === this.year()
+        );
         this.contas.update(list => [...list, ...inMonth].sort((a,b) => a.dataVencimento.localeCompare(b.dataVencimento)));
         this.showForm.set(false);
         this.refreshResumo();

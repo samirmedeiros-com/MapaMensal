@@ -116,6 +116,8 @@ export interface ContaPessoal {
   grupoRecorrencia?: string;
   recorrenciaAtual: number;
   totalRecorrencias: number;
+  mesReferencia?: number;
+  anoReferencia?: number;
   createdAt: string;
 }
 
