@@ -3,10 +3,9 @@
 
 name: Build and deploy ASP.Net Core app to Azure Web App - restpje
 
+# Migrado para deploy na VM do PjeMiddleware (ver .github/workflows/deploy.yml).
+# Mantido apenas para rollback manual — já não corre automaticamente em push.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:

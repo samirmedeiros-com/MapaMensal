@@ -1,0 +1,77 @@
+# .github/workflows/deploy.yml
+name: Build e Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Restaurar Oracle Wallet (ficheiros sensíveis via secret)
+        env:
+          ORACLE_WALLET_B64: ${{ secrets.ORACLE_WALLET_B64 }}
+        run: |
+          mkdir -p Oracle
+          echo "$ORACLE_WALLET_B64" | base64 -d > /tmp/oracle_wallet.zip
+          unzip -o /tmp/oracle_wallet.zip -d Oracle
+
+      - name: Definir nome da imagem em minúsculo
+        run: echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build e push da imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }}:${{ github.sha }}
+
+      - name: Copiar manifests para a VM
+        uses: appleboy/scp-action@v1
+        with:
+          host: 191.252.225.196
+          username: root
+          port: 22
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "k8s/*.yaml"
+          target: "~/deploy-mapamensal/"
+
+      - name: Aplicar deploy no cluster
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 191.252.225.196
+          username: root
+          port: 22
+          password: ${{ secrets.SSH_PASSWORD }}
+          envs: DB_CONNECTION,SIMPLYSEND_API_KEY,SIMPLYSEND_ACCOUNT_ID,APP_BASE_URL
+          script: |
+            kubectl create secret generic mapamensal-secrets \
+              --from-literal=ConnectionStrings__Default="$DB_CONNECTION" \
+              --from-literal=SimplySend__ApiKey="$SIMPLYSEND_API_KEY" \
+              --from-literal=SimplySend__AccountId="$SIMPLYSEND_ACCOUNT_ID" \
+              --from-literal=App__BaseUrl="$APP_BASE_URL" \
+              --dry-run=client -o yaml | kubectl apply -f -
+            kubectl apply -f ~/deploy-mapamensal/k8s/
+            kubectl set image deployment/mapamensal mapamensal=${{ env.IMAGE }}:${{ github.sha }}
+            kubectl rollout status deployment/mapamensal --timeout=180s
+        env:
+          DB_CONNECTION: ${{ secrets.MAPAMENSAL_DB_CONNECTION }}
+          SIMPLYSEND_API_KEY: ${{ secrets.SIMPLYSEND_API_KEY }}
+          SIMPLYSEND_ACCOUNT_ID: ${{ secrets.SIMPLYSEND_ACCOUNT_ID }}
+          APP_BASE_URL: ${{ secrets.MAPAMENSAL_APP_BASE_URL }}
