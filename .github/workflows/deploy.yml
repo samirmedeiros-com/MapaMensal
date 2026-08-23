@@ -59,12 +59,12 @@ jobs:
           username: root
           port: 22
           password: ${{ secrets.SSH_PASSWORD }}
-          envs: DB_CONNECTION,SIMPLYSEND_API_KEY,SIMPLYSEND_ACCOUNT_ID,APP_BASE_URL
+          envs: DB_CONNECTION,SMTP_USER,SMTP_PASSWORD,APP_BASE_URL
           script: |
             kubectl create secret generic mapamensal-secrets \
               --from-literal=ConnectionStrings__Default="$DB_CONNECTION" \
-              --from-literal=SimplySend__ApiKey="$SIMPLYSEND_API_KEY" \
-              --from-literal=SimplySend__AccountId="$SIMPLYSEND_ACCOUNT_ID" \
+              --from-literal=Smtp__User="$SMTP_USER" \
+              --from-literal=Smtp__Password="$SMTP_PASSWORD" \
               --from-literal=App__BaseUrl="$APP_BASE_URL" \
               --dry-run=client -o yaml | kubectl apply -f -
             kubectl apply -f ~/deploy-mapamensal/k8s/
@@ -72,6 +72,17 @@ jobs:
             kubectl rollout status deployment/mapamensal --timeout=180s
         env:
           DB_CONNECTION: ${{ secrets.MAPAMENSAL_DB_CONNECTION }}
-          SIMPLYSEND_API_KEY: ${{ secrets.SIMPLYSEND_API_KEY }}
-          SIMPLYSEND_ACCOUNT_ID: ${{ secrets.SIMPLYSEND_ACCOUNT_ID }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           APP_BASE_URL: ${{ secrets.MAPAMENSAL_APP_BASE_URL }}
+
+      # Mantém apenas as 10 versões mais recentes da imagem no GHCR. Sem isto,
+      # cada commit acumula uma tag nova para sempre e enche o disco da VM.
+      # continue-on-error: uma falha na limpeza não deve marcar o deploy como falhado.
+      - name: Limpar versões antigas da imagem no GHCR
+        continue-on-error: true
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: mapamensal
+          package-type: container
+          min-versions-to-keep: 10

@@ -48,9 +48,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddTransient<MapaMensal.Helpers.MacOsCurlHandler>();
-builder.Services.AddHttpClient("simplysend", c => c.Timeout = TimeSpan.FromSeconds(30))
-    .AddHttpMessageHandler<MapaMensal.Helpers.MacOsCurlHandler>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddCors(opt =>

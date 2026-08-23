@@ -1,58 +1,71 @@
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Web;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
+using MimeKit;
 
 namespace MapaMensal.Services;
 
-public class EmailService(IHttpClientFactory httpFactory, IConfiguration config, ILogger<EmailService> logger) : IEmailService
+/// Envio de email pelo relay SMTP do servidor (Postfix em zoompositivo.pt:587).
+/// O relay autentica cada aplicação com credenciais próprias, assina com DKIM e
+/// reencaminha por um smarthost — a aplicação só precisa de falar SMTP.
+public partial class EmailService(IConfiguration config, ILogger<EmailService> logger) : IEmailService
 {
-    private string ApiKey => config["SimplySend:ApiKey"] ?? "";
-    private string AccountId => config["SimplySend:AccountId"] ?? "";
-    private string From => config["SimplySend:From"] ?? "";
-    private string SenderName => config["SimplySend:SenderName"] ?? "Mapa Mensal";
-    private string BaseUrl => config["SimplySend:BaseUrl"] ?? "https://tapi.simplysend.email";
+    private string Host => config["Smtp:Host"] ?? "zoompositivo.pt";
+    private int Port => int.TryParse(config["Smtp:Port"], out var p) ? p : 587;
+    private string User => config["Smtp:User"] ?? "";
+    private string Password => config["Smtp:Password"] ?? "";
+    private string From => config["Smtp:From"] ?? "";
+    private string SenderName => config["Smtp:SenderName"] ?? "Mapa Mensal";
 
     public async Task SendAsync(string to, string subject, string htmlBody)
     {
-        var html = htmlBody + @"
-<br><br>
-<p style=""font-size:11px;color:#9ca3af"">
-{{company_address_html}}<br>
-{{unsubscribe_email_html}} &nbsp;|&nbsp; {{report_abuse_email_html}}
-</p>";
-
-        var payload = new Dictionary<string, object>
+        if (string.IsNullOrWhiteSpace(User) || string.IsNullOrWhiteSpace(Password))
         {
-            ["to"]        = to,
-            ["from"]      = From,
-            ["from_name"] = SenderName,
-            ["subject"]   = subject,
-            ["html"]      = html
-        };
+            logger.LogWarning("Email para {To} não enviado: SMTP por configurar.", to);
+            return;
+        }
 
-        var json = JsonSerializer.Serialize(payload,
-            new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+        var msg = new MimeMessage();
+        msg.From.Add(new MailboxAddress(SenderName, From));
+        msg.To.Add(MailboxAddress.Parse(to));
+        msg.Subject = subject;
 
-        logger.LogInformation("SimplySend payload: {json}", json);
+        // Alternativa em texto simples: além de servir quem lê sem HTML, uma
+        // mensagem só-HTML é um sinal negativo para os filtros de spam.
+        msg.Body = new BodyBuilder { HtmlBody = htmlBody, TextBody = ParaTextoSimples(htmlBody) }
+            .ToMessageBody();
 
-        var client = httpFactory.CreateClient("simplysend");
-        client.DefaultRequestHeaders.Clear();
-        client.DefaultRequestHeaders.Add("X-Api-Key", ApiKey);
-        client.DefaultRequestHeaders.Add("X-Id", AccountId);
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        using var client = new SmtpClient();
+        // StartTls e não StartTlsWhenAvailable: se o servidor não oferecer TLS,
+        // queremos que rebente em vez de enviar credenciais em claro.
+        await client.ConnectAsync(Host, Port,
+            Port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls);
+        await client.AuthenticateAsync(User, Password);
+        await client.SendAsync(msg);
+        await client.DisconnectAsync(true);
 
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PostAsync($"{BaseUrl.TrimEnd('/')}/send", content);
-
-        var responseBody = await response.Content.ReadAsStringAsync();
-        logger.LogInformation("SimplySend response {status}: {body}", (int)response.StatusCode, responseBody);
-
-        if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException($"SimplySend: erro {(int)response.StatusCode} — {responseBody}");
+        logger.LogInformation("Email enviado para {To}: {Subject}", to, subject);
     }
+
+    /// Reduz o HTML a texto legível para a parte alternativa da mensagem.
+    private static string ParaTextoSimples(string html)
+    {
+        var texto = QuebrasDeLinha().Replace(html, "\n");
+        texto = Etiquetas().Replace(texto, "");
+        texto = System.Net.WebUtility.HtmlDecode(texto);
+        return LinhasVazias().Replace(texto, "\n\n").Trim();
+    }
+
+    [GeneratedRegex(@"<(br|/p|/div|/h[1-6]|/tr)\b[^>]*>", RegexOptions.IgnoreCase)]
+    private static partial Regex QuebrasDeLinha();
+
+    [GeneratedRegex("<[^>]+>")]
+    private static partial Regex Etiquetas();
+
+    [GeneratedRegex(@"\n\s*\n\s*\n+")]
+    private static partial Regex LinhasVazias();
 
     public async Task SendConviteCompromissoAsync(string to, string nomeDestinatario,
         string tituloCompromisso, DateTime inicio, DateTime fim,
