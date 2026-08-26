@@ -43,6 +43,17 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+// ── TocOnline (emissão de faturas) ────────────────────────────────────────────
+builder.Services.Configure<TocOnlineOptions>(builder.Configuration.GetSection(TocOnlineOptions.Section));
+builder.Services.AddHttpClient("toconline", c => c.Timeout = TimeSpan.FromSeconds(30));
+builder.Services.AddHttpClient("toconline-auth", c =>
+{
+    c.Timeout = TimeSpan.FromSeconds(15);
+    c.DefaultRequestHeaders.Add("User-Agent", "MapaMensal/1.0");
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+builder.Services.AddScoped<ITocOnlineAuthService, TocOnlineAuthService>();
+builder.Services.AddScoped<ITocOnlineInvoiceService, TocOnlineInvoiceService>();
+
 builder.Services.AddCors(opt =>
     opt.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 

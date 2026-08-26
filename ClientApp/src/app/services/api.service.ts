@@ -6,7 +6,7 @@ import {
   Expense, AnnualSummary, TreasurySummary, Tarefa,
   ContaPessoal, ResumoAnualContas, CategoriaContaPessoal,
   Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso,
-  TimesheetStatus
+  TimesheetStatus, TimesheetFaturaDto
 } from '../models/models';
 import { environment } from '../../environments/environment';
 
@@ -46,6 +46,29 @@ export class ApiService {
   }
   cancelarAprovacaoTimesheet(year: number, month: number): Observable<void> {
     return this.http.post<void>(`${this.base}/timesheet/cancelar-aprovacao`, { year, month });
+  }
+  getTimesheetFaturas(year: number, month: number): Observable<TimesheetFaturaDto[]> {
+    return this.http.get<TimesheetFaturaDto[]>(`${this.base}/timesheet/faturas?year=${year}&month=${month}`);
+  }
+  emitirFaturaTimesheet(projectId: number, year: number, month: number): Observable<TimesheetFaturaDto> {
+    return this.http.post<TimesheetFaturaDto>(`${this.base}/timesheet/emitir-fatura`, { projectId, year, month });
+  }
+  confirmarRecebimentoTimesheet(projectId: number, year: number, month: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/timesheet/confirmar-recebimento`, { projectId, year, month });
+  }
+  getFaturaPdfBlob(projectId: number, year: number, month: number): Observable<Blob> {
+    return this.http.get(`${this.base}/timesheet/fatura/${projectId}/${year}/${month}/pdf`, { responseType: 'blob' });
+  }
+
+  // TocOnline (autorização)
+  getTocOnlineStatus(): Observable<{ isConfigured: boolean }> {
+    return this.http.get<{ isConfigured: boolean }>(`${this.base}/toconline/status`);
+  }
+  getTocOnlineAuthUrl(): Observable<{ url: string }> {
+    return this.http.get<{ url: string }>(`${this.base}/toconline/auth-url`);
+  }
+  exchangeTocOnlineCode(code: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/toconline/exchange`, { code });
   }
 
   // Holidays

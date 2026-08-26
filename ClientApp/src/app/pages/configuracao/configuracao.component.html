@@ -14,6 +14,23 @@
     </div>
   </div>
 
+  <!-- TocOnline -->
+  <div class="card">
+    <div class="card-title">TocOnline (emissão de faturas)</div>
+    @if (tocOnlineConfigurado()) {
+      <p class="toc-status ok">✓ Autorizado — pronto para emitir faturas.</p>
+      <button mat-stroked-button (click)="abrirAutorizacaoTocOnline()">Reautorizar</button>
+    } @else {
+      <p class="toc-status">Ainda não autorizado. Passos: 1) abrir a autorização, 2) iniciar sessão no TocOnline,
+        3) copiar o código da página de callback e colar abaixo.</p>
+      <div class="toc-row">
+        <button mat-flat-button color="primary" (click)="abrirAutorizacaoTocOnline()">Abrir autorização TocOnline</button>
+        <input class="inline-input toc-code" [(ngModel)]="tocOnlineCodigo" placeholder="Colar código aqui" />
+        <button mat-flat-button color="accent" [disabled]="tocOnlineLigando()" (click)="ligarTocOnline()">Ligar</button>
+      </div>
+    }
+  </div>
+
   <!-- Projetos -->
   <div class="card">
     <div class="card-title">Projetos</div>

@@ -37,6 +37,15 @@ export interface Expense {
   notes?: string;
 }
 
+export interface TimesheetFaturaDto {
+  projectId: number;
+  numeroFatura: string;
+  dataEmissao: string;
+  estado: 'Emitida' | 'Recebida';
+  dataRecebimento: string | null;
+  temPdf: boolean;
+}
+
 export interface TimesheetStatus {
   isApproved: boolean;
   approvedAt: string | null;

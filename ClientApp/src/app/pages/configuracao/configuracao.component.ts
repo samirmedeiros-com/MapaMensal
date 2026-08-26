@@ -20,6 +20,11 @@ export class ConfiguracaoComponent implements OnInit {
   private api = inject(ApiService);
   private snack = inject(MatSnackBar);
 
+  tocOnlineConfigurado = signal<boolean | null>(null);
+  tocOnlineCodigo = signal('');
+  tocOnlineAuthUrl = signal<string | null>(null);
+  tocOnlineLigando = signal(false);
+
   projects = signal<Project[]>([]);
   holidays = signal<Holiday[]>([]);
   categorias = signal<CategoriaContaPessoal[]>([]);
@@ -47,6 +52,31 @@ export class ConfiguracaoComponent implements OnInit {
     this.api.getConfig().subscribe(c => this.ivaRate.set(c['IvaRate'] ?? '0.23'));
     this.api.getCategoriasContasPessoais().subscribe(c => this.categorias.set(c));
     this.api.getCategoriasCompromisso().subscribe(c => this.categoriasAgenda.set(c));
+    this.api.getTocOnlineStatus().subscribe(s => this.tocOnlineConfigurado.set(s.isConfigured));
+  }
+
+  abrirAutorizacaoTocOnline() {
+    this.api.getTocOnlineAuthUrl().subscribe(r => {
+      this.tocOnlineAuthUrl.set(r.url);
+      window.open(r.url, '_blank');
+    });
+  }
+
+  ligarTocOnline() {
+    if (!this.tocOnlineCodigo().trim()) return;
+    this.tocOnlineLigando.set(true);
+    this.api.exchangeTocOnlineCode(this.tocOnlineCodigo().trim()).subscribe({
+      next: () => {
+        this.tocOnlineLigando.set(false);
+        this.tocOnlineConfigurado.set(true);
+        this.tocOnlineCodigo.set('');
+        this.snack.open('TocOnline autorizado com sucesso.', '', { duration: 3000 });
+      },
+      error: (err) => {
+        this.tocOnlineLigando.set(false);
+        this.snack.open(err?.error ?? 'Não foi possível autorizar o TocOnline.', '', { duration: 5000 });
+      }
+    });
   }
 
   saveIva() {

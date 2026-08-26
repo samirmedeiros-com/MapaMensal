@@ -87,6 +87,9 @@
           <th>Valor Total</th>
           <th>IVA</th>
           <th>Valor Fatura</th>
+          <th>Data Emissão</th>
+          <th>Nº Fatura</th>
+          <th></th>
           <th></th>
         </tr>
       </thead>
@@ -99,8 +102,25 @@
             <td>{{ formatCurrency(row.valorTotal) }} €</td>
             <td>{{ formatCurrency(row.valorIva) }} €</td>
             <td class="fatura-valor">{{ formatCurrency(row.valorFatura) }} €</td>
+            <td>{{ row.fatura ? formatDateTime(row.fatura.dataEmissao) : '—' }}</td>
+            <td>{{ row.fatura?.numeroFatura ?? '—' }}</td>
             <td>
-              <button type="button" class="btn-action btn-emitir" (click)="emitirFatura()">Emitir fatura</button>
+              @if (row.fatura?.temPdf) {
+                <button type="button" class="btn-action btn-emitir" (click)="verPdf(row.projectId)">Ver PDF</button>
+              }
+            </td>
+            <td>
+              @if (!row.fatura) {
+                <button type="button" class="btn-action btn-emitir" [disabled]="emitindoProjectId() === row.projectId" (click)="emitirFatura(row.projectId)">
+                  Emitir fatura
+                </button>
+              } @else if (row.fatura.estado === 'Emitida') {
+                <button type="button" class="btn-action btn-emitir" [disabled]="emitindoProjectId() === row.projectId" (click)="confirmarRecebimento(row.projectId)">
+                  Confirmar recebimento
+                </button>
+              } @else {
+                <span class="approval-badge approved">Recebida</span>
+              }
             </td>
           </tr>
         }

@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
-import { Project, WorkDay, Holiday, MONTH_NAMES, DAY_NAMES, TimesheetStatus } from '../../models/models';
+import { Project, WorkDay, Holiday, MONTH_NAMES, DAY_NAMES, TimesheetStatus, TimesheetFaturaDto } from '../../models/models';
 
 interface DayCell {
   day: number;
@@ -37,6 +37,9 @@ export class MapaDiasComponent implements OnInit {
   timesheetStatus = signal<TimesheetStatus | null>(null);
   aprovado = computed(() => this.timesheetStatus()?.isApproved ?? false);
   aprovando = signal(false);
+
+  faturas = signal<TimesheetFaturaDto[]>([]);
+  emitindoProjectId = signal<number | null>(null);
 
   monthName = computed(() => MONTH_NAMES[this.month()]);
   dayNames = DAY_NAMES;
@@ -96,16 +99,20 @@ export class MapaDiasComponent implements OnInit {
 
   faturaRows = computed(() => {
     const iva = this.ivaRate();
+    const faturas = this.faturas();
     return this.projectTotals().map(t => {
       const valorTotal = t.value;
       const valorIva = valorTotal * iva;
+      const fatura = faturas.find(f => f.projectId === t.project.id) ?? null;
       return {
+        projectId: t.project.id,
         nome: t.project.name,
         dias: t.workedDays,
         valorDia: t.project.dailyRate,
         valorTotal,
         valorIva,
-        valorFatura: valorTotal + valorIva
+        valorFatura: valorTotal + valorIva,
+        fatura
       };
     });
   });
@@ -129,6 +136,7 @@ export class MapaDiasComponent implements OnInit {
   loadMonth() {
     this.api.getWorkDays(this.year(), this.month()).subscribe(w => this.workDays.set(w));
     this.api.getTimesheetStatus(this.year(), this.month()).subscribe(s => this.timesheetStatus.set(s));
+    this.api.getTimesheetFaturas(this.year(), this.month()).subscribe(f => this.faturas.set(f));
   }
 
   changeMonth(delta: number) {
@@ -171,8 +179,49 @@ export class MapaDiasComponent implements OnInit {
     });
   }
 
-  emitirFatura() {
-    // Por implementar.
+  emitirFatura(projectId: number) {
+    this.emitindoProjectId.set(projectId);
+    this.api.emitirFaturaTimesheet(projectId, this.year(), this.month()).subscribe({
+      next: () => {
+        this.emitindoProjectId.set(null);
+        this.loadMonth();
+        this.snack.open('Fatura emitida com sucesso.', 'Ok', { duration: 3000 });
+      },
+      error: (err) => {
+        this.emitindoProjectId.set(null);
+        this.snack.open(err?.error ?? 'Não foi possível emitir a fatura.', 'Ok', { duration: 5000 });
+      }
+    });
+  }
+
+  confirmarRecebimento(projectId: number) {
+    this.emitindoProjectId.set(projectId);
+    this.api.confirmarRecebimentoTimesheet(projectId, this.year(), this.month()).subscribe({
+      next: () => {
+        this.emitindoProjectId.set(null);
+        this.loadMonth();
+        this.snack.open('Recebimento confirmado.', 'Ok', { duration: 3000 });
+      },
+      error: () => {
+        this.emitindoProjectId.set(null);
+        this.snack.open('Não foi possível confirmar o recebimento.', 'Ok', { duration: 3000 });
+      }
+    });
+  }
+
+  verPdf(projectId: number) {
+    this.api.getFaturaPdfBlob(projectId, this.year(), this.month()).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      },
+      error: () => this.snack.open('Não foi possível abrir o PDF.', 'Ok', { duration: 3000 })
+    });
+  }
+
+  formatDateTime(d: string | null) {
+    if (!d) return '';
+    return new Date(d).toLocaleDateString('pt-PT');
   }
 
   cycleMark(cell: DayCell, project: Project) {

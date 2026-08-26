@@ -51,13 +51,18 @@ jobs:
           username: root
           port: 22
           password: ${{ secrets.SSH_PASSWORD }}
-          envs: DB_CONNECTION,SMTP_USER,SMTP_PASSWORD,APP_BASE_URL
+          envs: DB_CONNECTION,SMTP_USER,SMTP_PASSWORD,APP_BASE_URL,TOC_OAUTH_URL,TOC_API_URL,TOC_CLIENT_ID,TOC_CLIENT_SECRET,TOC_REDIRECT_URI
           script: |
             kubectl create secret generic mapamensal-secrets \
               --from-literal=ConnectionStrings__Default="$DB_CONNECTION" \
               --from-literal=Smtp__User="$SMTP_USER" \
               --from-literal=Smtp__Password="$SMTP_PASSWORD" \
               --from-literal=App__BaseUrl="$APP_BASE_URL" \
+              --from-literal=TocOnline__OAuthUrl="$TOC_OAUTH_URL" \
+              --from-literal=TocOnline__ApiUrl="$TOC_API_URL" \
+              --from-literal=TocOnline__ClientId="$TOC_CLIENT_ID" \
+              --from-literal=TocOnline__ClientSecret="$TOC_CLIENT_SECRET" \
+              --from-literal=TocOnline__RedirectUri="$TOC_REDIRECT_URI" \
               --dry-run=client -o yaml | kubectl apply -f -
             kubectl apply -f ~/deploy-mapamensal/k8s/
             kubectl set image deployment/mapamensal mapamensal=${{ env.IMAGE }}:${{ github.sha }}
@@ -67,6 +72,11 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           APP_BASE_URL: ${{ secrets.MAPAMENSAL_APP_BASE_URL }}
+          TOC_OAUTH_URL: ${{ secrets.TOCONLINE_OAUTH_URL }}
+          TOC_API_URL: ${{ secrets.TOCONLINE_API_URL }}
+          TOC_CLIENT_ID: ${{ secrets.TOCONLINE_CLIENT_ID }}
+          TOC_CLIENT_SECRET: ${{ secrets.TOCONLINE_CLIENT_SECRET }}
+          TOC_REDIRECT_URI: ${{ secrets.TOCONLINE_REDIRECT_URI }}
 
       # Mantém apenas as 10 versões mais recentes da imagem no GHCR. Sem isto,
       # cada commit acumula uma tag nova para sempre e enche o disco da VM.
