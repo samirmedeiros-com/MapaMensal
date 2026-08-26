@@ -241,9 +241,6 @@ tr.row-locked td:not(.total-cell) {
 }
 
 .fatura-acoes {
-  display: flex;
-  gap: 6px;
-  flex-wrap: nowrap;
   white-space: nowrap;
 }
 
@@ -337,6 +334,10 @@ tr.row-locked td:not(.total-cell) {
 }
 
 .pdf-cell {
+  white-space: nowrap;
+}
+
+.icon-row {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -347,6 +348,7 @@ tr.row-locked td:not(.total-cell) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   width: 30px;
   height: 30px;
   border: none;

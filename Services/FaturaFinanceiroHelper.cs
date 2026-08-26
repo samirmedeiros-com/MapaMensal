@@ -31,11 +31,31 @@ public static class FaturaFinanceiroHelper
         return decimal.Parse(ivaRateStr, System.Globalization.CultureInfo.InvariantCulture);
     }
 
+    /// <summary>
+    /// Calcula a data de vencimento a partir do dia do mês configurado no projeto: se esse dia ainda
+    /// não tiver passado no mês da emissão, fica nesse mês; senão passa para o mês seguinte — nunca
+    /// antes (nem no mesmo dia, sempre posterior) da data de emissão.
+    /// </summary>
+    public static DateOnly CalcularDataVencimento(DateOnly dataEmissao, int diaVencimento)
+    {
+        DateOnly ParaDiaValido(int ano, int mes, int dia)
+        {
+            var diasNoMes = DateTime.DaysInMonth(ano, mes);
+            return new DateOnly(ano, mes, Math.Min(dia, diasNoMes));
+        }
+
+        var candidato = ParaDiaValido(dataEmissao.Year, dataEmissao.Month, diaVencimento);
+        if (candidato > dataEmissao) return candidato;
+
+        var proximoMes = dataEmissao.AddMonths(1);
+        return ParaDiaValido(proximoMes.Year, proximoMes.Month, diaVencimento);
+    }
+
     /// <summary>Cria em Contas Pessoais a previsão de entrada correspondente a uma fatura recém-emitida.</summary>
     public static async Task CriarPrevisaoAsync(AppDbContext db, TimesheetFatura fatura, Project project, CancellationToken ct = default)
     {
         var valorFatura = await CalcularValorFaturaAsync(db, fatura.ProjectId, fatura.Year, fatura.Month, ct);
-        var dataVencimento = DateOnly.FromDateTime(fatura.DataEmissao).AddDays(project.PrazoVencimentoDias);
+        var dataVencimento = CalcularDataVencimento(DateOnly.FromDateTime(fatura.DataEmissao), project.DiaVencimento);
 
         db.ContasPessoais.Add(new ContaPessoal
         {

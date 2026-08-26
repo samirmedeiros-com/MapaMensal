@@ -11,7 +11,7 @@ export interface Project {
   faturacaoCodigoPostal?: string | null;
   faturacaoLocalidade?: string | null;
   faturacaoPais?: string;
-  prazoVencimentoDias?: number;
+  diaVencimento?: number;
 }
 
 export interface WorkDay {

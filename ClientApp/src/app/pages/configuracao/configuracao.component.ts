@@ -40,6 +40,8 @@ export class ConfiguracaoComponent implements OnInit {
   editingCategoria: CategoriaContaPessoal | null = null;
   editingCategoriaAgenda: CategoriaCompromisso | null = null;
 
+  billingModalProject: Project | null = null;
+
   readonly CORES_AGENDA = CORES_PALETA;
 
   ngOnInit() {
@@ -104,6 +106,23 @@ export class ConfiguracaoComponent implements OnInit {
       this.projects.update(list => list.map(p => p.id === this.editingProject!.id ? this.editingProject! : p));
       this.editingProject = null;
       this.snack.open('Projeto atualizado', '', { duration: 2000 });
+    });
+  }
+
+  abrirFaturacao(p: Project) {
+    this.billingModalProject = { ...p };
+  }
+
+  fecharFaturacao() {
+    this.billingModalProject = null;
+  }
+
+  salvarFaturacao() {
+    if (!this.billingModalProject) return;
+    this.api.updateProject(this.billingModalProject).subscribe(() => {
+      this.projects.update(list => list.map(p => p.id === this.billingModalProject!.id ? this.billingModalProject! : p));
+      this.billingModalProject = null;
+      this.snack.open('Dados de faturação guardados', '', { duration: 2000 });
     });
   }
 
