@@ -27,9 +27,18 @@ public class WorkDaysController(AppDbContext db) : ControllerBase
         return Ok(days);
     }
 
+    private async Task<bool> IsApprovedAsync(int year, int month)
+    {
+        return await db.TimesheetApprovals
+            .AnyAsync(t => t.Year == year && t.Month == month && t.IsApproved);
+    }
+
     [HttpPost("upsert")]
     public async Task<IActionResult> Upsert([FromBody] WorkDayUpsertDto dto)
     {
+        if (await IsApprovedAsync(dto.Year, dto.Month))
+            return Conflict("TimeSheet já aprovado. Cancele a aprovação para poder alterar.");
+
         var date = new DateOnly(dto.Year, dto.Month, dto.Day);
         var existing = await db.WorkDays
             .FirstOrDefaultAsync(w => w.ProjectId == dto.ProjectId && w.Date == date);
@@ -55,6 +64,13 @@ public class WorkDaysController(AppDbContext db) : ControllerBase
     [HttpPost("bulk")]
     public async Task<IActionResult> BulkUpsert([FromBody] List<WorkDayUpsertDto> dtos)
     {
+        var meses = dtos.Select(d => (d.Year, d.Month)).Distinct();
+        foreach (var (year, month) in meses)
+        {
+            if (await IsApprovedAsync(year, month))
+                return Conflict("TimeSheet já aprovado. Cancele a aprovação para poder alterar.");
+        }
+
         foreach (var dto in dtos)
         {
             var date = new DateOnly(dto.Year, dto.Month, dto.Day);

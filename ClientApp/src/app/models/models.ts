@@ -31,6 +31,12 @@ export interface Expense {
   notes?: string;
 }
 
+export interface TimesheetStatus {
+  isApproved: boolean;
+  approvedAt: string | null;
+  approvedByUsername: string | null;
+}
+
 export interface WorkDayUpsertDto {
   projectId: number;
   year: number;

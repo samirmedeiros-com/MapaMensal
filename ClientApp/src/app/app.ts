@@ -53,7 +53,7 @@ export class App {
     {
       label: 'Principal',
       items: [
-        { path: '/mapa-dias',        icon: 'calendar_month',         label: 'Mapa Dias' },
+        { path: '/mapa-dias',        icon: 'calendar_month',         label: 'TimeSheet' },
         { path: '/resumo',           icon: 'bar_chart',              label: 'Resumo' },
         { path: '/tarefas',          icon: 'task_alt',               label: 'Tarefas' },
         { path: '/contas-pessoais',  icon: 'credit_card',            label: 'Contas Pessoais' },
@@ -76,7 +76,7 @@ export class App {
   });
 
   bottomNavItems = [
-    { path: '/mapa-dias',       icon: 'calendar_month',         label: 'Mapa' },
+    { path: '/mapa-dias',       icon: 'calendar_month',         label: 'TimeSheet' },
     { path: '/resumo',          icon: 'bar_chart',              label: 'Resumo' },
     { path: '/tarefas',         icon: 'task_alt',               label: 'Tarefas' },
     { path: '/contas-pessoais', icon: 'credit_card',            label: 'Contas' },

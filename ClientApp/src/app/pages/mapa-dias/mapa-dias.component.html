@@ -1,5 +1,22 @@
 <div class="page-container">
-  <div class="page-title">Mapa de Dias</div>
+  <div class="page-title-row">
+    <div class="page-title">TimeSheet</div>
+    <div class="approval-actions">
+      @if (aprovado()) {
+        <span class="approval-badge approved">
+          <mat-icon>check_circle</mat-icon>
+          Aprovado
+        </span>
+        <button mat-stroked-button color="warn" [disabled]="aprovando()" (click)="cancelarAprovacao()">
+          Cancelar aprovação
+        </button>
+      } @else {
+        <button mat-flat-button color="primary" [disabled]="aprovando()" (click)="aprovarTimesheet()">
+          Aprovar TimeSheet
+        </button>
+      }
+    </div>
+  </div>
 
   <!-- Navegação mês -->
   <div class="month-nav">
@@ -19,7 +36,7 @@
   </div>
 
   <!-- Calendário -->
-  <div class="card calendar-card">
+  <div class="card calendar-card" [class.approved]="aprovado()">
     <div class="calendar-scroll">
       <table class="calendar-table">
         <thead>
@@ -56,5 +73,38 @@
         </tbody>
       </table>
     </div>
+  </div>
+
+  <!-- Faturação -->
+  <div class="card fatura-card">
+    <div class="card-title">Faturação</div>
+    <table class="fatura-table">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Nº Dias</th>
+          <th>Valor Dia</th>
+          <th>Valor Total</th>
+          <th>IVA</th>
+          <th>Valor Fatura</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of faturaRows(); track row.nome) {
+          <tr>
+            <td class="fatura-nome">{{ row.nome }}</td>
+            <td>{{ row.dias }}</td>
+            <td>{{ formatCurrency(row.valorDia) }} €</td>
+            <td>{{ formatCurrency(row.valorTotal) }} €</td>
+            <td>{{ formatCurrency(row.valorIva) }} €</td>
+            <td class="fatura-valor">{{ formatCurrency(row.valorFatura) }} €</td>
+            <td>
+              <button mat-stroked-button (click)="emitirFatura()">Emitir fatura</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
   </div>
 </div>

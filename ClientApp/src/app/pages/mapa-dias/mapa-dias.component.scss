@@ -1,4 +1,32 @@
-.page-title { margin-bottom: 8px; }
+.page-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+
+  .page-title { margin-bottom: 0; }
+}
+
+.approval-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.approval-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 14px;
+
+  &.approved { background: #c8e6c9; color: #1b5e20; }
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
 
 .month-nav {
   display: flex;
@@ -36,6 +64,11 @@
 .calendar-card {
   padding: 0;
   overflow: hidden;
+
+  &.approved .calendar-table td:not(.total-cell) {
+    cursor: default;
+    &:hover { filter: none; }
+  }
 }
 
 .calendar-scroll {
@@ -120,6 +153,37 @@
   tr.project-row-alt td.project-name { background: #eeeeee; }
 }
 
+.fatura-card { margin-top: 14px; }
+
+.fatura-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+
+  th {
+    text-align: right;
+    padding: 8px 10px;
+    font-weight: 600;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.78rem;
+
+    &:first-child { text-align: left; }
+    &:last-child { width: 1%; }
+  }
+
+  td {
+    text-align: right;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+
+    &:first-child { text-align: left; }
+  }
+
+  .fatura-nome { font-weight: 600; }
+  .fatura-valor { font-weight: 700; color: var(--purple-800, #3C3489); }
+}
+
 @media (max-width: 600px) {
   .month-nav .month-label { font-size: 0.92rem; min-width: 130px; }
   .legend { gap: 5px; }
@@ -128,4 +192,9 @@
   // Em ecrãs muito estreitos não há como caber 31 colunas — mantém-se a
   // rolagem horizontal só aqui, como rede de segurança.
   .calendar-table { min-width: 700px; }
+
+  .page-title-row { flex-direction: column; align-items: flex-start; }
+
+  .fatura-card { overflow-x: auto; }
+  .fatura-table { min-width: 560px; }
 }

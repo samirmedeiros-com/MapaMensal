@@ -19,6 +19,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CompromissoParticipante> CompromissoParticipantes => Set<CompromissoParticipante>();
     public DbSet<HorarioDisponivel> HorariosDisponiveis => Set<HorarioDisponivel>();
     public DbSet<CategoriaCompromisso> CategoriasCompromisso => Set<CategoriaCompromisso>();
+    public DbSet<TimesheetApproval> TimesheetApprovals => Set<TimesheetApproval>();
 
     // Garante que todos os DateTime lidos do MySQL ficam com Kind=Utc.
     // Sem isto, o Pomelo devolve Kind=Unspecified e o System.Text.Json serializa
@@ -44,6 +45,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<CompromissoParticipante>().ToTable("mapa_compromisso_participantes");
         modelBuilder.Entity<HorarioDisponivel>().ToTable("mapa_horarios_disponiveis");
         modelBuilder.Entity<CategoriaCompromisso>().ToTable("mapa_categorias_compromisso");
+        modelBuilder.Entity<TimesheetApproval>().ToTable("mapa_timesheet_approvals");
 
         // Precisão explícita (decimal sem isto dava NUMERIC(65,30) genérico no MySQL)
         modelBuilder.Entity<Project>().Property(p => p.DailyRate).HasColumnType("decimal(18,4)");
@@ -76,6 +78,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
+            .IsUnique();
+
+        modelBuilder.Entity<TimesheetApproval>()
+            .HasIndex(t => new { t.Year, t.Month })
             .IsUnique();
 
         SeedData(modelBuilder);

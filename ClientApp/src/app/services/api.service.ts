@@ -5,7 +5,8 @@ import {
   Project, WorkDay, WorkDayUpsertDto, Holiday,
   Expense, AnnualSummary, TreasurySummary, Tarefa,
   ContaPessoal, ResumoAnualContas, CategoriaContaPessoal,
-  Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso
+  Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso,
+  TimesheetStatus
 } from '../models/models';
 import { environment } from '../../environments/environment';
 
@@ -34,6 +35,17 @@ export class ApiService {
   }
   upsertWorkDay(dto: WorkDayUpsertDto): Observable<void> {
     return this.http.post<void>(`${this.base}/workdays/upsert`, dto);
+  }
+
+  // Timesheet (aprovação)
+  getTimesheetStatus(year: number, month: number): Observable<TimesheetStatus> {
+    return this.http.get<TimesheetStatus>(`${this.base}/timesheet/status?year=${year}&month=${month}`);
+  }
+  aprovarTimesheet(year: number, month: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/timesheet/aprovar`, { year, month });
+  }
+  cancelarAprovacaoTimesheet(year: number, month: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/timesheet/cancelar-aprovacao`, { year, month });
   }
 
   // Holidays

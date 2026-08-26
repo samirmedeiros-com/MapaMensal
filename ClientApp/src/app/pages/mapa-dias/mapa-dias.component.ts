@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
-import { Project, WorkDay, Holiday, MONTH_NAMES, DAY_NAMES } from '../../models/models';
+import { Project, WorkDay, Holiday, MONTH_NAMES, DAY_NAMES, TimesheetStatus } from '../../models/models';
 
 interface DayCell {
   day: number;
@@ -32,6 +32,11 @@ export class MapaDiasComponent implements OnInit {
   projects = signal<Project[]>([]);
   holidays = signal<Holiday[]>([]);
   workDays = signal<WorkDay[]>([]);
+  ivaRate = signal(0.23);
+
+  timesheetStatus = signal<TimesheetStatus | null>(null);
+  aprovado = computed(() => this.timesheetStatus()?.isApproved ?? false);
+  aprovando = signal(false);
 
   monthName = computed(() => MONTH_NAMES[this.month()]);
   dayNames = DAY_NAMES;
@@ -89,6 +94,22 @@ export class MapaDiasComponent implements OnInit {
     });
   });
 
+  faturaRows = computed(() => {
+    const iva = this.ivaRate();
+    return this.projectTotals().map(t => {
+      const valorTotal = t.value;
+      const valorIva = valorTotal * iva;
+      return {
+        nome: t.project.name,
+        dias: t.workedDays,
+        valorDia: t.project.dailyRate,
+        valorTotal,
+        valorIva,
+        valorFatura: valorTotal + valorIva
+      };
+    });
+  });
+
   ngOnInit() {
     this.loadData();
   }
@@ -99,10 +120,15 @@ export class MapaDiasComponent implements OnInit {
       this.loadMonth();
     });
     this.api.getHolidays().subscribe(h => this.holidays.set(h));
+    this.api.getConfig().subscribe(c => {
+      const v = parseFloat(c['IvaRate']);
+      if (!isNaN(v)) this.ivaRate.set(v);
+    });
   }
 
   loadMonth() {
     this.api.getWorkDays(this.year(), this.month()).subscribe(w => this.workDays.set(w));
+    this.api.getTimesheetStatus(this.year(), this.month()).subscribe(s => this.timesheetStatus.set(s));
   }
 
   changeMonth(delta: number) {
@@ -115,7 +141,42 @@ export class MapaDiasComponent implements OnInit {
     this.loadMonth();
   }
 
+  aprovarTimesheet() {
+    this.aprovando.set(true);
+    this.api.aprovarTimesheet(this.year(), this.month()).subscribe({
+      next: () => {
+        this.aprovando.set(false);
+        this.loadMonth();
+        this.snack.open('TimeSheet aprovado.', 'Ok', { duration: 3000 });
+      },
+      error: () => {
+        this.aprovando.set(false);
+        this.snack.open('Não foi possível aprovar o TimeSheet.', 'Ok', { duration: 3000 });
+      }
+    });
+  }
+
+  cancelarAprovacao() {
+    this.aprovando.set(true);
+    this.api.cancelarAprovacaoTimesheet(this.year(), this.month()).subscribe({
+      next: () => {
+        this.aprovando.set(false);
+        this.loadMonth();
+        this.snack.open('Aprovação cancelada.', 'Ok', { duration: 3000 });
+      },
+      error: () => {
+        this.aprovando.set(false);
+        this.snack.open('Não foi possível cancelar a aprovação.', 'Ok', { duration: 3000 });
+      }
+    });
+  }
+
+  emitirFatura() {
+    // Por implementar.
+  }
+
   cycleMark(cell: DayCell, project: Project) {
+    if (this.aprovado()) return;
     if (cell.isWeekend) return;
     const current = cell.marks.get(project.id) ?? null;
     let next: number;
