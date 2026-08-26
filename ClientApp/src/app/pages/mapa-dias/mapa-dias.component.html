@@ -32,9 +32,9 @@
                 <div class="day-name">{{ cell.dayName }}</div>
               </th>
             }
-            <th class="totals-col">Dias</th>
-            <th class="totals-col">Valor</th>
-            <th class="totals-col">Férias</th>
+            <th class="totals-col totals-col-dias">Dias</th>
+            <th class="totals-col totals-col-valor">Valor</th>
+            <th class="totals-col totals-col-ferias">Férias</th>
           </tr>
         </thead>
         <tbody>
@@ -48,9 +48,9 @@
                   (click)="cycleMark(cell, proj)"
                 >{{ getMarkLabel(cell.marks.get(proj.id)) }}</td>
               }
-              <td class="total-cell">{{ projectTotals()[pi].workedDays }}</td>
-              <td class="total-cell">{{ formatCurrency(projectTotals()[pi].value) }} €</td>
-              <td class="total-cell">{{ projectTotals()[pi].vacationDays }}</td>
+              <td class="total-cell totals-col-dias">{{ projectTotals()[pi].workedDays }}</td>
+              <td class="total-cell totals-col-valor">{{ formatCurrency(projectTotals()[pi].value) }} €</td>
+              <td class="total-cell totals-col-ferias">{{ projectTotals()[pi].vacationDays }}</td>
             </tr>
           }
         </tbody>

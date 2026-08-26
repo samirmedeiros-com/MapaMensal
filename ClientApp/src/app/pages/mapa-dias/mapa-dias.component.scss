@@ -67,7 +67,9 @@
       left: 0;
       z-index: 2;
     }
-    &.totals-col { width: 58px; background: #283593; }
+    &.totals-col { background: #283593; }
+    &.totals-col-dias, &.totals-col-ferias { width: 44px; }
+    &.totals-col-valor { width: 84px; white-space: nowrap; }
     &.weekend-header { background: #5c6bc0; }
     &.holiday-header { background: #ad1457; }
   }
@@ -105,6 +107,7 @@
       cursor: default;
       color: #1a237e;
     }
+    &.totals-col-valor { white-space: nowrap; }
 
     &.worked   { background: #c8e6c9; color: #1b5e20; }
     &.half     { background: #fff9c4; color: #f57f17; }
