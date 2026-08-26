@@ -127,29 +127,31 @@
             </td>
             <td class="pdf-cell">
               @if (row.fatura?.temAnuladas) {
-                <button type="button" class="icon-btn-historico" (click)="abrirHistoricoAnuladas(row.projectId)" matTooltip="Há fatura(s) anulada(s) para este mês — ver histórico">
+                <button type="button" class="icon-btn icon-btn-historico" (click)="abrirHistoricoAnuladas(row.projectId)" matTooltip="Há fatura(s) anulada(s) para este mês — ver histórico">
                   <mat-icon>history</mat-icon>
                 </button>
               }
               @if (row.fatura?.temPdf) {
-                <button type="button" class="btn-action btn-emitir" (click)="verPdf(row.projectId)">Ver PDF</button>
+                <button type="button" class="icon-btn icon-btn-neutro" (click)="verPdf(row.projectId)" matTooltip="Ver PDF">
+                  <mat-icon>picture_as_pdf</mat-icon>
+                </button>
               }
             </td>
             <td class="fatura-acoes">
               @if (!row.fatura || row.fatura.estado === 'Anulada') {
                 @if (aprovado()) {
-                  <button type="button" class="btn-action btn-emitir" [disabled]="emitindoProjectId() === row.projectId" (click)="abrirModalEmitir(row.projectId)">
-                    Emitir fatura
+                  <button type="button" class="icon-btn icon-btn-primary" [disabled]="emitindoProjectId() === row.projectId" (click)="abrirModalEmitir(row.projectId)" matTooltip="Emitir fatura">
+                    <mat-icon>receipt_long</mat-icon>
                   </button>
                 } @else {
                   <span class="fatura-hint" matTooltip="Aprove o TimeSheet para poder emitir a fatura">Aprovar TimeSheet primeiro</span>
                 }
               } @else if (row.fatura.estado === 'Emitida') {
-                <button type="button" class="btn-action btn-emitir" [disabled]="emitindoProjectId() === row.projectId" (click)="confirmarRecebimento(row.projectId)">
-                  Confirmar recebimento
+                <button type="button" class="icon-btn icon-btn-success" [disabled]="emitindoProjectId() === row.projectId" (click)="confirmarRecebimento(row.projectId)" matTooltip="Confirmar recebimento">
+                  <mat-icon>check_circle</mat-icon>
                 </button>
-                <button type="button" class="btn-action btn-cancel-approve" [disabled]="emitindoProjectId() === row.projectId" (click)="abrirModalAnular(row.projectId)">
-                  Anular fatura
+                <button type="button" class="icon-btn icon-btn-danger" [disabled]="emitindoProjectId() === row.projectId" (click)="abrirModalAnular(row.projectId)" matTooltip="Anular fatura">
+                  <mat-icon>cancel</mat-icon>
                 </button>
               } @else {
                 <span class="approval-badge approved">Recebida</span>

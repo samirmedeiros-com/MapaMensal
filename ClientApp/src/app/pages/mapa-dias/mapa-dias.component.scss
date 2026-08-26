@@ -341,21 +341,50 @@ tr.row-locked td:not(.total-cell) {
   gap: 6px;
 }
 
-.icon-btn-historico {
+.icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border: none;
   border-radius: 50%;
-  background: #fff3e0;
-  color: #e65100;
   cursor: pointer;
+  transition: filter 0.15s, background 0.15s;
+  flex-shrink: 0;
 
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
+  &:hover:not(:disabled) { filter: brightness(0.94); }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.icon-btn-historico {
+  background: #fff3e0;
+  color: #e65100;
+
   &:hover { background: #ffe0b2; }
+}
+
+.icon-btn-neutro {
+  background: var(--surface-2, #F9F8F7);
+  color: var(--purple-800, #3C3489);
+  border: 1.5px solid var(--purple-200, #AFA9EC);
+}
+
+.icon-btn-primary {
+  background: var(--purple-500, #534AB7);
+  color: #fff;
+}
+
+.icon-btn-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.icon-btn-danger {
+  background: #fff0f0;
+  color: #c62828;
 }
 
 .historico-modal-card {
