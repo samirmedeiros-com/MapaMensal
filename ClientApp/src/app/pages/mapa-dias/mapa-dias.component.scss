@@ -225,7 +225,7 @@ tr.row-locked td:not(.total-cell) {
     font-size: 0.78rem;
 
     &:first-child { text-align: left; }
-    &:last-child { width: 1%; }
+    &:last-child, &:nth-last-child(2) { width: 1%; white-space: nowrap; }
   }
 
   td {
@@ -243,7 +243,8 @@ tr.row-locked td:not(.total-cell) {
 .fatura-acoes {
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .origem-icon {
@@ -339,6 +340,7 @@ tr.row-locked td:not(.total-cell) {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: nowrap;
 }
 
 .icon-btn {
