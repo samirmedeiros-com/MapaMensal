@@ -14,18 +14,27 @@ import { ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal } from '../../mod
 
 Chart.register(...registerables);
 
+// Formata em yyyy-MM-dd usando os componentes locais da data, nunca toISOString()
+// (que converte para UTC e pode voltar um dia atrás em fusos negativos).
+function paraIso(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function hoje(): string {
-  return new Date().toISOString().substring(0, 10);
+  return paraIso(new Date());
 }
 
 function primeiroDiaDoMes(): string {
   const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().substring(0, 10);
+  return paraIso(new Date(d.getFullYear(), d.getMonth(), 1));
 }
 
 function ultimoDiaDoMes(): string {
   const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().substring(0, 10);
+  return paraIso(new Date(d.getFullYear(), d.getMonth() + 1, 0));
 }
 
 @Component({
@@ -114,8 +123,8 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
     } else if (tipo === 'proximo-mes') {
       const inicio = new Date(d.getFullYear(), d.getMonth() + 1, 1);
       const fim = new Date(d.getFullYear(), d.getMonth() + 2, 0);
-      this.filtroInicio.set(inicio.toISOString().substring(0, 10));
-      this.filtroFim.set(fim.toISOString().substring(0, 10));
+      this.filtroInicio.set(paraIso(inicio));
+      this.filtroFim.set(paraIso(fim));
     } else {
       this.filtroInicio.set(`${d.getFullYear()}-01-01`);
       this.filtroFim.set(`${d.getFullYear()}-12-31`);
