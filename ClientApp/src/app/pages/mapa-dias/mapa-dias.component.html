@@ -221,4 +221,17 @@
       </div>
     </div>
   }
+
+  <!-- MODAL VER PDF -->
+  @if (pdfModalUrl(); as url) {
+    <div class="modal-overlay" (click)="fecharPdf()">
+      <div class="modal-card pdf-modal-card" (click)="$event.stopPropagation()">
+        <div class="pdf-modal-header">
+          <span class="modal-title">Fatura (PDF)</span>
+          <button mat-icon-button (click)="fecharPdf()"><mat-icon>close</mat-icon></button>
+        </div>
+        <iframe [src]="url" class="pdf-frame"></iframe>
+      </div>
+    </div>
+  }
 </div>

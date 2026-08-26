@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -23,9 +24,13 @@ interface DayCell {
   templateUrl: './mapa-dias.component.html',
   styleUrl: './mapa-dias.component.scss'
 })
-export class MapaDiasComponent implements OnInit {
+export class MapaDiasComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   private snack = inject(MatSnackBar);
+  private sanitizer = inject(DomSanitizer);
+
+  pdfModalUrl = signal<SafeResourceUrl | null>(null);
+  private pdfObjectUrl: string | null = null;
 
   year = signal(new Date().getFullYear());
   month = signal(new Date().getMonth() + 1);
@@ -283,8 +288,8 @@ export class MapaDiasComponent implements OnInit {
   verPdf(projectId: number) {
     this.api.getFaturaPdfBlob(projectId, this.year(), this.month()).subscribe({
       next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
+        this.pdfObjectUrl = URL.createObjectURL(blob);
+        this.pdfModalUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfObjectUrl));
       },
       error: () => this.snack.open('Não foi possível abrir o PDF.', 'Ok', { duration: 3000 })
     });
@@ -376,5 +381,17 @@ export class MapaDiasComponent implements OnInit {
 
   formatCurrency(v: number) {
     return v.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  fecharPdf() {
+    this.pdfModalUrl.set(null);
+    if (this.pdfObjectUrl) {
+      URL.revokeObjectURL(this.pdfObjectUrl);
+      this.pdfObjectUrl = null;
+    }
+  }
+
+  ngOnDestroy() {
+    this.fecharPdf();
   }
 }
