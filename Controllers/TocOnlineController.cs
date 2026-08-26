@@ -1,14 +1,28 @@
+using System.Net.Http.Headers;
 using MapaMensal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace MapaMensal.Controllers;
 
 [ApiController]
 [Authorize]
 [Route("api/[controller]")]
-public class TocOnlineController(ITocOnlineAuthService auth) : ControllerBase
+public class TocOnlineController(ITocOnlineAuthService auth, IHttpClientFactory httpFactory, IOptions<TocOnlineOptions> opts) : ControllerBase
 {
+    // Endpoint temporário de diagnóstico — remover depois de resolvido o problema da anulação.
+    [HttpGet("debug-raw")]
+    public async Task<IActionResult> DebugRaw([FromQuery] string path)
+    {
+        var token = await auth.GetAccessTokenAsync();
+        var client = httpFactory.CreateClient("toconline");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var resp = await client.GetAsync($"{opts.Value.ApiUrl}{path}");
+        var body = await resp.Content.ReadAsStringAsync();
+        return Content(body, "application/json");
+    }
+
     [HttpGet("status")]
     public async Task<IActionResult> GetStatus()
     {
