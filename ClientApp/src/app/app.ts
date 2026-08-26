@@ -1,4 +1,5 @@
 import { Component, inject, computed, signal, ViewChild } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
@@ -28,6 +29,9 @@ export class App {
   readonly loading = inject(LoadingService);
   private bp = inject(BreakpointObserver);
   private router = inject(Router);
+  private http = inject(HttpClient);
+
+  appVersion = signal<string | null>(null);
 
   private currentUrl = toSignal(
     this.router.events.pipe(
@@ -46,6 +50,10 @@ export class App {
   constructor() {
     this.bp.observe([Breakpoints.Handset, Breakpoints.TabletPortrait]).subscribe(r => {
       this.isMobile.set(r.matches);
+    });
+    this.http.get<{ version: string }>('/version.json').subscribe({
+      next: r => this.appVersion.set(r.version),
+      error: () => this.appVersion.set(null)
     });
   }
 

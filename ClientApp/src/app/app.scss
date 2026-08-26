@@ -119,9 +119,50 @@
   border-top: 0.5px solid var(--border);
   flex-shrink: 0;
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-footer-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 4px;
+}
+
+.sidebar-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+.app-version {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+
+.zp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+
+  &:hover { background: var(--purple-50); }
+
+  svg { flex: 0 0 auto; opacity: 0.8; transition: opacity 0.2s; }
+  &:hover svg { opacity: 1; }
+
+  .zt { display: grid; line-height: 1.2; }
+  .zn { font-size: 0.72rem; font-weight: 400; color: var(--text-2); transition: color 0.2s; }
+  .zn b { font-weight: 700; }
+  .zs { font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+  &:hover .zn { color: var(--purple-800); }
 }
 
 .user-card {

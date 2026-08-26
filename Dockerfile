@@ -9,6 +9,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-env
 WORKDIR /App
 COPY . ./
 COPY --from=node-build /App/wwwroot ./wwwroot
+ARG APP_VERSION=dev
+RUN echo "{\"version\":\"${APP_VERSION}\"}" > ./wwwroot/version.json
 RUN dotnet restore
 RUN dotnet publish -c Release -o out
 
