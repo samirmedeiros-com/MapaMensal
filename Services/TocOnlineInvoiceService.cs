@@ -141,7 +141,10 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var body = new JsonObject { ["status"] = "void" };
+                // TocOnline usa o inteiro 4 para "anulado" (não uma string "void") e exige
+                // "voided_reason" — confirmado na documentação, depois de o pedido anterior
+                // devolver 200 sem anular nada de facto (campo não reconhecido é ignorado).
+                var body = new JsonObject { ["status"] = 4, ["voided_reason"] = justificativa };
                 var bodyBytes = Encoding.UTF8.GetBytes(body.ToJsonString());
                 var bodyContent = new ByteArrayContent(bodyBytes);
                 bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -156,6 +159,18 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 {
                     _logger.LogWarning("TocOnline recusou anulação {Status}: {Body}", resp.StatusCode, respBody);
                     return (false, $"TocOnline recusou a anulação ({(int)resp.StatusCode}): {respBody}");
+                }
+
+                // O TocOnline já aceitou (200) um pedido com um campo não reconhecido sem
+                // anular nada — confirma-se sempre a seguir que o documento ficou mesmo anulado.
+                var confirmResp = await client.GetAsync(
+                    $"{_opts.ApiUrl}/api/v1/commercial_sales_documents/{fatura.TocOnlineDocId}", ct);
+                var confirmBody = await confirmResp.Content.ReadAsStringAsync(ct);
+                var statusAtual = JsonNode.Parse(confirmBody)?["status"]?.GetValue<int>();
+                if (statusAtual != 4)
+                {
+                    _logger.LogWarning("TocOnline não anulou o documento {DocId}: status atual {Status}", fatura.TocOnlineDocId, statusAtual);
+                    return (false, $"O TocOnline não confirmou a anulação (estado atual do documento: {statusAtual}). Verifique manualmente no TocOnline.");
                 }
             }
             catch (Exception ex)
