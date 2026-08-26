@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,7 +21,7 @@ interface DayCell {
 
 @Component({
   selector: 'app-mapa-dias',
-  imports: [FormsModule, MatButtonModule, MatIconModule, MatTooltipModule, MatSnackBarModule],
+  imports: [FormsModule, DecimalPipe, MatButtonModule, MatIconModule, MatTooltipModule, MatSnackBarModule],
   templateUrl: './mapa-dias.component.html',
   styleUrl: './mapa-dias.component.scss'
 })
@@ -57,6 +58,12 @@ export class MapaDiasComponent implements OnInit, OnDestroy {
   modalEmitirProjectId = signal<number | null>(null);
   modalEmitirModo = signal<'escolha' | 'offline'>('escolha');
   offlineForm = { numeroFatura: '', dataEmissao: '', ficheiro: null as File | null };
+
+  modalEmitirRow = computed(() => {
+    const projectId = this.modalEmitirProjectId();
+    if (projectId === null) return null;
+    return this.faturaRows().find(r => r.projectId === projectId) ?? null;
+  });
 
   modalAnularProjectId = signal<number | null>(null);
   anularJustificativa = '';

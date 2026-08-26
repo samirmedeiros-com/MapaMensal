@@ -294,6 +294,28 @@ tr.row-locked td:not(.total-cell) {
     }
   }
 
+  .fatura-totalizador {
+    background: #f5f5fa;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .fatura-totalizador-linha {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.86rem;
+    color: #555;
+    padding: 3px 0;
+  }
+  .fatura-totalizador-total {
+    border-top: 1px solid #d5d5e0;
+    margin-top: 4px;
+    padding-top: 7px;
+    font-weight: 700;
+    color: #1a237e;
+    font-size: 0.94rem;
+  }
+
   .modal-actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
   .modal-actions-col {
     flex-direction: column;

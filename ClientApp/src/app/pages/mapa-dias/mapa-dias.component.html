@@ -179,6 +179,22 @@
         @if (modalEmitirModo() === 'escolha') {
           <div class="modal-title">Emitir fatura</div>
           <p class="modal-desc">A fatura vai ser emitida online (via TocOnline) ou registada manualmente (offline)?</p>
+          @if (modalEmitirRow(); as r) {
+            <div class="fatura-totalizador">
+              <div class="fatura-totalizador-linha">
+                <span>Valor total</span>
+                <span>{{ r.valorTotal | number:'1.2-2' }} €</span>
+              </div>
+              <div class="fatura-totalizador-linha">
+                <span>IVA</span>
+                <span>{{ r.valorIva | number:'1.2-2' }} €</span>
+              </div>
+              <div class="fatura-totalizador-linha fatura-totalizador-total">
+                <span>Valor da fatura</span>
+                <span>{{ r.valorFatura | number:'1.2-2' }} €</span>
+              </div>
+            </div>
+          }
           <div class="modal-actions modal-actions-col">
             <button type="button" class="btn-action btn-approve" [disabled]="emitindoProjectId() !== null" (click)="emitirOnline()">
               <mat-icon>cloud_upload</mat-icon> Emitir Online (TocOnline)
