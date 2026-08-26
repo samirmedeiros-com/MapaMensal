@@ -3,17 +3,17 @@ using System;
 using MapaMensal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Oracle.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
 namespace MapaMensal.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260630054152_NullableLocalCompromisso")]
-    partial class NullableLocalCompromisso
+    [Migration("20260826045950_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,25 +21,25 @@ namespace MapaMensal.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.6")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("MapaMensal.Models.AppConfig", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -61,17 +61,17 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Cor")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -82,19 +82,19 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Cor")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Ordem")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -177,58 +177,58 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CategoriaId")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<int?>("ContaPessoalId")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Cor")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("TIMESTAMP(7)");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Descricao")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("Fim")
-                        .HasColumnType("TIMESTAMP(7)");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("Inicio")
-                        .HasColumnType("TIMESTAMP(7)");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("LinkOnline")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Local")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("NotificarParticipantes")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("Online")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int?>("ProjectId")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<string>("RecorrenciaId")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Status")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<int>("Tipo")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -243,40 +243,40 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Aceite")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime?>("AceiteEm")
-                        .HasColumnType("TIMESTAMP(7)");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("CodigoPais")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("CompromissoId")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("Notificar")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Telefone")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("NVARCHAR2(32)");
+                        .HasColumnType("varchar(32)");
 
                     b.HasKey("Id");
 
@@ -289,48 +289,53 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnoReferencia")
+                        .HasColumnType("int");
 
                     b.Property<string>("Categoria")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMP(7)");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<string>("DataPagamento")
-                        .HasColumnType("NVARCHAR2(10)");
+                    b.Property<DateOnly?>("DataPagamento")
+                        .HasColumnType("date");
 
-                    b.Property<string>("DataVencimento")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(10)");
+                    b.Property<DateOnly>("DataVencimento")
+                        .HasColumnType("date");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid?>("GrupoRecorrencia")
-                        .HasColumnType("RAW(16)");
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("MesReferencia")
+                        .HasColumnType("int");
 
                     b.Property<string>("MetodoPagamento")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("Pago")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("RecorrenciaAtual")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<int>("TotalRecorrencias")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<decimal?>("ValorPago")
-                        .HasColumnType("NUMBER(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("ValorPrevisto")
-                        .HasColumnType("NUMBER(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -341,25 +346,25 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("NUMBER(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Month")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Year")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -370,20 +375,19 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(10)");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<bool>("IsNational")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -395,56 +399,56 @@ namespace MapaMensal.Migrations
                         new
                         {
                             Id = 1,
-                            Date = "2026-06-04",
+                            Date = new DateOnly(2026, 6, 4),
                             IsNational = true,
                             Name = "Corpo de Deus"
                         },
                         new
                         {
                             Id = 2,
-                            Date = "2026-06-10",
+                            Date = new DateOnly(2026, 6, 10),
                             IsNational = true,
                             Name = "Dia de Portugal"
                         },
                         new
                         {
                             Id = 3,
-                            Date = "2026-08-15",
+                            Date = new DateOnly(2026, 8, 15),
                             IsNational = true,
                             Name = "Assunção de Nossa Senhora"
                         },
                         new
                         {
                             Id = 4,
-                            Date = "2026-10-05",
+                            Date = new DateOnly(2026, 10, 5),
                             IsNational = true,
                             Name = "Implantação da República"
                         },
                         new
                         {
                             Id = 5,
-                            Date = "2026-11-01",
+                            Date = new DateOnly(2026, 11, 1),
                             IsNational = true,
                             Name = "Todos os Santos"
                         },
                         new
                         {
                             Id = 6,
-                            Date = "2026-12-01",
+                            Date = new DateOnly(2026, 12, 1),
                             IsNational = true,
                             Name = "Restauração da Independência"
                         },
                         new
                         {
                             Id = 7,
-                            Date = "2026-12-08",
+                            Date = new DateOnly(2026, 12, 8),
                             IsNational = true,
                             Name = "Imaculada Conceição"
                         },
                         new
                         {
                             Id = 8,
-                            Date = "2026-12-25",
+                            Date = new DateOnly(2026, 12, 25),
                             IsNational = true,
                             Name = "Natal"
                         });
@@ -454,24 +458,24 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Ativo")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("DiaSemana")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<int>("DuracaoSlotMinutos")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<TimeSpan>("HoraFim")
-                        .HasColumnType("INTERVAL DAY(8) TO SECOND(7)");
+                        .HasColumnType("time(6)");
 
                     b.Property<TimeSpan>("HoraInicio")
-                        .HasColumnType("INTERVAL DAY(8) TO SECOND(7)");
+                        .HasColumnType("time(6)");
 
                     b.HasKey("Id");
 
@@ -482,25 +486,25 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Client")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("DailyRate")
-                        .HasColumnType("NUMBER(18,4)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -537,35 +541,35 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Arquivado")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMP(7)");
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<string>("DataEntrega")
-                        .HasColumnType("NVARCHAR2(10)");
+                    b.Property<DateOnly?>("DataEntrega")
+                        .HasColumnType("date");
 
                     b.Property<string>("Descricao")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("HorasGastas")
-                        .HasColumnType("NUMBER(18,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProjectId")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -578,31 +582,31 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMP(7)");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("BOOLEAN");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(450)");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
@@ -619,19 +623,18 @@ namespace MapaMensal.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(10)");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<decimal>("Mark")
-                        .HasColumnType("NUMBER(18,4)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<int>("ProjectId")
-                        .HasColumnType("NUMBER(10)");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

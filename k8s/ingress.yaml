@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mapamensal
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: app.zoompositivo.pt
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mapamensal
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - app.zoompositivo.pt
+      secretName: mapamensal-tls

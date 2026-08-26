@@ -5,14 +5,7 @@ using MapaMensal.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Oracle.ManagedDataAccess.Client;
 using System.Text;
-
-// Configurar Oracle Wallet (deve ser antes de qualquer ligação)
-// A pasta Oracle é copiada para o directório do executável pelo .csproj
-string walletPath = Path.Combine(AppContext.BaseDirectory, "Oracle");
-OracleConfiguration.WalletLocation = walletPath;
-OracleConfiguration.TnsAdmin = walletPath;
 
 // Azure App Service define PORT; localmente usa 5016 via launchSettings
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5016";
@@ -28,7 +21,7 @@ builder.Services.AddSwaggerGen();
 
 var connectionString = builder.Configuration.GetConnectionString("Default")!;
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseOracle(connectionString));
+    opt.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 46))));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

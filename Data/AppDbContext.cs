@@ -45,13 +45,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<HorarioDisponivel>().ToTable("mapa_horarios_disponiveis");
         modelBuilder.Entity<CategoriaCompromisso>().ToTable("mapa_categorias_compromisso");
 
-        // Precisão explícita para Oracle (evita NUMBER sem escala)
-        modelBuilder.Entity<Project>().Property(p => p.DailyRate).HasColumnType("NUMBER(18,4)");
-        modelBuilder.Entity<WorkDay>().Property(w => w.Mark).HasColumnType("NUMBER(18,4)");
-        modelBuilder.Entity<Expense>().Property(e => e.Amount).HasColumnType("NUMBER(18,2)");
-        modelBuilder.Entity<ContaPessoal>().Property(c => c.ValorPrevisto).HasColumnType("NUMBER(18,2)");
-        modelBuilder.Entity<ContaPessoal>().Property(c => c.ValorPago).HasColumnType("NUMBER(18,2)");
-        modelBuilder.Entity<Tarefa>().Property(t => t.HorasGastas).HasColumnType("NUMBER(18,2)");
+        // Precisão explícita (decimal sem isto dava NUMERIC(65,30) genérico no MySQL)
+        modelBuilder.Entity<Project>().Property(p => p.DailyRate).HasColumnType("decimal(18,4)");
+        modelBuilder.Entity<WorkDay>().Property(w => w.Mark).HasColumnType("decimal(18,4)");
+        modelBuilder.Entity<Expense>().Property(e => e.Amount).HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<ContaPessoal>().Property(c => c.ValorPrevisto).HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<ContaPessoal>().Property(c => c.ValorPago).HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<Tarefa>().Property(t => t.HorasGastas).HasColumnType("decimal(18,2)");
 
         modelBuilder.Entity<Compromisso>()
             .HasMany(c => c.Participantes)

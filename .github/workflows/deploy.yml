@@ -17,14 +17,6 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Restaurar Oracle Wallet (ficheiros sensíveis via secret)
-        env:
-          ORACLE_WALLET_B64: ${{ secrets.ORACLE_WALLET_B64 }}
-        run: |
-          mkdir -p Oracle
-          echo "$ORACLE_WALLET_B64" | base64 -d > /tmp/oracle_wallet.zip
-          unzip -o /tmp/oracle_wallet.zip -d Oracle
-
       - name: Definir nome da imagem em minúsculo
         run: echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
