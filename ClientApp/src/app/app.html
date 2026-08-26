@@ -49,6 +49,26 @@
             <mat-icon>logout</mat-icon>
           </button>
         </div>
+
+        <div class="sidebar-brand">
+          @if (appVersion()) {
+            <span class="app-version">v{{ appVersion() }}</span>
+          }
+          <a class="zp" href="https://zoompositivo.pt" target="_blank" rel="noopener"
+             aria-label="Aplicação desenvolvida pela ZoomPositivo — abre em nova janela">
+            <svg width="18" height="18" viewBox="0 0 120 120" aria-hidden="true">
+              <g transform="translate(60,60)" fill="none" stroke-linecap="round">
+                <circle r="44" stroke="#6B6A65" stroke-width="7" stroke-dasharray="233 43.4" transform="rotate(118)"/>
+                <circle r="30" stroke="#6B6A65" stroke-width="7" stroke-dasharray="162 26.5" transform="rotate(-28)"/>
+                <path d="M-14 0H14M0 -14V14" stroke="#C6A04E" stroke-width="12"/>
+              </g>
+            </svg>
+            <span class="zt">
+              <span class="zn"><b>Zoom</b>Positivo</span>
+              <span class="zs">zoompositivo.pt</span>
+            </span>
+          </a>
+        </div>
       </div>
 
     </mat-sidenav>
@@ -68,26 +88,6 @@
         </div>
       }
       <router-outlet />
-
-      <footer class="page-footer" [class.has-bottom-nav]="isMobile()">
-        @if (appVersion()) {
-          <span class="app-version">v{{ appVersion() }}</span>
-        }
-        <a class="zp" href="https://zoompositivo.pt" target="_blank" rel="noopener"
-           aria-label="Aplicação desenvolvida pela ZoomPositivo — abre em nova janela">
-          <svg width="18" height="18" viewBox="0 0 120 120" aria-hidden="true">
-            <g transform="translate(60,60)" fill="none" stroke-linecap="round">
-              <circle r="44" stroke="#6B6A65" stroke-width="7" stroke-dasharray="233 43.4" transform="rotate(118)"/>
-              <circle r="30" stroke="#6B6A65" stroke-width="7" stroke-dasharray="162 26.5" transform="rotate(-28)"/>
-              <path d="M-14 0H14M0 -14V14" stroke="#C6A04E" stroke-width="12"/>
-            </g>
-          </svg>
-          <span class="zt">
-            <span class="zn"><b>Zoom</b>Positivo</span>
-            <span class="zs">zoompositivo.pt</span>
-          </span>
-        </a>
-      </footer>
     </mat-sidenav-content>
 
     @if (isMobile()) {
