@@ -7,11 +7,11 @@
           <mat-icon>check_circle</mat-icon>
           Aprovado
         </span>
-        <button mat-stroked-button color="warn" [disabled]="aprovando()" (click)="cancelarAprovacao()">
+        <button type="button" class="btn-action btn-cancel-approve" [disabled]="aprovando()" (click)="cancelarAprovacao()">
           Cancelar aprovação
         </button>
       } @else {
-        <button mat-flat-button color="primary" [disabled]="aprovando()" (click)="aprovarTimesheet()">
+        <button type="button" class="btn-action btn-approve" [disabled]="aprovando()" (click)="aprovarTimesheet()">
           Aprovar TimeSheet
         </button>
       }
@@ -100,7 +100,7 @@
             <td>{{ formatCurrency(row.valorIva) }} €</td>
             <td class="fatura-valor">{{ formatCurrency(row.valorFatura) }} €</td>
             <td>
-              <button mat-stroked-button (click)="emitirFatura()">Emitir fatura</button>
+              <button type="button" class="btn-action btn-emitir" (click)="emitirFatura()">Emitir fatura</button>
             </td>
           </tr>
         }
