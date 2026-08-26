@@ -238,6 +238,16 @@ tr.row-locked td:not(.total-cell) {
 
   .fatura-nome { font-weight: 600; }
   .fatura-valor { font-weight: 700; color: var(--purple-800, #3C3489); }
+
+  .fatura-totais {
+    td {
+      border-bottom: none;
+      border-top: 2px solid var(--border);
+      font-weight: 700;
+      color: var(--text);
+    }
+    .fatura-valor { color: var(--purple-800, #3C3489); }
+  }
 }
 
 .fatura-acoes {

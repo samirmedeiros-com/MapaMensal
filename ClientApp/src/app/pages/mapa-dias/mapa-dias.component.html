@@ -169,6 +169,17 @@
           </tr>
         }
       </tbody>
+      <tfoot>
+        <tr class="fatura-totais">
+          <td class="fatura-nome">Total</td>
+          <td>{{ faturaTotais().dias }}</td>
+          <td></td>
+          <td>{{ formatCurrency(faturaTotais().valorTotal) }} €</td>
+          <td>{{ formatCurrency(faturaTotais().valorIva) }} €</td>
+          <td class="fatura-valor">{{ formatCurrency(faturaTotais().valorFatura) }} €</td>
+          <td colspan="4"></td>
+        </tr>
+      </tfoot>
     </table>
   </div>
 

@@ -145,6 +145,16 @@ export class MapaDiasComponent implements OnInit, OnDestroy {
     });
   });
 
+  faturaTotais = computed(() => {
+    const rows = this.faturaRows();
+    return {
+      dias: rows.reduce((s, r) => s + r.dias, 0),
+      valorTotal: rows.reduce((s, r) => s + r.valorTotal, 0),
+      valorIva: rows.reduce((s, r) => s + r.valorIva, 0),
+      valorFatura: rows.reduce((s, r) => s + r.valorFatura, 0)
+    };
+  });
+
   ngOnInit() {
     this.loadData();
   }
