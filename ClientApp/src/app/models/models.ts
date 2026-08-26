@@ -5,6 +5,12 @@ export interface Project {
   dailyRate: number;
   isActive: boolean;
   sortOrder: number;
+  faturacaoNomeFiscal?: string | null;
+  faturacaoNif?: string | null;
+  faturacaoMorada?: string | null;
+  faturacaoCodigoPostal?: string | null;
+  faturacaoLocalidade?: string | null;
+  faturacaoPais?: string;
 }
 
 export interface WorkDay {

@@ -55,6 +55,41 @@
               </td>
             }
           </tr>
+          @if (editingProject?.id === p.id) {
+            <tr class="billing-row">
+              <td colspan="4">
+                <div class="billing-form">
+                  <div class="billing-title">Dados de faturação (TocOnline)</div>
+                  <div class="billing-grid">
+                    <label>
+                      <span>Nome fiscal / Razão social</span>
+                      <input class="inline-input" [(ngModel)]="editingProject!.faturacaoNomeFiscal" placeholder="Ex: Cliente, Lda." />
+                    </label>
+                    <label>
+                      <span>NIF</span>
+                      <input class="inline-input" [(ngModel)]="editingProject!.faturacaoNif" placeholder="500000000" />
+                    </label>
+                    <label>
+                      <span>Morada</span>
+                      <input class="inline-input" [(ngModel)]="editingProject!.faturacaoMorada" placeholder="Rua, número" />
+                    </label>
+                    <label>
+                      <span>Código Postal</span>
+                      <input class="inline-input" [(ngModel)]="editingProject!.faturacaoCodigoPostal" placeholder="0000-000" />
+                    </label>
+                    <label>
+                      <span>Localidade</span>
+                      <input class="inline-input" [(ngModel)]="editingProject!.faturacaoLocalidade" placeholder="Lisboa" />
+                    </label>
+                    <label>
+                      <span>País</span>
+                      <input class="inline-input" [(ngModel)]="editingProject!.faturacaoPais" placeholder="PT" />
+                    </label>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          }
         }
         <tr class="add-row">
           <td><input class="inline-input" [(ngModel)]="newProject.name" placeholder="Nome do projeto" /></td>
