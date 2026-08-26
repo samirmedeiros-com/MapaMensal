@@ -12,52 +12,82 @@ namespace MapaMensal.Controllers;
 public class ContasPessoaisController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int year, [FromQuery] int? month)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] string? inicio, [FromQuery] string? fim,
+        [FromQuery] string? tipo, [FromQuery] bool? pago)
     {
-        IQueryable<ContaPessoal> query;
-        if (month.HasValue)
-            query = db.ContasPessoais.Where(c => c.AnoReferencia == year && c.MesReferencia == month.Value);
-        else
-            query = db.ContasPessoais.Where(c => c.AnoReferencia == year);
+        var query = db.ContasPessoais.AsQueryable();
+
+        if (!string.IsNullOrEmpty(inicio))
+        {
+            var d = DateOnly.Parse(inicio);
+            query = query.Where(c => c.DataVencimento >= d);
+        }
+        if (!string.IsNullOrEmpty(fim))
+        {
+            var d = DateOnly.Parse(fim);
+            query = query.Where(c => c.DataVencimento <= d);
+        }
+        if (!string.IsNullOrEmpty(tipo))
+            query = query.Where(c => c.Tipo == tipo);
+        if (pago.HasValue)
+            query = query.Where(c => c.Pago == pago.Value);
 
         var result = await query
             .OrderBy(c => c.DataVencimento)
             .ThenBy(c => c.Categoria)
-            .Select(c => new
-            {
-                c.Id, c.Descricao, c.Categoria,
-                DataVencimento  = c.DataVencimento.ToString("yyyy-MM-dd"),
-                DataPagamento   = c.DataPagamento.HasValue ? c.DataPagamento.Value.ToString("yyyy-MM-dd") : null,
-                c.ValorPrevisto, c.ValorPago, c.Pago, c.MetodoPagamento,
-                GrupoRecorrencia = c.GrupoRecorrencia.HasValue ? c.GrupoRecorrencia.Value.ToString() : null,
-                c.RecorrenciaAtual, c.TotalRecorrencias,
-                CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd")
-            })
+            .Select(c => ToDtoAnon(c))
             .ToListAsync();
 
         return Ok(result);
     }
 
-    [HttpGet("resumo-anual")]
-    public async Task<IActionResult> ResumoAnual([FromQuery] int year)
+    [HttpGet("resumo")]
+    public async Task<IActionResult> Resumo([FromQuery] string? inicio, [FromQuery] string? fim)
     {
-        var contas = await db.ContasPessoais
-            .Where(c => c.AnoReferencia == year)
-            .ToListAsync();
+        // Saldo total: posição de caixa acumulada de sempre (todos os movimentos já pagos/recebidos).
+        var todasRealizadas = await db.ContasPessoais.Where(c => c.Pago).ToListAsync();
+        var saldoTotal = todasRealizadas.Where(c => c.Tipo == "Entrada").Sum(c => c.ValorPago ?? 0)
+                       - todasRealizadas.Where(c => c.Tipo == "Saida").Sum(c => c.ValorPago ?? 0);
 
-        var porMes = Enumerable.Range(1, 12).Select(m => new
+        var query = db.ContasPessoais.AsQueryable();
+        if (!string.IsNullOrEmpty(inicio))
         {
-            Mes = m,
-            Previsto = contas.Where(c => c.MesReferencia == m).Sum(c => c.ValorPrevisto),
-            Pago     = contas.Where(c => c.MesReferencia == m && c.Pago).Sum(c => c.ValorPago ?? 0)
-        });
+            var d = DateOnly.Parse(inicio);
+            query = query.Where(c => c.DataVencimento >= d);
+        }
+        if (!string.IsNullOrEmpty(fim))
+        {
+            var d = DateOnly.Parse(fim);
+            query = query.Where(c => c.DataVencimento <= d);
+        }
 
-        var porCategoria = contas
+        var noPeriodo = await query.ToListAsync();
+        var entradas = noPeriodo.Where(c => c.Tipo == "Entrada").ToList();
+        var saidas = noPeriodo.Where(c => c.Tipo == "Saida").ToList();
+
+        var totalEntradas = entradas.Sum(c => c.ValorPrevisto);
+        var totalSaidas = saidas.Sum(c => c.ValorPrevisto);
+        var saldoReal = entradas.Where(c => c.Pago).Sum(c => c.ValorPago ?? 0)
+                      - saidas.Where(c => c.Pago).Sum(c => c.ValorPago ?? 0);
+        var previsaoEntradas = entradas.Where(c => !c.Pago).Sum(c => c.ValorPrevisto);
+        var previsaoDespesas = saidas.Where(c => !c.Pago).Sum(c => c.ValorPrevisto);
+
+        var porCategoria = saidas
             .GroupBy(c => c.Categoria)
             .Select(g => new { Categoria = g.Key, Total = g.Sum(c => c.ValorPrevisto) })
             .OrderByDescending(x => x.Total);
 
-        return Ok(new { PorMes = porMes, PorCategoria = porCategoria });
+        return Ok(new
+        {
+            SaldoTotal = saldoTotal,
+            TotalEntradas = totalEntradas,
+            TotalSaidas = totalSaidas,
+            SaldoReal = saldoReal,
+            PrevisaoEntradas = previsaoEntradas,
+            PrevisaoDespesas = previsaoDespesas,
+            PorCategoria = porCategoria
+        });
     }
 
     [HttpPost]
@@ -65,31 +95,30 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
     {
         var vencimento = DateOnly.Parse(dto.DataVencimento);
         var grupo = dto.TotalRecorrencias > 1 ? (Guid?)Guid.NewGuid() : null;
-        var mesRef = dto.MesReferencia ?? vencimento.Month;
-        var anoRef = dto.AnoReferencia ?? vencimento.Year;
 
         var criadas = new List<ContaPessoal>();
         for (int i = 0; i < dto.TotalRecorrencias; i++)
         {
-            var refDate = new DateOnly(anoRef, mesRef, 1).AddMonths(i);
+            var dataVenc = vencimento.AddMonths(i);
             var c = new ContaPessoal
             {
+                Tipo              = dto.Tipo,
                 Descricao         = dto.Descricao,
                 Categoria         = dto.Categoria,
-                DataVencimento    = vencimento.AddMonths(i),
+                DataVencimento    = dataVenc,
                 ValorPrevisto     = dto.ValorPrevisto,
                 GrupoRecorrencia  = grupo,
                 RecorrenciaAtual  = i + 1,
                 TotalRecorrencias = dto.TotalRecorrencias,
-                MesReferencia     = refDate.Month,
-                AnoReferencia     = refDate.Year,
+                MesReferencia     = dataVenc.Month,
+                AnoReferencia     = dataVenc.Year,
                 CreatedAt         = DateTime.UtcNow
             };
             db.ContasPessoais.Add(c);
             criadas.Add(c);
         }
         await db.SaveChangesAsync();
-        return Ok(criadas.Select(ToDto));
+        return Ok(criadas.Select(ToDtoAnon));
     }
 
     [HttpPut("{id}")]
@@ -99,14 +128,15 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
         if (c is null) return NotFound();
 
         var vencimento = DateOnly.Parse(dto.DataVencimento);
+        c.Tipo           = dto.Tipo;
         c.Descricao      = dto.Descricao;
         c.Categoria      = dto.Categoria;
         c.DataVencimento = vencimento;
         c.ValorPrevisto  = dto.ValorPrevisto;
-        c.MesReferencia  = dto.MesReferencia ?? c.MesReferencia;
-        c.AnoReferencia  = dto.AnoReferencia ?? c.AnoReferencia;
+        c.MesReferencia  = vencimento.Month;
+        c.AnoReferencia  = vencimento.Year;
         await db.SaveChangesAsync();
-        return Ok(ToDto(c));
+        return Ok(ToDtoAnon(c));
     }
 
     [HttpPatch("{id}/pagar")]
@@ -122,7 +152,7 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
             : null;
         c.MetodoPagamento = dto.Pago ? dto.MetodoPagamento : null;
         await db.SaveChangesAsync();
-        return Ok(ToDto(c));
+        return Ok(ToDtoAnon(c));
     }
 
     [HttpDelete("{id}")]
@@ -146,23 +176,22 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
         return NoContent();
     }
 
-    private static object ToDto(ContaPessoal c) => new
+    private static object ToDtoAnon(ContaPessoal c) => new
     {
-        c.Id, c.Descricao, c.Categoria,
+        c.Id, c.Tipo, c.Descricao, c.Categoria,
         DataVencimento   = c.DataVencimento.ToString("yyyy-MM-dd"),
         DataPagamento    = c.DataPagamento?.ToString("yyyy-MM-dd"),
         c.ValorPrevisto, c.ValorPago, c.Pago, c.MetodoPagamento,
         GrupoRecorrencia = c.GrupoRecorrencia?.ToString(),
         c.RecorrenciaAtual, c.TotalRecorrencias,
-        c.MesReferencia, c.AnoReferencia,
+        c.MesReferencia, c.AnoReferencia, c.TimesheetFaturaId,
         CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd")
     };
 }
 
 public record ContaPessoalDto(
-    string Descricao, string Categoria, string DataVencimento,
-    decimal ValorPrevisto, int TotalRecorrencias,
-    int? MesReferencia = null, int? AnoReferencia = null
+    string Tipo, string Descricao, string Categoria, string DataVencimento,
+    decimal ValorPrevisto, int TotalRecorrencias
 );
 
 public record PagarDto(bool Pago, decimal? ValorPago, string? DataPagamento, string? MetodoPagamento = null);

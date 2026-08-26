@@ -14,19 +14,26 @@
   .page-title { font-size: 1.5rem; font-weight: 600; color: #1a237e; }
 }
 
-.month-selector {
+.periodo-bar {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
 
-  button[mat-icon-button] { color: #1a237e; }
-  span { font-weight: 600; font-size: 1.1rem; color: #333; min-width: 160px; text-align: center; }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  label { font-size: 0.72rem; font-weight: 600; color: #888; text-transform: uppercase; }
+  input[type="date"] {
+    border: 1px solid #ddd; border-radius: 6px; padding: 6px 8px; font-size: 0.85rem;
+  }
+
+  .atalhos { display: flex; gap: 6px; margin-left: auto; }
 }
 
 // --- SUMMARY CARDS ---
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 12px;
 }
 
@@ -46,9 +53,10 @@
   .sc-value { font-size: 1.15rem; font-weight: 700; color: #222; margin-top: 2px; }
 
   &.previsto { border-color: #5c6bc0; mat-icon { color: #5c6bc0; } }
-  &.pago     { border-color: #43a047; mat-icon { color: #43a047; } }
+  &.pago     { border-color: #43a047; mat-icon { color: #43a047; } &.neg { border-color: #e65100; mat-icon { color: #e65100; } } }
   &.aberto   { border-color: #e65100; mat-icon { color: #e65100; } }
-  &.saldo    { border-color: #00897b; mat-icon { color: #00897b; } &.neg mat-icon { color: #e65100; } }
+  &.entrada  { border-color: #2e7d32; mat-icon { color: #2e7d32; } }
+  &.saldo    { border-color: #00897b; mat-icon { color: #00897b; } &.neg { border-color: #e65100; mat-icon { color: #e65100; } } }
 }
 
 // --- CARD MÉTODO DE PAGAMENTO ---
@@ -285,7 +293,47 @@
   &.active        { background: #1a237e; color: white; border-color: #1a237e; }
   &.aberto-chip.active { background: #e65100; border-color: #e65100; color: white; }
   &.pago-chip.active   { background: #43a047; border-color: #43a047; color: white; }
+  &.entrada-chip.active { background: #2e7d32; border-color: #2e7d32; color: white; }
 }
+
+.tipo-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.tipo-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #ddd;
+  background: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  color: #666;
+  transition: all 0.15s;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+  &.entrada.active { background: #2e7d32; border-color: #2e7d32; color: white; }
+  &.saida.active    { background: #e65100; border-color: #e65100; color: white; }
+}
+
+.tipo-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+
+  &.entrada { background: #e8f5e9; color: #2e7d32; }
+  &.saida   { background: #fff3e0; color: #e65100; }
+}
+
 
 .filter-count { font-size: 0.85rem; color: #888; }
 
@@ -300,6 +348,8 @@
     font-weight: 700;
     padding: 1px 6px;
     border-radius: 8px;
+
+    &.auto { background: #e3f2fd; color: #1565c0; }
   }
 
   .cat-badge {

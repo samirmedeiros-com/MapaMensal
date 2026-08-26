@@ -134,7 +134,8 @@ export class CompromissoDialogComponent implements OnInit {
       this.recDiasSemana = [dow === 0 ? 7 : dow];
     }
 
-    this.api.getContasPessoais(new Date().getFullYear()).subscribe(contas => {
+    const ano = new Date().getFullYear();
+    this.api.getContasPessoais(`${ano}-01-01`, `${ano}-12-31`).subscribe(contas => {
       this.contasPendentes.set(contas.filter(c => !c.pago));
     });
     this.api.getCategoriasCompromisso().subscribe(cs => this.categorias.set(cs));

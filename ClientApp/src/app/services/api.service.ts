@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   Project, WorkDay, WorkDayUpsertDto, Holiday,
   Expense, AnnualSummary, TreasurySummary, Tarefa,
-  ContaPessoal, ResumoAnualContas, CategoriaContaPessoal,
+  ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal,
   Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso,
   TimesheetStatus, TimesheetFaturaDto
 } from '../models/models';
@@ -124,18 +124,20 @@ export class ApiService {
     return this.http.delete<void>(`${this.base}/tarefas/${id}`);
   }
 
-  // Contas Pessoais
-  getContasPessoais(year: number, month?: number): Observable<ContaPessoal[]> {
-    const q = month ? `&month=${month}` : '';
-    return this.http.get<ContaPessoal[]>(`${this.base}/contaspessoais?year=${year}${q}`);
+  // Financeiro (Contas Pessoais)
+  getContasPessoais(inicio: string, fim: string, tipo?: string, pago?: boolean): Observable<ContaPessoal[]> {
+    let params = `inicio=${inicio}&fim=${fim}`;
+    if (tipo) params += `&tipo=${tipo}`;
+    if (pago !== undefined) params += `&pago=${pago}`;
+    return this.http.get<ContaPessoal[]>(`${this.base}/contaspessoais?${params}`);
   }
-  getResumoAnualContas(year: number): Observable<ResumoAnualContas> {
-    return this.http.get<ResumoAnualContas>(`${this.base}/contaspessoais/resumo-anual?year=${year}`);
+  getResumoFinanceiro(inicio: string, fim: string): Observable<ResumoFinanceiro> {
+    return this.http.get<ResumoFinanceiro>(`${this.base}/contaspessoais/resumo?inicio=${inicio}&fim=${fim}`);
   }
-  createContaPessoal(dto: { descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; mesReferencia: number; anoReferencia: number }): Observable<ContaPessoal[]> {
+  createContaPessoal(dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number }): Observable<ContaPessoal[]> {
     return this.http.post<ContaPessoal[]>(`${this.base}/contaspessoais`, dto);
   }
-  updateContaPessoal(id: number, dto: { descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; mesReferencia: number; anoReferencia: number }): Observable<ContaPessoal> {
+  updateContaPessoal(id: number, dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number }): Observable<ContaPessoal> {
     return this.http.put<ContaPessoal>(`${this.base}/contaspessoais/${id}`, dto);
   }
   pagarConta(id: number, dto: { pago: boolean; valorPago?: number; dataPagamento?: string; metodoPagamento?: string }): Observable<ContaPessoal> {

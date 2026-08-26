@@ -126,6 +126,7 @@ export interface TreasuryReceivable {
 
 export interface ContaPessoal {
   id: number;
+  tipo: 'Entrada' | 'Saida';
   descricao: string;
   categoria: string;
   dataVencimento: string;
@@ -139,11 +140,17 @@ export interface ContaPessoal {
   totalRecorrencias: number;
   mesReferencia?: number;
   anoReferencia?: number;
+  timesheetFaturaId?: number | null;
   createdAt: string;
 }
 
-export interface ResumoAnualContas {
-  porMes: { mes: number; previsto: number; pago: number }[];
+export interface ResumoFinanceiro {
+  saldoTotal: number;
+  totalEntradas: number;
+  totalSaidas: number;
+  saldoReal: number;
+  previsaoEntradas: number;
+  previsaoDespesas: number;
   porCategoria: { categoria: string; total: number }[];
 }
 

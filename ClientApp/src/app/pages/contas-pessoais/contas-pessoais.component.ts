@@ -10,9 +10,23 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Chart, registerables } from 'chart.js';
 import { ApiService } from '../../services/api.service';
-import { ContaPessoal, ResumoAnualContas, CategoriaContaPessoal, MONTH_NAMES } from '../../models/models';
+import { ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal } from '../../models/models';
 
 Chart.register(...registerables);
+
+function hoje(): string {
+  return new Date().toISOString().substring(0, 10);
+}
+
+function primeiroDiaDoMes(): string {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().substring(0, 10);
+}
+
+function ultimoDiaDoMes(): string {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().substring(0, 10);
+}
 
 @Component({
   selector: 'app-contas-pessoais',
@@ -24,47 +38,43 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   private api    = inject(ApiService);
   private snack  = inject(MatSnackBar);
 
-  @ViewChild('barCanvas')  barCanvas!:  ElementRef<HTMLCanvasElement>;
-  @ViewChild('pieCanvas')  pieCanvas!:  ElementRef<HTMLCanvasElement>;
+  @ViewChild('pieCanvas') pieCanvas!: ElementRef<HTMLCanvasElement>;
 
-  year   = signal(new Date().getFullYear());
-  month  = signal(new Date().getMonth() + 1);
-  monthNames = MONTH_NAMES;
   categorias = signal<CategoriaContaPessoal[]>([]);
 
-  contas   = signal<ContaPessoal[]>([]);
-  resumo   = signal<ResumoAnualContas | null>(null);
+  contas = signal<ContaPessoal[]>([]);
+  resumo = signal<ResumoFinanceiro | null>(null);
   showGraficos = signal(true);
 
-  filterCategoria  = signal<string>('');
-  filterStatus     = signal<'todos' | 'pago' | 'aberto'>('todos');
+  filtroInicio = signal<string>(primeiroDiaDoMes());
+  filtroFim    = signal<string>(ultimoDiaDoMes());
+  filterCategoria = signal<string>('');
+  filterTipo      = signal<'todos' | 'Entrada' | 'Saida'>('todos');
+  filterStatus    = signal<'todos' | 'pago' | 'aberto'>('todos');
 
   showForm   = signal(false);
   pagarModal = signal<ContaPessoal | null>(null);
   editMode   = signal<ContaPessoal | null>(null);
 
-  form = { descricao: '', categoria: '', dataVencimento: '', valorPrevisto: 0, totalRecorrencias: 1, mesReferencia: 0, anoReferencia: 0 };
+  form = { tipo: 'Saida' as 'Entrada' | 'Saida', descricao: '', categoria: '', dataVencimento: '', valorPrevisto: 0, totalRecorrencias: 1 };
   pagarForm = { valorPago: 0, dataPagamento: '', metodoPagamento: '' };
 
-  private barChart?: Chart;
   private pieChart?: Chart;
   private chartsReady = false;
-
-  monthName = computed(() => MONTH_NAMES[this.month()]);
 
   filtered = computed(() => {
     let list = this.contas();
     const cat = this.filterCategoria();
+    const tipo = this.filterTipo();
     const st  = this.filterStatus();
     if (cat) list = list.filter(c => c.categoria === cat);
+    if (tipo !== 'todos') list = list.filter(c => c.tipo === tipo);
     if (st === 'pago')   list = list.filter(c => c.pago);
     if (st === 'aberto') list = list.filter(c => !c.pago);
     return list;
   });
 
-  totalPrevisto  = computed(() => this.filtered().reduce((s, c) => s + c.valorPrevisto, 0));
   totalPago      = computed(() => this.filtered().filter(c => c.pago).reduce((s, c) => s + (c.valorPago ?? 0), 0));
-  totalAberto    = computed(() => this.filtered().filter(c => !c.pago).reduce((s, c) => s + c.valorPrevisto, 0));
   totalDinheiro  = computed(() => this.filtered().filter(c => c.pago && c.metodoPagamento === 'Dinheiro').reduce((s, c) => s + (c.valorPago ?? 0), 0));
   totalCartao    = computed(() => this.filtered().filter(c => c.pago && c.metodoPagamento === 'Cartão').reduce((s, c) => s + (c.valorPago ?? 0), 0));
   totalSemMetodo = computed(() => this.filtered().filter(c => c.pago && !c.metodoPagamento).reduce((s, c) => s + (c.valorPago ?? 0), 0));
@@ -84,42 +94,43 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   ngOnDestroy() {
-    this.barChart?.destroy();
     this.pieChart?.destroy();
   }
 
   loadAll() {
-    this.api.getContasPessoais(this.year(), this.month()).subscribe(c => this.contas.set(c));
-    this.api.getResumoAnualContas(this.year()).subscribe(r => {
-      this.resumo.set(r);
-      if (this.chartsReady) this.drawCharts();
-    });
+    this.api.getContasPessoais(this.filtroInicio(), this.filtroFim()).subscribe(c => this.contas.set(c));
+    this.refreshResumo();
   }
 
-  changeMonth(delta: number) {
-    const prev = this.year();
-    let m = this.month() + delta;
-    let y = prev;
-    if (m > 12) { m = 1; y++; }
-    if (m < 1)  { m = 12; y--; }
-    this.month.set(m);
-    this.year.set(y);
-    if (y !== prev) {
-      this.api.getResumoAnualContas(y).subscribe(r => { this.resumo.set(r); this.drawCharts(); });
+  aplicarFiltroData() {
+    this.loadAll();
+  }
+
+  atalhoData(tipo: 'mes-atual' | 'proximo-mes' | 'ano-atual') {
+    const d = new Date();
+    if (tipo === 'mes-atual') {
+      this.filtroInicio.set(primeiroDiaDoMes());
+      this.filtroFim.set(ultimoDiaDoMes());
+    } else if (tipo === 'proximo-mes') {
+      const inicio = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      const fim = new Date(d.getFullYear(), d.getMonth() + 2, 0);
+      this.filtroInicio.set(inicio.toISOString().substring(0, 10));
+      this.filtroFim.set(fim.toISOString().substring(0, 10));
+    } else {
+      this.filtroInicio.set(`${d.getFullYear()}-01-01`);
+      this.filtroFim.set(`${d.getFullYear()}-12-31`);
     }
-    this.api.getContasPessoais(y, m).subscribe(c => this.contas.set(c));
+    this.loadAll();
   }
 
   openForm() {
-    const today = new Date();
-    const d = today.toISOString().substring(0, 10);
-    this.form = { descricao: '', categoria: this.categorias()[0]?.nome ?? '', dataVencimento: d, valorPrevisto: 0, totalRecorrencias: 1, mesReferencia: this.month(), anoReferencia: this.year() };
+    this.form = { tipo: 'Saida', descricao: '', categoria: this.categorias()[0]?.nome ?? '', dataVencimento: hoje(), valorPrevisto: 0, totalRecorrencias: 1 };
     this.editMode.set(null);
     this.showForm.set(true);
   }
 
   openEdit(c: ContaPessoal) {
-    this.form = { descricao: c.descricao, categoria: c.categoria, dataVencimento: c.dataVencimento, valorPrevisto: c.valorPrevisto, totalRecorrencias: 1, mesReferencia: c.mesReferencia ?? this.month(), anoReferencia: c.anoReferencia ?? this.year() };
+    this.form = { tipo: c.tipo, descricao: c.descricao, categoria: c.categoria, dataVencimento: c.dataVencimento, valorPrevisto: c.valorPrevisto, totalRecorrencias: 1 };
     this.editMode.set(c);
     this.showForm.set(true);
   }
@@ -135,19 +146,17 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
         this.showForm.set(false);
         this.editMode.set(null);
         this.refreshResumo();
-        this.snack.open('Conta atualizada', '', { duration: 2000 });
+        this.snack.open('Lançamento atualizado', '', { duration: 2000 });
       });
     } else {
       this.api.createContaPessoal(this.form).subscribe(created => {
-        const inMonth = created.filter(c =>
-          (c.mesReferencia ?? 0) === this.month() && (c.anoReferencia ?? 0) === this.year()
-        );
-        this.contas.update(list => [...list, ...inMonth].sort((a,b) => a.dataVencimento.localeCompare(b.dataVencimento)));
+        const noIntervalo = created.filter(c => c.dataVencimento >= this.filtroInicio() && c.dataVencimento <= this.filtroFim());
+        this.contas.update(list => [...list, ...noIntervalo].sort((a,b) => a.dataVencimento.localeCompare(b.dataVencimento)));
         this.showForm.set(false);
         this.refreshResumo();
         const msg = this.form.totalRecorrencias > 1
-          ? `${this.form.totalRecorrencias} contas recorrentes criadas`
-          : 'Conta criada';
+          ? `${this.form.totalRecorrencias} lançamentos recorrentes criados`
+          : 'Lançamento criado';
         this.snack.open(msg, '', { duration: 2500 });
       });
     }
@@ -156,7 +165,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   openPagar(c: ContaPessoal) {
     this.pagarForm = {
       valorPago: c.valorPago ?? c.valorPrevisto,
-      dataPagamento: c.dataPagamento ?? new Date().toISOString().substring(0, 10),
+      dataPagamento: c.dataPagamento ?? hoje(),
       metodoPagamento: c.metodoPagamento ?? ''
     };
     this.pagarModal.set(c);
@@ -188,7 +197,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   delete(c: ContaPessoal) {
     const temGrupo = !!c.grupoRecorrencia && !c.pago;
     const msg = temGrupo
-      ? `Eliminar só esta ou todas as ${c.totalRecorrencias} ocorrências por pagar?\n\nOK = todas | Cancelar = só esta`
+      ? `Eliminar só este ou todos os ${c.totalRecorrencias} lançamentos por pagar?\n\nOK = todos | Cancelar = só este`
       : `Eliminar "${c.descricao}"?`;
 
     if (temGrupo) {
@@ -211,33 +220,17 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private refreshResumo() {
-    this.api.getResumoAnualContas(this.year()).subscribe(r => { this.resumo.set(r); this.drawCharts(); });
+    this.api.getResumoFinanceiro(this.filtroInicio(), this.filtroFim()).subscribe(r => {
+      this.resumo.set(r);
+      this.drawCharts();
+    });
   }
 
   private drawCharts() {
-    if (!this.chartsReady || !this.barCanvas || !this.pieCanvas) return;
+    if (!this.chartsReady || !this.pieCanvas) return;
     const r = this.resumo();
     if (!r) return;
 
-    // Bar chart — previsto vs pago por mês
-    this.barChart?.destroy();
-    this.barChart = new Chart(this.barCanvas.nativeElement, {
-      type: 'bar',
-      data: {
-        labels: r.porMes.map(m => MONTH_NAMES[m.mes].substring(0, 3)),
-        datasets: [
-          { label: 'Previsto', data: r.porMes.map(m => m.previsto), backgroundColor: '#9fa8da', borderRadius: 4 },
-          { label: 'Pago',     data: r.porMes.map(m => m.pago),     backgroundColor: '#43a047', borderRadius: 4 }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'top' } },
-        scales: { y: { beginAtZero: true, ticks: { callback: (v) => v + ' €' } } }
-      }
-    });
-
-    // Pie chart — por categoria (ano inteiro)
     this.pieChart?.destroy();
     const cats = r.porCategoria.filter(c => c.total > 0);
     const colors = ['#3f51b5','#e53935','#fb8c00','#43a047','#8e24aa','#00acc1','#f4511e','#6d4c41','#546e7a','#fdd835'];
@@ -261,6 +254,6 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
 
   isVencida(c: ContaPessoal): boolean {
     if (c.pago) return false;
-    return c.dataVencimento < new Date().toISOString().substring(0, 10);
+    return c.dataVencimento < hoje();
   }
 }

@@ -2,57 +2,84 @@
 
   <!-- HEADER -->
   <div class="page-header">
-    <div class="page-title">Contas Pessoais</div>
+    <div class="page-title">Financeiro</div>
     <button mat-flat-button color="primary" (click)="openForm()">
-      <mat-icon>add</mat-icon> Nova Conta
+      <mat-icon>add</mat-icon> Novo Lançamento
     </button>
   </div>
 
-  <!-- NAVEGAÇÃO MÊS -->
-  <div class="month-selector">
-    <button mat-icon-button (click)="changeMonth(-1)"><mat-icon>chevron_left</mat-icon></button>
-    <span>{{ monthName() }} {{ year() }}</span>
-    <button mat-icon-button (click)="changeMonth(1)"><mat-icon>chevron_right</mat-icon></button>
+  <!-- FILTRO DE PERÍODO -->
+  <div class="periodo-bar card">
+    <div class="filter-group">
+      <label>De</label>
+      <input type="date" [ngModel]="filtroInicio()" (ngModelChange)="filtroInicio.set($event)" />
+    </div>
+    <div class="filter-group">
+      <label>Até</label>
+      <input type="date" [ngModel]="filtroFim()" (ngModelChange)="filtroFim.set($event)" />
+    </div>
+    <button mat-stroked-button (click)="aplicarFiltroData()">Aplicar</button>
+    <div class="atalhos">
+      <button class="chip" (click)="atalhoData('mes-atual')">Mês atual</button>
+      <button class="chip" (click)="atalhoData('proximo-mes')">Próximo mês</button>
+      <button class="chip" (click)="atalhoData('ano-atual')">Ano atual</button>
+    </div>
   </div>
 
   <!-- CARDS RESUMO -->
-  <div class="summary-cards">
-    <div class="summary-card previsto">
-      <mat-icon>receipt_long</mat-icon>
-      <div>
-        <div class="sc-label">Total Previsto</div>
-        <div class="sc-value">{{ fmt(totalPrevisto()) }} €</div>
+  @if (resumo(); as r) {
+    <div class="summary-cards">
+      <div class="summary-card saldo" [class.neg]="r.saldoTotal < 0">
+        <mat-icon>account_balance_wallet</mat-icon>
+        <div>
+          <div class="sc-label">Saldo Total</div>
+          <div class="sc-value">{{ fmt(r.saldoTotal) }} €</div>
+        </div>
+      </div>
+      <div class="summary-card entrada">
+        <mat-icon>arrow_downward</mat-icon>
+        <div>
+          <div class="sc-label">Total Entradas (período)</div>
+          <div class="sc-value">{{ fmt(r.totalEntradas) }} €</div>
+        </div>
+      </div>
+      <div class="summary-card aberto">
+        <mat-icon>arrow_upward</mat-icon>
+        <div>
+          <div class="sc-label">Total Saídas (período)</div>
+          <div class="sc-value">{{ fmt(r.totalSaidas) }} €</div>
+        </div>
+      </div>
+      <div class="summary-card pago" [class.neg]="r.saldoReal < 0">
+        <mat-icon>done_all</mat-icon>
+        <div>
+          <div class="sc-label">Saldo Real (período)</div>
+          <div class="sc-value">{{ fmt(r.saldoReal) }} €</div>
+        </div>
+      </div>
+      <div class="summary-card entrada">
+        <mat-icon>trending_up</mat-icon>
+        <div>
+          <div class="sc-label">Previsão de Entradas</div>
+          <div class="sc-value">{{ fmt(r.previsaoEntradas) }} €</div>
+        </div>
+      </div>
+      <div class="summary-card aberto">
+        <mat-icon>trending_down</mat-icon>
+        <div>
+          <div class="sc-label">Previsão de Despesas</div>
+          <div class="sc-value">{{ fmt(r.previsaoDespesas) }} €</div>
+        </div>
       </div>
     </div>
-    <div class="summary-card pago">
-      <mat-icon>check_circle</mat-icon>
-      <div>
-        <div class="sc-label">Total Pago</div>
-        <div class="sc-value">{{ fmt(totalPago()) }} €</div>
-      </div>
-    </div>
-    <div class="summary-card aberto">
-      <mat-icon>pending</mat-icon>
-      <div>
-        <div class="sc-label">Em Aberto</div>
-        <div class="sc-value">{{ fmt(totalAberto()) }} €</div>
-      </div>
-    </div>
-    <div class="summary-card saldo" [class.neg]="totalAberto() > 0">
-      <mat-icon>{{ totalAberto() === 0 ? 'done_all' : 'hourglass_bottom' }}</mat-icon>
-      <div>
-        <div class="sc-label">Contas</div>
-        <div class="sc-value">{{ filtered().length }} ({{ filtered().filter(c => c.pago).length }} pagas)</div>
-      </div>
-    </div>
-  </div>
+  }
 
   <!-- Card método de pagamento -->
   @if (totalPago() > 0) {
     <div class="metodo-card">
       <div class="metodo-card-title">
         <mat-icon>payments</mat-icon>
-        Pagamentos por método
+        Pagamentos por método (no período filtrado)
       </div>
       <div class="metodo-rows">
         <div class="metodo-row dinheiro">
@@ -103,11 +130,22 @@
   <!-- FORMULÁRIO -->
   @if (showForm()) {
     <div class="card form-card">
-      <div class="form-title">{{ editMode() ? 'Editar Conta' : 'Nova Conta a Pagar' }}</div>
+      <div class="form-title">{{ editMode() ? 'Editar Lançamento' : 'Novo Lançamento' }}</div>
       <div class="form-grid">
+        <div class="form-group">
+          <label>Tipo *</label>
+          <div class="tipo-toggle">
+            <button type="button" class="tipo-btn entrada" [class.active]="form.tipo === 'Entrada'" (click)="form.tipo = 'Entrada'">
+              <mat-icon>arrow_downward</mat-icon> Entrada
+            </button>
+            <button type="button" class="tipo-btn saida" [class.active]="form.tipo === 'Saida'" (click)="form.tipo = 'Saida'">
+              <mat-icon>arrow_upward</mat-icon> Saída
+            </button>
+          </div>
+        </div>
         <div class="form-group span2">
           <label>Descrição *</label>
-          <input type="text" [(ngModel)]="form.descricao" placeholder="Ex: Renda, Seguro de Saúde..." />
+          <input type="text" [(ngModel)]="form.descricao" placeholder="Ex: Renda, Salário, Seguro de Saúde..." />
         </div>
         <div class="form-group">
           <label>Categoria *</label>
@@ -122,14 +160,6 @@
           <input type="date" [(ngModel)]="form.dataVencimento" />
         </div>
         <div class="form-group">
-          <label>Competência (Mês de Referência)</label>
-          <select [(ngModel)]="form.mesReferencia">
-            @for (i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
-              <option [value]="i">{{ monthNames[i] }} {{ form.anoReferencia }}</option>
-            }
-          </select>
-        </div>
-        <div class="form-group">
           <label>Valor Previsto (€) *</label>
           <input type="number" [(ngModel)]="form.valorPrevisto" min="0" step="0.01" placeholder="0.00" />
         </div>
@@ -138,7 +168,7 @@
             <label>Recorrência (meses)</label>
             <input type="number" [(ngModel)]="form.totalRecorrencias" min="1" max="60" step="1" />
             @if (form.totalRecorrencias > 1) {
-              <span class="recorrencia-hint">Cria {{ form.totalRecorrencias }} contas mensais</span>
+              <span class="recorrencia-hint">Cria {{ form.totalRecorrencias }} lançamentos mensais</span>
             }
           </div>
         }
@@ -146,7 +176,7 @@
       <div class="form-actions">
         <button mat-flat-button color="primary" (click)="save()">
           <mat-icon>{{ editMode() ? 'save' : 'add' }}</mat-icon>
-          {{ editMode() ? 'Guardar' : (form.totalRecorrencias > 1 ? 'Criar ' + form.totalRecorrencias + ' contas' : 'Criar Conta') }}
+          {{ editMode() ? 'Guardar' : (form.totalRecorrencias > 1 ? 'Criar ' + form.totalRecorrencias + ' lançamentos' : 'Criar Lançamento') }}
         </button>
         <button mat-button (click)="cancelForm()">Cancelar</button>
       </div>
@@ -157,22 +187,22 @@
   @if (pagarModal(); as conta) {
     <div class="modal-overlay" (click)="pagarModal.set(null)">
       <div class="modal-card" (click)="$event.stopPropagation()">
-        <div class="modal-title">Registar Pagamento</div>
+        <div class="modal-title">{{ conta.tipo === 'Entrada' ? 'Registar Recebimento' : 'Registar Pagamento' }}</div>
         <div class="modal-desc">{{ conta.descricao }}</div>
         <div class="modal-desc cat">{{ conta.categoria }}</div>
         <div class="form-group" style="margin-top:16px">
-          <label>Data de Pagamento</label>
+          <label>Data</label>
           <input type="date" [(ngModel)]="pagarForm.dataPagamento" />
         </div>
         <div class="form-group">
-          <label>Valor Pago (€)</label>
+          <label>Valor (€)</label>
           <input type="number" [(ngModel)]="pagarForm.valorPago" min="0" step="0.01" />
           @if (pagarForm.valorPago !== conta.valorPrevisto) {
             <span class="recorrencia-hint warn">Previsto: {{ fmt(conta.valorPrevisto) }} €</span>
           }
         </div>
         <div class="form-group">
-          <label>Método de Pagamento</label>
+          <label>Método</label>
           <div class="metodo-opts">
             <button type="button" class="metodo-btn"
               [class.active]="pagarForm.metodoPagamento === ''"
@@ -193,7 +223,7 @@
         </div>
         <div class="modal-actions">
           <button mat-flat-button color="primary" (click)="confirmarPagar()">
-            <mat-icon>check</mat-icon> Confirmar Pagamento
+            <mat-icon>check</mat-icon> Confirmar
           </button>
           <button mat-button (click)="pagarModal.set(null)">Cancelar</button>
         </div>
@@ -203,6 +233,14 @@
 
   <!-- FILTROS -->
   <div class="filters-bar card">
+    <div class="filter-group">
+      <label>Tipo</label>
+      <div class="status-chips">
+        <button class="chip" [class.active]="filterTipo() === 'todos'"   (click)="filterTipo.set('todos')">Todos</button>
+        <button class="chip entrada-chip" [class.active]="filterTipo() === 'Entrada'" (click)="filterTipo.set('Entrada')">Entradas</button>
+        <button class="chip aberto-chip"  [class.active]="filterTipo() === 'Saida'"   (click)="filterTipo.set('Saida')">Saídas</button>
+      </div>
+    </div>
     <div class="filter-group">
       <label>Categoria</label>
       <select [ngModel]="filterCategoria()" (ngModelChange)="filterCategoria.set($event)">
@@ -220,14 +258,15 @@
         <button class="chip pago-chip"   [class.active]="filterStatus() === 'pago'"   (click)="filterStatus.set('pago')">Pagos</button>
       </div>
     </div>
-    <div class="filter-count">{{ filtered().length }} conta{{ filtered().length !== 1 ? 's' : '' }}</div>
+    <div class="filter-count">{{ filtered().length }} lançamento{{ filtered().length !== 1 ? 's' : '' }}</div>
   </div>
 
-  <!-- TABELA DE CONTAS -->
+  <!-- TABELA -->
   <div class="card">
     <table class="summary-table cp-table">
       <thead>
         <tr>
+          <th>Tipo</th>
           <th>Descrição</th>
           <th>Categoria</th>
           <th>Vencimento</th>
@@ -243,12 +282,20 @@
         @for (c of filtered(); track c.id) {
           <tr [class.pago-row]="c.pago" [class.vencida-row]="isVencida(c)">
             <td>
+              <span class="tipo-badge" [class.entrada]="c.tipo === 'Entrada'" [class.saida]="c.tipo === 'Saida'">
+                {{ c.tipo === 'Entrada' ? 'Entrada' : 'Saída' }}
+              </span>
+            </td>
+            <td>
               <div class="desc-cell">
                 {{ c.descricao }}
                 @if (c.totalRecorrencias > 1) {
                   <span class="recorr-badge" [matTooltip]="'Recorrência ' + c.recorrenciaAtual + ' de ' + c.totalRecorrencias">
                     {{ c.recorrenciaAtual }}/{{ c.totalRecorrencias }}
                   </span>
+                }
+                @if (c.timesheetFaturaId) {
+                  <span class="recorr-badge auto" matTooltip="Lançamento automático de fatura confirmada">auto</span>
                 }
               </div>
             </td>
@@ -278,11 +325,11 @@
             </td>
             <td class="acoes">
               @if (!c.pago) {
-                <button mat-icon-button color="primary" (click)="openPagar(c)" matTooltip="Registar pagamento">
+                <button mat-icon-button color="primary" (click)="openPagar(c)" matTooltip="Registar pagamento/recebimento">
                   <mat-icon>payments</mat-icon>
                 </button>
               } @else {
-                <button mat-icon-button (click)="desmarcarPago(c)" matTooltip="Desmarcar pagamento">
+                <button mat-icon-button (click)="desmarcarPago(c)" matTooltip="Desmarcar">
                   <mat-icon>undo</mat-icon>
                 </button>
               }
@@ -296,34 +343,25 @@
           </tr>
         }
         @if (filtered().length === 0) {
-          <tr><td colspan="8" class="empty-row">Sem contas neste mês. Clique em "Nova Conta" para adicionar.</td></tr>
+          <tr><td colspan="10" class="empty-row">Sem lançamentos no período. Clique em "Novo Lançamento" para adicionar.</td></tr>
         }
       </tbody>
     </table>
   </div>
 
-  <!-- GRÁFICOS -->
+  <!-- GRÁFICO -->
   <div class="card graficos-card">
     <div class="graficos-header">
-      <span class="card-title" style="margin:0;border:none">Análise de Despesas {{ year() }}</span>
-      <button mat-icon-button (click)="showGraficos.update(v => !v)" [matTooltip]="showGraficos() ? 'Ocultar gráficos' : 'Mostrar gráficos'">
+      <span class="card-title" style="margin:0;border:none">Distribuição de Saídas por Categoria</span>
+      <button mat-icon-button (click)="showGraficos.update(v => !v)" [matTooltip]="showGraficos() ? 'Ocultar gráfico' : 'Mostrar gráfico'">
         <mat-icon>{{ showGraficos() ? 'expand_less' : 'expand_more' }}</mat-icon>
       </button>
     </div>
 
     @if (showGraficos()) {
-      <div class="graficos-grid">
-        <div class="grafico-box">
-          <div class="grafico-title">Previsto vs Pago — Mensal</div>
-          <div class="canvas-wrap">
-            <canvas #barCanvas></canvas>
-          </div>
-        </div>
-        <div class="grafico-box">
-          <div class="grafico-title">Distribuição por Categoria</div>
-          <div class="canvas-wrap">
-            <canvas #pieCanvas></canvas>
-          </div>
+      <div class="grafico-box">
+        <div class="canvas-wrap">
+          <canvas #pieCanvas></canvas>
         </div>
       </div>
     }
