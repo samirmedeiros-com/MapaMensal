@@ -33,11 +33,19 @@ public class WorkDaysController(AppDbContext db) : ControllerBase
             .AnyAsync(t => t.Year == year && t.Month == month && t.IsApproved);
     }
 
+    private async Task<bool> IsProjectInvoicedAsync(int projectId, int year, int month)
+    {
+        return await db.TimesheetFaturas
+            .AnyAsync(f => f.ProjectId == projectId && f.Year == year && f.Month == month);
+    }
+
     [HttpPost("upsert")]
     public async Task<IActionResult> Upsert([FromBody] WorkDayUpsertDto dto)
     {
         if (await IsApprovedAsync(dto.Year, dto.Month))
             return Conflict("TimeSheet já aprovado. Cancele a aprovação para poder alterar.");
+        if (await IsProjectInvoicedAsync(dto.ProjectId, dto.Year, dto.Month))
+            return Conflict("Este projeto já tem fatura emitida neste mês, não pode ser alterado.");
 
         var date = new DateOnly(dto.Year, dto.Month, dto.Day);
         var existing = await db.WorkDays
@@ -69,6 +77,13 @@ public class WorkDaysController(AppDbContext db) : ControllerBase
         {
             if (await IsApprovedAsync(year, month))
                 return Conflict("TimeSheet já aprovado. Cancele a aprovação para poder alterar.");
+        }
+
+        var projetosMes = dtos.Select(d => (d.ProjectId, d.Year, d.Month)).Distinct();
+        foreach (var (projectId, year, month) in projetosMes)
+        {
+            if (await IsProjectInvoicedAsync(projectId, year, month))
+                return Conflict("Este projeto já tem fatura emitida neste mês, não pode ser alterado.");
         }
 
         foreach (var dto in dtos)

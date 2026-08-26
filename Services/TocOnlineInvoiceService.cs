@@ -37,6 +37,11 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
 
     public async Task<FaturaEmitidaResultado> EmitirFaturaAsync(int projectId, int year, int month, CancellationToken ct)
     {
+        var aprovado = await _db.TimesheetApprovals
+            .AnyAsync(a => a.Year == year && a.Month == month && a.IsApproved, ct);
+        if (!aprovado)
+            return new(false, "O TimeSheet tem de estar aprovado antes de emitir a fatura.", null);
+
         var project = await _db.Projects.FindAsync([projectId], ct);
         if (project is null) return new(false, "Projeto não encontrado.", null);
 
@@ -98,7 +103,8 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 DataEmissao = DateTime.UtcNow,
                 TocOnlineDocId = docId,
                 PdfBase64 = pdfBase64,
-                Estado = "Emitida"
+                Estado = "Emitida",
+                Origem = "Online"
             };
             _db.TimesheetFaturas.Add(fatura);
             await _db.SaveChangesAsync(ct);
@@ -132,7 +138,7 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 new JsonObject
                 {
                     ["item_type"] = "Service",
-                    ["description"] = $"Prestação de serviços — {project.Name} — {month:D2}/{year}",
+                    ["description"] = $"CI - {month:D2}{year}",
                     ["quantity"] = workedDays,
                     ["unit_price"] = project.DailyRate,
                     ["tax_percentage"] = ivaRate * 100,

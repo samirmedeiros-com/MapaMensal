@@ -106,6 +106,27 @@
   }
 }
 
+tr.row-locked td:not(.total-cell) {
+  cursor: default;
+  opacity: 0.75;
+  &:hover { filter: none; }
+}
+
+.lock-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--text-3, #9E9D98);
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.fatura-hint {
+  font-size: 0.78rem;
+  color: var(--text-3, #9E9D98);
+  font-style: italic;
+}
+
 .calendar-scroll {
   width: 100%;
   overflow-x: auto;
@@ -217,6 +238,64 @@
 
   .fatura-nome { font-weight: 600; }
   .fatura-valor { font-weight: 700; color: var(--purple-800, #3C3489); }
+}
+
+.origem-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 4px;
+  color: var(--purple-500, #534AB7);
+}
+
+// --- MODAL EMITIR FATURA ---
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 12px;
+  padding: 28px 32px;
+  width: 380px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+
+  .modal-title { font-size: 1.1rem; font-weight: 700; color: #1a237e; margin-bottom: 8px; }
+  .modal-desc { font-size: 0.9rem; color: #555; margin-bottom: 16px; }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+
+    label { font-size: 0.78rem; font-weight: 600; color: #555; text-transform: uppercase; }
+    input {
+      padding: 8px 10px;
+      border: 1px solid #c5cae9;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+    }
+  }
+
+  .modal-actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+  .modal-actions-col {
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 8px;
+
+    .btn-action { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  }
 }
 
 @media (max-width: 600px) {

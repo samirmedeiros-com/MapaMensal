@@ -43,6 +43,7 @@ export interface TimesheetFaturaDto {
   dataEmissao: string;
   estado: 'Emitida' | 'Recebida';
   dataRecebimento: string | null;
+  origem: 'Online' | 'Offline';
   temPdf: boolean;
 }
 

@@ -53,6 +53,9 @@ export class ApiService {
   emitirFaturaTimesheet(projectId: number, year: number, month: number): Observable<TimesheetFaturaDto> {
     return this.http.post<TimesheetFaturaDto>(`${this.base}/timesheet/emitir-fatura`, { projectId, year, month });
   }
+  emitirFaturaOfflineTimesheet(dto: { projectId: number; year: number; month: number; numeroFatura: string; dataEmissao: string; pdfBase64: string | null }): Observable<TimesheetFaturaDto> {
+    return this.http.post<TimesheetFaturaDto>(`${this.base}/timesheet/emitir-fatura-offline`, dto);
+  }
   confirmarRecebimentoTimesheet(projectId: number, year: number, month: number): Observable<void> {
     return this.http.post<void>(`${this.base}/timesheet/confirmar-recebimento`, { projectId, year, month });
   }

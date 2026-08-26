@@ -34,14 +34,27 @@
 .add-row td { background: #f9f9f9; }
 .actions { white-space: nowrap; }
 
-.billing-row td { background: var(--surface-2, #F9F8F7); padding: 12px 16px; }
+.billing-row td { background: transparent; padding: 10px 0 6px; }
 
 .billing-form {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, rgba(0,0,0,0.1));
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  padding: 16px 18px;
+
   .billing-title {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-2, #6B6A65);
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--purple-800, #3C3489);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border, rgba(0,0,0,0.08));
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
   }
 }
 

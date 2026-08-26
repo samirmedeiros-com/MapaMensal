@@ -56,12 +56,17 @@
         </thead>
         <tbody>
           @for (proj of projects(); track proj.id; let pi = $index) {
-            <tr [class.project-row-alt]="pi % 2 === 1">
-              <td class="project-name">{{ proj.name }}</td>
+            <tr [class.project-row-alt]="pi % 2 === 1" [class.row-locked]="projetoTemFatura(proj.id)">
+              <td class="project-name">
+                {{ proj.name }}
+                @if (projetoTemFatura(proj.id)) {
+                  <mat-icon class="lock-icon" matTooltip="Fatura já emitida — não pode ser alterado">lock</mat-icon>
+                }
+              </td>
               @for (cell of cells(); track cell.day) {
                 <td
                   [class]="getMarkClass(cell.marks.get(proj.id), cell.isWeekend, cell.isHoliday)"
-                  [matTooltip]="cell.isHoliday ? cell.holidayName! : (cell.isWeekend ? '' : 'Clique para alternar')"
+                  [matTooltip]="cell.isHoliday ? cell.holidayName! : (cell.isWeekend || projetoTemFatura(proj.id) ? '' : 'Clique para alternar')"
                   (click)="cycleMark(cell, proj)"
                 >{{ getMarkLabel(cell.marks.get(proj.id)) }}</td>
               }
@@ -103,7 +108,16 @@
             <td>{{ formatCurrency(row.valorIva) }} €</td>
             <td class="fatura-valor">{{ formatCurrency(row.valorFatura) }} €</td>
             <td>{{ row.fatura ? formatDateTime(row.fatura.dataEmissao) : '—' }}</td>
-            <td>{{ row.fatura?.numeroFatura ?? '—' }}</td>
+            <td>
+              @if (row.fatura) {
+                <mat-icon class="origem-icon" [matTooltip]="row.fatura.origem === 'Online' ? 'Emitida online (TocOnline)' : 'Emitida offline (carregada manualmente)'">
+                  {{ row.fatura.origem === 'Online' ? 'cloud_done' : 'upload_file' }}
+                </mat-icon>
+                {{ row.fatura.numeroFatura }}
+              } @else {
+                —
+              }
+            </td>
             <td>
               @if (row.fatura?.temPdf) {
                 <button type="button" class="btn-action btn-emitir" (click)="verPdf(row.projectId)">Ver PDF</button>
@@ -111,9 +125,13 @@
             </td>
             <td>
               @if (!row.fatura) {
-                <button type="button" class="btn-action btn-emitir" [disabled]="emitindoProjectId() === row.projectId" (click)="emitirFatura(row.projectId)">
-                  Emitir fatura
-                </button>
+                @if (aprovado()) {
+                  <button type="button" class="btn-action btn-emitir" [disabled]="emitindoProjectId() === row.projectId" (click)="abrirModalEmitir(row.projectId)">
+                    Emitir fatura
+                  </button>
+                } @else {
+                  <span class="fatura-hint" matTooltip="Aprove o TimeSheet para poder emitir a fatura">Aprovar TimeSheet primeiro</span>
+                }
               } @else if (row.fatura.estado === 'Emitida') {
                 <button type="button" class="btn-action btn-emitir" [disabled]="emitindoProjectId() === row.projectId" (click)="confirmarRecebimento(row.projectId)">
                   Confirmar recebimento
@@ -127,4 +145,47 @@
       </tbody>
     </table>
   </div>
+
+  <!-- MODAL EMITIR FATURA -->
+  @if (modalEmitirProjectId() !== null) {
+    <div class="modal-overlay" (click)="fecharModalEmitir()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        @if (modalEmitirModo() === 'escolha') {
+          <div class="modal-title">Emitir fatura</div>
+          <p class="modal-desc">A fatura vai ser emitida online (via TocOnline) ou registada manualmente (offline)?</p>
+          <div class="modal-actions modal-actions-col">
+            <button type="button" class="btn-action btn-approve" [disabled]="emitindoProjectId() !== null" (click)="emitirOnline()">
+              <mat-icon>cloud_upload</mat-icon> Emitir Online (TocOnline)
+            </button>
+            <button type="button" class="btn-action btn-emitir" (click)="modalEmitirModo.set('offline')">
+              <mat-icon>upload_file</mat-icon> Registar Offline
+            </button>
+          </div>
+          <div class="modal-actions">
+            <button mat-button (click)="fecharModalEmitir()">Cancelar</button>
+          </div>
+        } @else {
+          <div class="modal-title">Registar fatura offline</div>
+          <div class="form-group">
+            <label>Número da Fatura</label>
+            <input type="text" [(ngModel)]="offlineForm.numeroFatura" placeholder="Ex: FT 2026/12" />
+          </div>
+          <div class="form-group">
+            <label>Data de Emissão</label>
+            <input type="date" [(ngModel)]="offlineForm.dataEmissao" />
+          </div>
+          <div class="form-group">
+            <label>PDF da Fatura</label>
+            <input type="file" accept="application/pdf" (change)="onFicheiroOffline($event)" />
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-action btn-approve" [disabled]="emitindoProjectId() !== null" (click)="confirmarOffline()">
+              Guardar
+            </button>
+            <button mat-button (click)="modalEmitirModo.set('escolha')">Voltar</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </div>

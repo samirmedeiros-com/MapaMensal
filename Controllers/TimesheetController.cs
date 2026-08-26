@@ -75,6 +75,7 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
                 f.DataEmissao,
                 f.Estado,
                 f.DataRecebimento,
+                f.Origem,
                 TemPdf = f.PdfBase64 != null
             })
             .ToListAsync();
@@ -94,6 +95,37 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
             resultado.Fatura.DataEmissao,
             resultado.Fatura.Estado
         });
+    }
+
+    [HttpPost("emitir-fatura-offline")]
+    public async Task<IActionResult> EmitirFaturaOffline([FromBody] EmitirFaturaOfflineDto dto)
+    {
+        var aprovado = await db.TimesheetApprovals
+            .AnyAsync(a => a.Year == dto.Year && a.Month == dto.Month && a.IsApproved);
+        if (!aprovado) return UnprocessableEntity("O TimeSheet tem de estar aprovado antes de emitir a fatura.");
+
+        var existente = await db.TimesheetFaturas
+            .AnyAsync(f => f.ProjectId == dto.ProjectId && f.Year == dto.Year && f.Month == dto.Month);
+        if (existente) return UnprocessableEntity("Já existe uma fatura emitida para este projeto/mês.");
+
+        if (string.IsNullOrWhiteSpace(dto.NumeroFatura) || string.IsNullOrWhiteSpace(dto.DataEmissao))
+            return BadRequest("Número da fatura e data de emissão são obrigatórios.");
+
+        var fatura = new TimesheetFatura
+        {
+            ProjectId = dto.ProjectId,
+            Year = dto.Year,
+            Month = dto.Month,
+            NumeroFatura = dto.NumeroFatura.Trim(),
+            DataEmissao = DateTime.Parse(dto.DataEmissao),
+            PdfBase64 = dto.PdfBase64,
+            Estado = "Emitida",
+            Origem = "Offline"
+        };
+        db.TimesheetFaturas.Add(fatura);
+        await db.SaveChangesAsync();
+
+        return Ok(new { fatura.NumeroFatura, fatura.DataEmissao, fatura.Estado });
     }
 
     [HttpGet("fatura/{projectId}/{year}/{month}/pdf")]
@@ -160,3 +192,4 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
 
 public record TimesheetActionDto(int Year, int Month);
 public record EmitirFaturaDto(int ProjectId, int Year, int Month);
+public record EmitirFaturaOfflineDto(int ProjectId, int Year, int Month, string NumeroFatura, string DataEmissao, string? PdfBase64);

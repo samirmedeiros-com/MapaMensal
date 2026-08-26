@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -18,7 +19,7 @@ interface DayCell {
 
 @Component({
   selector: 'app-mapa-dias',
-  imports: [MatButtonModule, MatIconModule, MatTooltipModule, MatSnackBarModule],
+  imports: [FormsModule, MatButtonModule, MatIconModule, MatTooltipModule, MatSnackBarModule],
   templateUrl: './mapa-dias.component.html',
   styleUrl: './mapa-dias.component.scss'
 })
@@ -40,6 +41,10 @@ export class MapaDiasComponent implements OnInit {
 
   faturas = signal<TimesheetFaturaDto[]>([]);
   emitindoProjectId = signal<number | null>(null);
+
+  modalEmitirProjectId = signal<number | null>(null);
+  modalEmitirModo = signal<'escolha' | 'offline'>('escolha');
+  offlineForm = { numeroFatura: '', dataEmissao: '', ficheiro: null as File | null };
 
   monthName = computed(() => MONTH_NAMES[this.month()]);
   dayNames = DAY_NAMES;
@@ -179,11 +184,24 @@ export class MapaDiasComponent implements OnInit {
     });
   }
 
-  emitirFatura(projectId: number) {
+  abrirModalEmitir(projectId: number) {
+    this.modalEmitirProjectId.set(projectId);
+    this.modalEmitirModo.set('escolha');
+    this.offlineForm = { numeroFatura: '', dataEmissao: new Date().toISOString().substring(0, 10), ficheiro: null };
+  }
+
+  fecharModalEmitir() {
+    this.modalEmitirProjectId.set(null);
+  }
+
+  emitirOnline() {
+    const projectId = this.modalEmitirProjectId();
+    if (projectId === null) return;
     this.emitindoProjectId.set(projectId);
     this.api.emitirFaturaTimesheet(projectId, this.year(), this.month()).subscribe({
       next: () => {
         this.emitindoProjectId.set(null);
+        this.fecharModalEmitir();
         this.loadMonth();
         this.snack.open('Fatura emitida com sucesso.', 'Ok', { duration: 3000 });
       },
@@ -192,6 +210,55 @@ export class MapaDiasComponent implements OnInit {
         this.snack.open(err?.error ?? 'Não foi possível emitir a fatura.', 'Ok', { duration: 5000 });
       }
     });
+  }
+
+  onFicheiroOffline(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.offlineForm.ficheiro = input.files?.[0] ?? null;
+  }
+
+  confirmarOffline() {
+    const projectId = this.modalEmitirProjectId();
+    if (projectId === null) return;
+    if (!this.offlineForm.numeroFatura.trim() || !this.offlineForm.dataEmissao) {
+      this.snack.open('Preencha o número da fatura e a data de emissão.', 'Ok', { duration: 3000 });
+      return;
+    }
+
+    const enviar = (pdfBase64: string | null) => {
+      this.emitindoProjectId.set(projectId);
+      this.api.emitirFaturaOfflineTimesheet({
+        projectId,
+        year: this.year(),
+        month: this.month(),
+        numeroFatura: this.offlineForm.numeroFatura,
+        dataEmissao: this.offlineForm.dataEmissao,
+        pdfBase64
+      }).subscribe({
+        next: () => {
+          this.emitindoProjectId.set(null);
+          this.fecharModalEmitir();
+          this.loadMonth();
+          this.snack.open('Fatura registada com sucesso.', 'Ok', { duration: 3000 });
+        },
+        error: (err) => {
+          this.emitindoProjectId.set(null);
+          this.snack.open(err?.error ?? 'Não foi possível registar a fatura.', 'Ok', { duration: 5000 });
+        }
+      });
+    };
+
+    if (this.offlineForm.ficheiro) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        const base64 = result.substring(result.indexOf(',') + 1);
+        enviar(base64);
+      };
+      reader.readAsDataURL(this.offlineForm.ficheiro);
+    } else {
+      enviar(null);
+    }
   }
 
   confirmarRecebimento(projectId: number) {
@@ -224,8 +291,13 @@ export class MapaDiasComponent implements OnInit {
     return new Date(d).toLocaleDateString('pt-PT');
   }
 
+  projetoTemFatura(projectId: number): boolean {
+    return this.faturas().some(f => f.projectId === projectId);
+  }
+
   cycleMark(cell: DayCell, project: Project) {
     if (this.aprovado()) return;
+    if (this.projetoTemFatura(project.id)) return;
     if (cell.isWeekend) return;
     const current = cell.marks.get(project.id) ?? null;
     let next: number;
