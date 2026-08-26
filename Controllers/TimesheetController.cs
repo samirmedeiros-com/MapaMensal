@@ -186,6 +186,7 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
             Origem = "Offline"
         };
         db.TimesheetFaturas.Add(fatura);
+        await db.SaveChangesAsync(); // atribui fatura.Id antes de o usar como FK abaixo
         await FaturaFinanceiroHelper.CriarPrevisaoAsync(db, fatura, project);
         await db.SaveChangesAsync();
 
@@ -211,7 +212,7 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
         if (fatura.Estado != "Emitida")
             return UnprocessableEntity("Só é possível anular uma fatura ainda não recebida nem já anulada.");
 
-        var (sucesso, erro) = await invoiceService.AnularFaturaAsync(fatura.Id, dto.Justificativa);
+        var (sucesso, erro) = await invoiceService.AnularFaturaAsync(fatura.Id, dto.Justificativa, dto.PdfBase64);
         if (!sucesso) return UnprocessableEntity(erro);
 
         return Ok();
@@ -265,4 +266,4 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
 public record TimesheetActionDto(int Year, int Month);
 public record EmitirFaturaDto(int ProjectId, int Year, int Month);
 public record EmitirFaturaOfflineDto(int ProjectId, int Year, int Month, string NumeroFatura, string DataEmissao, string? PdfBase64);
-public record AnularFaturaDto(int ProjectId, int Year, int Month, string Justificativa);
+public record AnularFaturaDto(int ProjectId, int Year, int Month, string Justificativa, string? PdfBase64 = null);

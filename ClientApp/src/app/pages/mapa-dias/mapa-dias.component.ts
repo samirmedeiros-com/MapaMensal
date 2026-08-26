@@ -306,13 +306,21 @@ export class MapaDiasComponent implements OnInit, OnDestroy {
     return new Date(d).toLocaleDateString('pt-PT');
   }
 
+  anularFicheiro: File | null = null;
+
   abrirModalAnular(projectId: number) {
     this.modalAnularProjectId.set(projectId);
     this.anularJustificativa = '';
+    this.anularFicheiro = null;
   }
 
   fecharModalAnular() {
     this.modalAnularProjectId.set(null);
+  }
+
+  onFicheiroAnular(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.anularFicheiro = input.files?.[0] ?? null;
   }
 
   confirmarAnular() {
@@ -323,18 +331,32 @@ export class MapaDiasComponent implements OnInit, OnDestroy {
       return;
     }
     this.anulando.set(true);
-    this.api.anularFaturaTimesheet(projectId, this.year(), this.month(), this.anularJustificativa.trim()).subscribe({
-      next: () => {
-        this.anulando.set(false);
-        this.fecharModalAnular();
-        this.loadMonth();
-        this.snack.open('Fatura anulada.', 'Ok', { duration: 3000 });
-      },
-      error: (err) => {
-        this.anulando.set(false);
-        this.snack.open(err?.error ?? 'Não foi possível anular a fatura.', 'Ok', { duration: 5000 });
-      }
-    });
+
+    const enviar = (pdfBase64: string | null) => {
+      this.api.anularFaturaTimesheet(projectId, this.year(), this.month(), this.anularJustificativa.trim(), pdfBase64).subscribe({
+        next: () => {
+          this.anulando.set(false);
+          this.fecharModalAnular();
+          this.loadMonth();
+          this.snack.open('Fatura anulada.', 'Ok', { duration: 3000 });
+        },
+        error: (err) => {
+          this.anulando.set(false);
+          this.snack.open(err?.error ?? 'Não foi possível anular a fatura.', 'Ok', { duration: 5000 });
+        }
+      });
+    };
+
+    if (this.anularFicheiro) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        enviar(result.substring(result.indexOf(',') + 1));
+      };
+      reader.readAsDataURL(this.anularFicheiro);
+    } else {
+      enviar(null);
+    }
   }
 
   projetoTemFatura(projectId: number): boolean {

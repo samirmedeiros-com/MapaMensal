@@ -14,7 +14,7 @@ public sealed record FaturaEmitidaResultado(bool Sucesso, string? Erro, Timeshee
 public interface ITocOnlineInvoiceService
 {
     Task<FaturaEmitidaResultado> EmitirFaturaAsync(int projectId, int year, int month, CancellationToken ct = default);
-    Task<(bool Sucesso, string? Erro)> AnularFaturaAsync(int faturaId, string justificativa, CancellationToken ct = default);
+    Task<(bool Sucesso, string? Erro)> AnularFaturaAsync(int faturaId, string justificativa, string? pdfSubstituto = null, CancellationToken ct = default);
 }
 
 public class TocOnlineInvoiceService : ITocOnlineInvoiceService
@@ -113,6 +113,7 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 Origem = "Online"
             };
             _db.TimesheetFaturas.Add(fatura);
+            await _db.SaveChangesAsync(ct); // atribui fatura.Id antes de o usar como FK abaixo
             await FaturaFinanceiroHelper.CriarPrevisaoAsync(_db, fatura, project, ct);
             await _db.SaveChangesAsync(ct);
 
@@ -125,7 +126,7 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
         }
     }
 
-    public async Task<(bool Sucesso, string? Erro)> AnularFaturaAsync(int faturaId, string justificativa, CancellationToken ct)
+    public async Task<(bool Sucesso, string? Erro)> AnularFaturaAsync(int faturaId, string justificativa, string? pdfSubstituto, CancellationToken ct)
     {
         var fatura = await _db.TimesheetFaturas.FindAsync([faturaId], ct);
         if (fatura is null) return (false, "Fatura não encontrada.");
@@ -173,6 +174,12 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                     _logger.LogWarning("TocOnline não anulou o documento {DocId}: status atual {Status}", fatura.TocOnlineDocId, statusAtual);
                     return (false, $"O TocOnline não confirmou a anulação (estado atual do documento: {statusAtual}). Verifique manualmente no TocOnline.");
                 }
+
+                // Guarda a versão anulada do PDF (o TocOnline marca-o visualmente como anulado),
+                // substituindo a versão emitida.
+                var pdfAnulado = await ObterPdfBase64Async(client, fatura.TocOnlineDocId, ct);
+                if (pdfAnulado is not null)
+                    fatura.PdfBase64 = pdfAnulado;
             }
             catch (Exception ex)
             {
@@ -180,6 +187,9 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 return (false, ex.Message);
             }
         }
+
+        if (fatura.Origem == "Offline" && !string.IsNullOrEmpty(pdfSubstituto))
+            fatura.PdfBase64 = pdfSubstituto;
 
         fatura.Estado = "Anulada";
         fatura.AnuladaEm = DateTime.UtcNow;
