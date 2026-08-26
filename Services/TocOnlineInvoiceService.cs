@@ -14,6 +14,7 @@ public sealed record FaturaEmitidaResultado(bool Sucesso, string? Erro, Timeshee
 public interface ITocOnlineInvoiceService
 {
     Task<FaturaEmitidaResultado> EmitirFaturaAsync(int projectId, int year, int month, CancellationToken ct = default);
+    Task<(bool Sucesso, string? Erro)> AnularFaturaAsync(int faturaId, string justificativa, CancellationToken ct = default);
 }
 
 public class TocOnlineInvoiceService : ITocOnlineInvoiceService
@@ -49,7 +50,7 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
             return new(false, "Preencha os dados de faturação do projeto (nome fiscal e NIF) em Configurações.", null);
 
         var existente = await _db.TimesheetFaturas
-            .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.Year == year && f.Month == month, ct);
+            .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.Year == year && f.Month == month && f.Estado != "Anulada", ct);
         if (existente is not null)
             return new(false, "Já existe uma fatura emitida para este projeto/mês.", existente);
 
@@ -116,6 +117,51 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
             _logger.LogWarning(ex, "Falha ao emitir fatura TocOnline (projeto {ProjectId}, {Month}/{Year})", projectId, month, year);
             return new(false, ex.Message, null);
         }
+    }
+
+    public async Task<(bool Sucesso, string? Erro)> AnularFaturaAsync(int faturaId, string justificativa, CancellationToken ct)
+    {
+        var fatura = await _db.TimesheetFaturas.FindAsync([faturaId], ct);
+        if (fatura is null) return (false, "Fatura não encontrada.");
+        if (fatura.Estado == "Anulada") return (false, "Esta fatura já está anulada.");
+        if (string.IsNullOrWhiteSpace(justificativa)) return (false, "É necessário indicar uma justificação.");
+
+        if (fatura.Origem == "Online" && !string.IsNullOrEmpty(fatura.TocOnlineDocId))
+        {
+            try
+            {
+                var token = await _auth.GetAccessTokenAsync();
+                var client = _httpFactory.CreateClient("toconline");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var body = new JsonObject { ["status"] = "void" };
+                var req = new HttpRequestMessage(HttpMethod.Patch,
+                    $"{_opts.ApiUrl}/api/v1/commercial_sales_documents/{fatura.TocOnlineDocId}")
+                {
+                    Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json")
+                };
+                var resp = await client.SendAsync(req, ct);
+                var respBody = await resp.Content.ReadAsStringAsync(ct);
+                if (!resp.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("TocOnline recusou anulação {Status}: {Body}", resp.StatusCode, respBody);
+                    return (false, $"TocOnline recusou a anulação ({(int)resp.StatusCode}): {respBody}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Falha ao anular fatura TocOnline {DocId}", fatura.TocOnlineDocId);
+                return (false, ex.Message);
+            }
+        }
+
+        fatura.Estado = "Anulada";
+        fatura.AnuladaEm = DateTime.UtcNow;
+        fatura.JustificativaAnulacao = justificativa;
+        await _db.SaveChangesAsync(ct);
+
+        return (true, null);
     }
 
     private static JsonObject BuildDocumentPayload(Project project, decimal workedDays, decimal ivaRate, int month, int year)

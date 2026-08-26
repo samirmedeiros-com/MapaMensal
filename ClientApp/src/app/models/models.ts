@@ -41,9 +41,11 @@ export interface TimesheetFaturaDto {
   projectId: number;
   numeroFatura: string;
   dataEmissao: string;
-  estado: 'Emitida' | 'Recebida';
+  estado: 'Emitida' | 'Recebida' | 'Anulada';
   dataRecebimento: string | null;
   origem: 'Online' | 'Offline';
+  anuladaEm: string | null;
+  justificativaAnulacao: string | null;
   temPdf: boolean;
 }
 

@@ -88,9 +88,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasIndex(t => new { t.Year, t.Month })
             .IsUnique();
 
+        // Não é único: uma fatura anulada fica como histórico e permite emitir
+        // uma nova para o mesmo projeto/mês.
         modelBuilder.Entity<TimesheetFatura>()
-            .HasIndex(f => new { f.ProjectId, f.Year, f.Month })
-            .IsUnique();
+            .HasIndex(f => new { f.ProjectId, f.Year, f.Month });
 
         modelBuilder.Entity<TimesheetFatura>().Property(f => f.PdfBase64).HasColumnType("LONGTEXT");
 

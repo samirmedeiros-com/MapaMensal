@@ -46,6 +46,10 @@ export class MapaDiasComponent implements OnInit {
   modalEmitirModo = signal<'escolha' | 'offline'>('escolha');
   offlineForm = { numeroFatura: '', dataEmissao: '', ficheiro: null as File | null };
 
+  modalAnularProjectId = signal<number | null>(null);
+  anularJustificativa = '';
+  anulando = signal(false);
+
   monthName = computed(() => MONTH_NAMES[this.month()]);
   dayNames = DAY_NAMES;
 
@@ -291,8 +295,39 @@ export class MapaDiasComponent implements OnInit {
     return new Date(d).toLocaleDateString('pt-PT');
   }
 
+  abrirModalAnular(projectId: number) {
+    this.modalAnularProjectId.set(projectId);
+    this.anularJustificativa = '';
+  }
+
+  fecharModalAnular() {
+    this.modalAnularProjectId.set(null);
+  }
+
+  confirmarAnular() {
+    const projectId = this.modalAnularProjectId();
+    if (projectId === null) return;
+    if (!this.anularJustificativa.trim()) {
+      this.snack.open('Indique a justificação da anulação.', 'Ok', { duration: 3000 });
+      return;
+    }
+    this.anulando.set(true);
+    this.api.anularFaturaTimesheet(projectId, this.year(), this.month(), this.anularJustificativa.trim()).subscribe({
+      next: () => {
+        this.anulando.set(false);
+        this.fecharModalAnular();
+        this.loadMonth();
+        this.snack.open('Fatura anulada.', 'Ok', { duration: 3000 });
+      },
+      error: (err) => {
+        this.anulando.set(false);
+        this.snack.open(err?.error ?? 'Não foi possível anular a fatura.', 'Ok', { duration: 5000 });
+      }
+    });
+  }
+
   projetoTemFatura(projectId: number): boolean {
-    return this.faturas().some(f => f.projectId === projectId);
+    return this.faturas().some(f => f.projectId === projectId && f.estado !== 'Anulada');
   }
 
   cycleMark(cell: DayCell, project: Project) {

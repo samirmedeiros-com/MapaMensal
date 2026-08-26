@@ -12,12 +12,15 @@ public class TimesheetFatura
     public string? PdfBase64 { get; set; }
     public string? TocOnlineDocId { get; set; }
 
-    /// <summary>"Emitida" ou "Recebida".</summary>
+    /// <summary>"Emitida", "Recebida" ou "Anulada".</summary>
     public string Estado { get; set; } = "Emitida";
     public DateTime? DataRecebimento { get; set; }
 
     /// <summary>"Online" (via TocOnline) ou "Offline" (carregada manualmente).</summary>
     public string Origem { get; set; } = "Online";
+
+    public DateTime? AnuladaEm { get; set; }
+    public string? JustificativaAnulacao { get; set; }
 
     public Project Project { get; set; } = null!;
 }

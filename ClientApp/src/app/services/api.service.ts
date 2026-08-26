@@ -59,6 +59,9 @@ export class ApiService {
   confirmarRecebimentoTimesheet(projectId: number, year: number, month: number): Observable<void> {
     return this.http.post<void>(`${this.base}/timesheet/confirmar-recebimento`, { projectId, year, month });
   }
+  anularFaturaTimesheet(projectId: number, year: number, month: number, justificativa: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/timesheet/anular-fatura`, { projectId, year, month, justificativa });
+  }
   getFaturaPdfBlob(projectId: number, year: number, month: number): Observable<Blob> {
     return this.http.get(`${this.base}/timesheet/fatura/${projectId}/${year}/${month}/pdf`, { responseType: 'blob' });
   }

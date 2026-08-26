@@ -36,7 +36,7 @@ public class WorkDaysController(AppDbContext db) : ControllerBase
     private async Task<bool> IsProjectInvoicedAsync(int projectId, int year, int month)
     {
         return await db.TimesheetFaturas
-            .AnyAsync(f => f.ProjectId == projectId && f.Year == year && f.Month == month);
+            .AnyAsync(f => f.ProjectId == projectId && f.Year == year && f.Month == month && f.Estado != "Anulada");
     }
 
     [HttpPost("upsert")]

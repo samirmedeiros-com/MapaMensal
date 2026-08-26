@@ -63,11 +63,35 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
         return Ok();
     }
 
+    /// <summary>
+    /// Para cada projeto devolve a fatura "atual": a ativa (não anulada) se existir,
+    /// senão a anulada mais recente (para se poder mostrar o histórico/ícone de anulada).
+    /// </summary>
+    private async Task<TimesheetFatura?> GetFaturaAtualAsync(int projectId, int year, int month)
+    {
+        var todas = await db.TimesheetFaturas
+            .Where(f => f.ProjectId == projectId && f.Year == year && f.Month == month)
+            .ToListAsync();
+
+        return todas
+            .OrderBy(f => f.Estado == "Anulada" ? 1 : 0)
+            .ThenByDescending(f => f.DataEmissao)
+            .FirstOrDefault();
+    }
+
     [HttpGet("faturas")]
     public async Task<IActionResult> GetFaturas([FromQuery] int year, [FromQuery] int month)
     {
-        var faturas = await db.TimesheetFaturas
+        var todas = await db.TimesheetFaturas
             .Where(f => f.Year == year && f.Month == month)
+            .ToListAsync();
+
+        var atuais = todas
+            .GroupBy(f => f.ProjectId)
+            .Select(g => g
+                .OrderBy(f => f.Estado == "Anulada" ? 1 : 0)
+                .ThenByDescending(f => f.DataEmissao)
+                .First())
             .Select(f => new
             {
                 f.ProjectId,
@@ -76,11 +100,12 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
                 f.Estado,
                 f.DataRecebimento,
                 f.Origem,
+                f.AnuladaEm,
+                f.JustificativaAnulacao,
                 TemPdf = f.PdfBase64 != null
-            })
-            .ToListAsync();
+            });
 
-        return Ok(faturas);
+        return Ok(atuais);
     }
 
     [HttpPost("emitir-fatura")]
@@ -105,7 +130,7 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
         if (!aprovado) return UnprocessableEntity("O TimeSheet tem de estar aprovado antes de emitir a fatura.");
 
         var existente = await db.TimesheetFaturas
-            .AnyAsync(f => f.ProjectId == dto.ProjectId && f.Year == dto.Year && f.Month == dto.Month);
+            .AnyAsync(f => f.ProjectId == dto.ProjectId && f.Year == dto.Year && f.Month == dto.Month && f.Estado != "Anulada");
         if (existente) return UnprocessableEntity("Já existe uma fatura emitida para este projeto/mês.");
 
         if (string.IsNullOrWhiteSpace(dto.NumeroFatura) || string.IsNullOrWhiteSpace(dto.DataEmissao))
@@ -131,8 +156,7 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
     [HttpGet("fatura/{projectId}/{year}/{month}/pdf")]
     public async Task<IActionResult> GetFaturaPdf(int projectId, int year, int month)
     {
-        var fatura = await db.TimesheetFaturas
-            .FirstOrDefaultAsync(f => f.ProjectId == projectId && f.Year == year && f.Month == month);
+        var fatura = await GetFaturaAtualAsync(projectId, year, month);
 
         if (fatura?.PdfBase64 is null) return NotFound();
 
@@ -140,12 +164,28 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
         return File(bytes, "application/pdf", $"Fatura_{fatura.NumeroFatura}.pdf");
     }
 
+    [HttpPost("anular-fatura")]
+    public async Task<IActionResult> AnularFatura([FromBody] AnularFaturaDto dto)
+    {
+        var fatura = await GetFaturaAtualAsync(dto.ProjectId, dto.Year, dto.Month);
+        if (fatura is null) return NotFound("Fatura não encontrada.");
+        if (fatura.Estado != "Emitida")
+            return UnprocessableEntity("Só é possível anular uma fatura ainda não recebida nem já anulada.");
+
+        var (sucesso, erro) = await invoiceService.AnularFaturaAsync(fatura.Id, dto.Justificativa);
+        if (!sucesso) return UnprocessableEntity(erro);
+
+        return Ok();
+    }
+
     [HttpPost("confirmar-recebimento")]
     public async Task<IActionResult> ConfirmarRecebimento([FromBody] EmitirFaturaDto dto)
     {
         var fatura = await db.TimesheetFaturas
             .Include(f => f.Project)
-            .FirstOrDefaultAsync(f => f.ProjectId == dto.ProjectId && f.Year == dto.Year && f.Month == dto.Month);
+            .Where(f => f.ProjectId == dto.ProjectId && f.Year == dto.Year && f.Month == dto.Month && f.Estado != "Anulada")
+            .OrderByDescending(f => f.DataEmissao)
+            .FirstOrDefaultAsync();
 
         if (fatura is null) return NotFound("Fatura não encontrada.");
         if (fatura.Estado == "Recebida") return Ok();
@@ -193,3 +233,4 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
 public record TimesheetActionDto(int Year, int Month);
 public record EmitirFaturaDto(int ProjectId, int Year, int Month);
 public record EmitirFaturaOfflineDto(int ProjectId, int Year, int Month, string NumeroFatura, string DataEmissao, string? PdfBase64);
+public record AnularFaturaDto(int ProjectId, int Year, int Month, string Justificativa);

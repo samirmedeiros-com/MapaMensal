@@ -107,7 +107,14 @@
             <td>{{ formatCurrency(row.valorTotal) }} €</td>
             <td>{{ formatCurrency(row.valorIva) }} €</td>
             <td class="fatura-valor">{{ formatCurrency(row.valorFatura) }} €</td>
-            <td>{{ row.fatura ? formatDateTime(row.fatura.dataEmissao) : '—' }}</td>
+            <td>
+              @if (row.fatura?.estado === 'Anulada') {
+                <mat-icon class="origem-icon anulado-icon" matTooltip="Fatura anulada">cancel</mat-icon>
+                {{ formatDateTime(row.fatura.anuladaEm) }}
+              } @else {
+                {{ row.fatura ? formatDateTime(row.fatura.dataEmissao) : '—' }}
+              }
+            </td>
             <td>
               @if (row.fatura) {
                 <mat-icon class="origem-icon" [matTooltip]="row.fatura.origem === 'Online' ? 'Emitida online (TocOnline)' : 'Emitida offline (carregada manualmente)'">
@@ -123,8 +130,8 @@
                 <button type="button" class="btn-action btn-emitir" (click)="verPdf(row.projectId)">Ver PDF</button>
               }
             </td>
-            <td>
-              @if (!row.fatura) {
+            <td class="fatura-acoes">
+              @if (!row.fatura || row.fatura.estado === 'Anulada') {
                 @if (aprovado()) {
                   <button type="button" class="btn-action btn-emitir" [disabled]="emitindoProjectId() === row.projectId" (click)="abrirModalEmitir(row.projectId)">
                     Emitir fatura
@@ -135,6 +142,9 @@
               } @else if (row.fatura.estado === 'Emitida') {
                 <button type="button" class="btn-action btn-emitir" [disabled]="emitindoProjectId() === row.projectId" (click)="confirmarRecebimento(row.projectId)">
                   Confirmar recebimento
+                </button>
+                <button type="button" class="btn-action btn-cancel-approve" [disabled]="emitindoProjectId() === row.projectId" (click)="abrirModalAnular(row.projectId)">
+                  Anular fatura
                 </button>
               } @else {
                 <span class="approval-badge approved">Recebida</span>
@@ -185,6 +195,29 @@
             <button mat-button (click)="modalEmitirModo.set('escolha')">Voltar</button>
           </div>
         }
+      </div>
+    </div>
+  }
+
+  <!-- MODAL ANULAR FATURA -->
+  @if (modalAnularProjectId() !== null) {
+    <div class="modal-overlay" (click)="fecharModalAnular()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-title">Anular fatura</div>
+        <p class="modal-desc">
+          Se a fatura foi emitida online, a anulação é também pedida ao TocOnline.
+          Esta ação não pode ser desfeita — depois de anulada pode voltar a emitir uma nova fatura.
+        </p>
+        <div class="form-group">
+          <label>Justificação *</label>
+          <input type="text" [(ngModel)]="anularJustificativa" placeholder="Ex: valor errado, projeto trocado..." />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action btn-cancel-approve" [disabled]="anulando()" (click)="confirmarAnular()">
+            Confirmar anulação
+          </button>
+          <button mat-button (click)="fecharModalAnular()">Cancelar</button>
+        </div>
       </div>
     </div>
   }
