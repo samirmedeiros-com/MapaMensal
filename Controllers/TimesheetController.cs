@@ -10,7 +10,7 @@ namespace MapaMensal.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/[controller]")]
-public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoiceService) : ControllerBase
+public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoiceService, IEmailService emailService, ILogger<TimesheetController> logger) : ControllerBase
 {
     [HttpGet("status")]
     public async Task<IActionResult> GetStatus([FromQuery] int year, [FromQuery] int month)
@@ -189,6 +189,19 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
         await db.SaveChangesAsync(); // atribui fatura.Id antes de o usar como FK abaixo
         await FaturaFinanceiroHelper.CriarPrevisaoAsync(db, fatura, project);
         await db.SaveChangesAsync();
+
+        if (!string.IsNullOrWhiteSpace(project.FaturacaoEmail) && dto.PdfBase64 is not null)
+        {
+            try
+            {
+                var (iban, bic, titular) = await FaturaFinanceiroHelper.ObterDadosBancariosAsync(db);
+                await emailService.SendFaturaAsync(project.FaturacaoEmail, project.Name, fatura.NumeroFatura, Convert.FromBase64String(dto.PdfBase64), iban, bic, titular);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Falha ao enviar fatura {NumeroFatura} por email para {Email}", fatura.NumeroFatura, project.FaturacaoEmail);
+            }
+        }
 
         return Ok(new { fatura.NumeroFatura, fatura.DataEmissao, fatura.Estado });
     }

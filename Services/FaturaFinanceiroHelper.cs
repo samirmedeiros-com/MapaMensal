@@ -31,6 +31,18 @@ public static class FaturaFinanceiroHelper
         return decimal.Parse(ivaRateStr, System.Globalization.CultureInfo.InvariantCulture);
     }
 
+    public static async Task<(string? Iban, string? Bic, string? Titular)> ObterDadosBancariosAsync(AppDbContext db, CancellationToken ct = default)
+    {
+        var configs = await db.AppConfigs
+            .Where(c => c.Key == "Banco:Iban" || c.Key == "Banco:Bic" || c.Key == "Banco:Titular")
+            .ToDictionaryAsync(c => c.Key, c => c.Value, ct);
+        return (
+            configs.GetValueOrDefault("Banco:Iban"),
+            configs.GetValueOrDefault("Banco:Bic"),
+            configs.GetValueOrDefault("Banco:Titular")
+        );
+    }
+
     /// <summary>
     /// Calcula a data de vencimento a partir do dia do mês configurado no projeto: se esse dia ainda
     /// não tiver passado no mês da emissão, fica nesse mês; senão passa para o mês seguinte — nunca

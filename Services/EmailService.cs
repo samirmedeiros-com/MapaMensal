@@ -19,7 +19,10 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
     private string From => config["Smtp:From"] ?? "";
     private string SenderName => config["Smtp:SenderName"] ?? "Mapa Mensal";
 
-    public async Task SendAsync(string to, string subject, string htmlBody)
+    public Task SendAsync(string to, string subject, string htmlBody) =>
+        SendAsync(to, subject, htmlBody, null, null);
+
+    private async Task SendAsync(string to, string subject, string htmlBody, string? anexoNome, byte[]? anexoBytes)
     {
         if (string.IsNullOrWhiteSpace(User) || string.IsNullOrWhiteSpace(Password))
         {
@@ -34,8 +37,10 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
 
         // Alternativa em texto simples: além de servir quem lê sem HTML, uma
         // mensagem só-HTML é um sinal negativo para os filtros de spam.
-        msg.Body = new BodyBuilder { HtmlBody = htmlBody, TextBody = ParaTextoSimples(htmlBody) }
-            .ToMessageBody();
+        var builder = new BodyBuilder { HtmlBody = htmlBody, TextBody = ParaTextoSimples(htmlBody) };
+        if (anexoBytes is not null && anexoNome is not null)
+            builder.Attachments.Add(anexoNome, anexoBytes, new ContentType("application", "pdf"));
+        msg.Body = builder.ToMessageBody();
 
         using var client = new SmtpClient();
         // StartTls e não StartTlsWhenAvailable: se o servidor não oferecer TLS,
@@ -142,6 +147,29 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
 </div>";
 
         await SendAsync(to, $"Marcação confirmada: {titulo}", html);
+    }
+
+    public async Task SendFaturaAsync(string to, string nomeProjeto, string numeroFatura, byte[] pdfBytes,
+        string? iban = null, string? bic = null, string? titular = null)
+    {
+        var dadosPagamento = string.IsNullOrWhiteSpace(iban) ? "" : $@"
+  <div style=""background:#EEEDFE;border-left:4px solid #534AB7;border-radius:6px;padding:16px 20px;margin:20px 0"">
+    <p style=""margin:0 0 8px;font-weight:600;color:#3C3489"">Dados para pagamento</p>
+    {(string.IsNullOrEmpty(titular) ? "" : $@"<p style=""margin:0 0 4px;color:#6B6A65"">Titular: {titular}</p>")}
+    <p style=""margin:0 0 4px;color:#6B6A65"">IBAN: {iban}</p>
+    {(string.IsNullOrEmpty(bic) ? "" : $@"<p style=""margin:0;color:#6B6A65"">BIC/SWIFT: {bic}</p>")}
+  </div>";
+
+        var html = $@"
+<div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto"">
+  <h2 style=""color:#534AB7"">Fatura {numeroFatura}</h2>
+  <p>Segue em anexo a fatura referente a <strong>{nomeProjeto}</strong>.</p>
+  {dadosPagamento}
+  <hr/>
+  <p style=""color:#9E9D98;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
+</div>";
+
+        await SendAsync(to, $"Fatura {numeroFatura}", html, $"Fatura_{numeroFatura}.pdf", pdfBytes);
     }
 
     private static string BtnPrimario(string link, string texto, string cor = "#534AB7") =>

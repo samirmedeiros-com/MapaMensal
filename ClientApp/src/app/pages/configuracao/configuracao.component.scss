@@ -15,6 +15,23 @@
   &:focus { outline: 2px solid #3f51b5; border-color: transparent; }
 }
 
+.banco-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--text-2, #6B6A65);
+  }
+
+  .inline-input { width: 220px; }
+}
+
 .toc-status {
   font-size: 0.85rem;
   color: var(--text-2, #6B6A65);
@@ -48,10 +65,22 @@
   mat-icon { font-size: 20px; width: 20px; height: 20px; }
 }
 
+.billing-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3, #9E9D98);
+  margin: 20px 0 10px;
+
+  &:first-of-type { margin-top: 0; }
+}
+
 .dia-vencimento-hint {
   font-size: 0.75rem;
+  line-height: 1.6;
   color: var(--text-3, #9E9D98);
-  margin: 12px 0 0;
+  margin: 18px 0 0;
   font-style: italic;
 }
 
@@ -75,33 +104,36 @@
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
-.billing-modal-card { width: 560px; }
+.billing-modal-card { width: 620px; }
 
 .modal-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: 22px;
 }
 
 .billing-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(140px, 1fr));
-  gap: 10px 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 20px;
 
   label {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-size: 0.75rem;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 500;
     color: var(--text-2, #6B6A65);
+
+    &.span2 { grid-column: span 2; }
   }
+
+  .inline-input { padding: 8px 10px; font-size: 0.92rem; }
 }
 
-@media (max-width: 700px) {
-  .billing-grid { grid-template-columns: repeat(2, 1fr); }
-}
 @media (max-width: 480px) {
   .billing-grid { grid-template-columns: 1fr; }
+  .billing-grid label.span2 { grid-column: span 1; }
 }
 
 .cat-color-dot {

@@ -30,6 +30,9 @@ export class ConfiguracaoComponent implements OnInit {
   categorias = signal<CategoriaContaPessoal[]>([]);
   categoriasAgenda = signal<CategoriaCompromisso[]>([]);
   ivaRate = signal('0.23');
+  bancoIban = signal('');
+  bancoBic = signal('');
+  bancoTitular = signal('');
   year = signal(new Date().getFullYear());
 
   newProject: Partial<Project> = { name: '', dailyRate: 0 };
@@ -51,7 +54,12 @@ export class ConfiguracaoComponent implements OnInit {
   loadAll() {
     this.api.getProjects().subscribe(p => this.projects.set(p));
     this.api.getHolidays(this.year()).subscribe(h => this.holidays.set(h));
-    this.api.getConfig().subscribe(c => this.ivaRate.set(c['IvaRate'] ?? '0.23'));
+    this.api.getConfig().subscribe(c => {
+      this.ivaRate.set(c['IvaRate'] ?? '0.23');
+      this.bancoIban.set(c['Banco:Iban'] ?? '');
+      this.bancoBic.set(c['Banco:Bic'] ?? '');
+      this.bancoTitular.set(c['Banco:Titular'] ?? '');
+    });
     this.api.getCategoriasContasPessoais().subscribe(c => this.categorias.set(c));
     this.api.getCategoriasCompromisso().subscribe(c => this.categoriasAgenda.set(c));
     this.api.getTocOnlineStatus().subscribe(s => this.tocOnlineConfigurado.set(s.isConfigured));
@@ -84,6 +92,16 @@ export class ConfiguracaoComponent implements OnInit {
   saveIva() {
     this.api.setConfig({ IvaRate: this.ivaRate() }).subscribe(() =>
       this.snack.open('Taxa de IVA guardada', '', { duration: 2000 })
+    );
+  }
+
+  saveDadosBancarios() {
+    this.api.setConfig({
+      'Banco:Iban': this.bancoIban(),
+      'Banco:Bic': this.bancoBic(),
+      'Banco:Titular': this.bancoTitular()
+    }).subscribe(() =>
+      this.snack.open('Dados bancários guardados', '', { duration: 2000 })
     );
   }
 

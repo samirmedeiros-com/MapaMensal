@@ -14,6 +14,26 @@
     </div>
   </div>
 
+  <!-- Dados Bancários -->
+  <div class="card">
+    <div class="card-title">Dados Bancários (para email das faturas)</div>
+    <div class="banco-row">
+      <label>
+        <span>IBAN</span>
+        <input class="inline-input" [ngModel]="bancoIban()" (ngModelChange)="bancoIban.set($event)" placeholder="PT50 0000 0000 0000 0000 0000 0" />
+      </label>
+      <label>
+        <span>BIC/SWIFT</span>
+        <input class="inline-input" [ngModel]="bancoBic()" (ngModelChange)="bancoBic.set($event)" placeholder="REVOLT21XXX" />
+      </label>
+      <label>
+        <span>Titular</span>
+        <input class="inline-input" [ngModel]="bancoTitular()" (ngModelChange)="bancoTitular.set($event)" placeholder="Nome do titular" />
+      </label>
+      <button mat-flat-button color="primary" (click)="saveDadosBancarios()">Guardar</button>
+    </div>
+  </div>
+
   <!-- TocOnline -->
   <div class="card">
     <div class="card-title">TocOnline (emissão de faturas)</div>
@@ -257,8 +277,10 @@
     <div class="modal-overlay" (click)="fecharFaturacao()">
       <div class="modal-card billing-modal-card" (click)="$event.stopPropagation()">
         <div class="billing-title"><mat-icon>receipt_long</mat-icon> Dados de faturação — {{ bp.name }}</div>
+
+        <div class="billing-section-title">Identificação fiscal</div>
         <div class="billing-grid">
-          <label>
+          <label class="span2">
             <span>Nome fiscal / Razão social</span>
             <input class="inline-input" [(ngModel)]="bp.faturacaoNomeFiscal" placeholder="Ex: Cliente, Lda." />
           </label>
@@ -267,6 +289,14 @@
             <input class="inline-input" [(ngModel)]="bp.faturacaoNif" placeholder="500000000" />
           </label>
           <label>
+            <span>País</span>
+            <input class="inline-input" [(ngModel)]="bp.faturacaoPais" placeholder="PT" />
+          </label>
+        </div>
+
+        <div class="billing-section-title">Morada</div>
+        <div class="billing-grid">
+          <label class="span2">
             <span>Morada</span>
             <input class="inline-input" [(ngModel)]="bp.faturacaoMorada" placeholder="Rua, número" />
           </label>
@@ -278,17 +308,22 @@
             <span>Localidade</span>
             <input class="inline-input" [(ngModel)]="bp.faturacaoLocalidade" placeholder="Lisboa" />
           </label>
-          <label>
-            <span>País</span>
-            <input class="inline-input" [(ngModel)]="bp.faturacaoPais" placeholder="PT" />
-          </label>
+        </div>
+
+        <div class="billing-section-title">Vencimento e envio</div>
+        <div class="billing-grid">
           <label>
             <span>Dia de vencimento</span>
             <input class="inline-input" type="number" min="1" max="31" [(ngModel)]="bp.diaVencimento" placeholder="30" />
           </label>
+          <label class="span2">
+            <span>Email do destinatário (envio automático da fatura)</span>
+            <input class="inline-input" type="email" [(ngModel)]="bp.faturacaoEmail" placeholder="financeiro@cliente.pt" />
+          </label>
         </div>
         <p class="dia-vencimento-hint">
-          Ex: fatura emitida a 15/08 com dia de vencimento 28 → vence a 28/08. Com dia de vencimento 05 → vence a 05/09 (sempre depois da emissão).
+          Dia de vencimento: ex. fatura emitida a 15/08 com dia 28 → vence a 28/08; com dia 05 → vence a 05/09 (sempre depois da emissão).<br>
+          Email: se preenchido, a fatura (PDF + dados de pagamento) é enviada automaticamente para este endereço assim que for emitida.
         </p>
         <div class="modal-actions">
           <button mat-flat-button color="primary" (click)="salvarFaturacao()">Guardar</button>

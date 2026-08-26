@@ -14,4 +14,7 @@ public interface IEmailService
 
     Task SendConfirmacaoPublicaAsync(string to, string nomeParticipante,
         string titulo, DateTime inicio, DateTime fim, string local, string? linkIcs = null);
+
+    Task SendFaturaAsync(string to, string nomeProjeto, string numeroFatura, byte[] pdfBytes,
+        string? iban = null, string? bic = null, string? titular = null);
 }

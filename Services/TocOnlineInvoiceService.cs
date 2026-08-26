@@ -23,16 +23,18 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
     private readonly TocOnlineOptions _opts;
     private readonly IHttpClientFactory _httpFactory;
     private readonly ITocOnlineAuthService _auth;
+    private readonly IEmailService _email;
     private readonly ILogger<TocOnlineInvoiceService> _logger;
 
     public TocOnlineInvoiceService(
         AppDbContext db, IOptions<TocOnlineOptions> opts, IHttpClientFactory httpFactory,
-        ITocOnlineAuthService auth, ILogger<TocOnlineInvoiceService> logger)
+        ITocOnlineAuthService auth, IEmailService email, ILogger<TocOnlineInvoiceService> logger)
     {
         _db = db;
         _opts = opts.Value;
         _httpFactory = httpFactory;
         _auth = auth;
+        _email = email;
         _logger = logger;
     }
 
@@ -116,6 +118,19 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
             await _db.SaveChangesAsync(ct); // atribui fatura.Id antes de o usar como FK abaixo
             await FaturaFinanceiroHelper.CriarPrevisaoAsync(_db, fatura, project, ct);
             await _db.SaveChangesAsync(ct);
+
+            if (!string.IsNullOrWhiteSpace(project.FaturacaoEmail) && pdfBase64 is not null)
+            {
+                try
+                {
+                    var (iban, bic, titular) = await FaturaFinanceiroHelper.ObterDadosBancariosAsync(_db, ct);
+                    await _email.SendFaturaAsync(project.FaturacaoEmail, project.Name, fatura.NumeroFatura, Convert.FromBase64String(pdfBase64), iban, bic, titular);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Falha ao enviar fatura {NumeroFatura} por email para {Email}", fatura.NumeroFatura, project.FaturacaoEmail);
+                }
+            }
 
             return new(true, null, fatura);
         }
