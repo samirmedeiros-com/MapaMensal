@@ -137,6 +137,11 @@
                     <mat-icon>picture_as_pdf</mat-icon>
                   </button>
                 }
+                @if (row.fatura?.temPdf && row.fatura?.estado !== 'Anulada') {
+                  <button type="button" class="icon-btn icon-btn-neutro" [disabled]="reenviandoEmailProjectId() === row.projectId" (click)="reenviarEmail(row.projectId)" matTooltip="Reenviar email da fatura">
+                    <mat-icon>forward_to_inbox</mat-icon>
+                  </button>
+                }
               </div>
             </td>
             <td class="fatura-acoes">

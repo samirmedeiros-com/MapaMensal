@@ -206,6 +206,32 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
         return Ok(new { fatura.NumeroFatura, fatura.DataEmissao, fatura.Estado });
     }
 
+    [HttpPost("reenviar-email")]
+    public async Task<IActionResult> ReenviarEmail([FromBody] EmitirFaturaDto dto)
+    {
+        var fatura = await GetFaturaAtualAsync(dto.ProjectId, dto.Year, dto.Month);
+        if (fatura is null) return NotFound("Fatura não encontrada.");
+        if (fatura.PdfBase64 is null) return UnprocessableEntity("Esta fatura não tem PDF guardado.");
+
+        var project = await db.Projects.FindAsync(dto.ProjectId);
+        if (project is null) return NotFound("Projeto não encontrado.");
+        if (string.IsNullOrWhiteSpace(project.FaturacaoEmail))
+            return UnprocessableEntity("Preencha o email do destinatário nos dados de faturação do projeto.");
+
+        try
+        {
+            var (iban, bic, titular) = await FaturaFinanceiroHelper.ObterDadosBancariosAsync(db);
+            await emailService.SendFaturaAsync(project.FaturacaoEmail, project.Name, fatura.NumeroFatura, Convert.FromBase64String(fatura.PdfBase64), iban, bic, titular);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Falha ao reenviar fatura {NumeroFatura} por email", fatura.NumeroFatura);
+            return UnprocessableEntity($"Não foi possível enviar o email: {ex.Message}");
+        }
+
+        return Ok(new { project.FaturacaoEmail });
+    }
+
     [HttpGet("fatura/{projectId}/{year}/{month}/pdf")]
     public async Task<IActionResult> GetFaturaPdf(int projectId, int year, int month)
     {

@@ -46,6 +46,7 @@ export class MapaDiasComponent implements OnInit, OnDestroy {
 
   faturas = signal<TimesheetFaturaDto[]>([]);
   emitindoProjectId = signal<number | null>(null);
+  reenviandoEmailProjectId = signal<number | null>(null);
 
   modalHistoricoProjectId = signal<number | null>(null);
   historicoAnuladas = signal<TimesheetFaturaAnuladaDto[]>([]);
@@ -298,6 +299,20 @@ export class MapaDiasComponent implements OnInit, OnDestroy {
         this.pdfModalUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfObjectUrl));
       },
       error: () => this.snack.open('Não foi possível abrir o PDF.', 'Ok', { duration: 3000 })
+    });
+  }
+
+  reenviarEmail(projectId: number) {
+    this.reenviandoEmailProjectId.set(projectId);
+    this.api.reenviarEmailFatura(projectId, this.year(), this.month()).subscribe({
+      next: (r) => {
+        this.reenviandoEmailProjectId.set(null);
+        this.snack.open(`Email reenviado para ${r.faturacaoEmail}.`, 'Ok', { duration: 4000 });
+      },
+      error: (err) => {
+        this.reenviandoEmailProjectId.set(null);
+        this.snack.open(err?.error ?? 'Não foi possível reenviar o email.', 'Ok', { duration: 5000 });
+      }
     });
   }
 

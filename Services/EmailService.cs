@@ -22,7 +22,8 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
     public Task SendAsync(string to, string subject, string htmlBody) =>
         SendAsync(to, subject, htmlBody, null, null);
 
-    private async Task SendAsync(string to, string subject, string htmlBody, string? anexoNome, byte[]? anexoBytes)
+    private async Task SendAsync(string to, string subject, string htmlBody, string? anexoNome, byte[]? anexoBytes,
+        string? remetenteNome = null, string? remetenteEmail = null)
     {
         if (string.IsNullOrWhiteSpace(User) || string.IsNullOrWhiteSpace(Password))
         {
@@ -31,7 +32,7 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
         }
 
         var msg = new MimeMessage();
-        msg.From.Add(new MailboxAddress(SenderName, From));
+        msg.From.Add(new MailboxAddress(remetenteNome ?? SenderName, remetenteEmail ?? From));
         msg.To.Add(MailboxAddress.Parse(to));
         msg.Subject = subject;
 
@@ -154,22 +155,25 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
     {
         var dadosPagamento = string.IsNullOrWhiteSpace(iban) ? "" : $@"
   <div style=""background:#EEEDFE;border-left:4px solid #534AB7;border-radius:6px;padding:16px 20px;margin:20px 0"">
-    <p style=""margin:0 0 8px;font-weight:600;color:#3C3489"">Dados para pagamento</p>
     {(string.IsNullOrEmpty(titular) ? "" : $@"<p style=""margin:0 0 4px;color:#6B6A65"">Titular: {titular}</p>")}
     <p style=""margin:0 0 4px;color:#6B6A65"">IBAN: {iban}</p>
     {(string.IsNullOrEmpty(bic) ? "" : $@"<p style=""margin:0;color:#6B6A65"">BIC/SWIFT: {bic}</p>")}
   </div>";
 
         var html = $@"
-<div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto"">
-  <h2 style=""color:#534AB7"">Fatura {numeroFatura}</h2>
-  <p>Segue em anexo a fatura referente a <strong>{nomeProjeto}</strong>.</p>
+<div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1A1A18"">
+  <p>Segue em anexo fatura {numeroFatura} referente aos serviços prestados. Agradeço o pagamento na conta bancária abaixo:</p>
   {dadosPagamento}
-  <hr/>
-  <p style=""color:#9E9D98;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
+  <p>Com os melhores cumprimentos,<br/>Samir Medeiros</p>
+  <hr style=""border:none;border-top:1px solid #e5e5e5;margin:24px 0 16px""/>
+  <a href=""https://zoompositivo.pt"" target=""_blank"" rel=""noopener"" style=""display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#6B6A65;font-size:12px"">
+    <img src=""https://app.zoompositivo.pt/zoompositivo-logo.png"" width=""20"" height=""20"" alt="""" style=""display:inline-block;vertical-align:middle""/>
+    <span><b>Zoom</b>Positivo</span>
+  </a>
 </div>";
 
-        await SendAsync(to, $"Fatura {numeroFatura}", html, $"Fatura_{numeroFatura}.pdf", pdfBytes);
+        await SendAsync(to, $"Fatura Mensal - {numeroFatura}", html, $"Fatura_{numeroFatura}.pdf", pdfBytes,
+            remetenteNome: "Samir Medeiros (ZoomPositivo)", remetenteEmail: "contabilidade@zoompositivo.pt");
     }
 
     private static string BtnPrimario(string link, string texto, string cor = "#534AB7") =>
