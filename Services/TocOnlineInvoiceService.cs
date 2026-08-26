@@ -187,7 +187,7 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
             ["customer_city"] = project.FaturacaoLocalidade ?? "",
             ["customer_country"] = string.IsNullOrWhiteSpace(project.FaturacaoPais) ? "PT" : project.FaturacaoPais,
             ["vat_included_prices"] = false,
-            ["payment_mechanism"] = "TB",
+            ["payment_mechanism"] = "TR", // Transferência bancária (o "TB" usado antes não é um código reconhecido pelo TocOnline)
             ["notes"] = $"TimeSheet {project.Name} — {month:D2}/{year}.",
             ["lines"] = new JsonArray
             {
