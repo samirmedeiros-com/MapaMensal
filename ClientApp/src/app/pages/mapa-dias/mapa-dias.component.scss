@@ -1,22 +1,6 @@
-:host {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
-.page-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  flex: 1 1 auto;
-}
-
-.page-title { flex: 0 0 auto; margin-bottom: 8px; }
+.page-title { margin-bottom: 8px; }
 
 .month-nav {
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -25,7 +9,6 @@
 }
 
 .legend {
-  flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -53,23 +36,16 @@
 .calendar-card {
   padding: 0;
   overflow: hidden;
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  margin-bottom: 0;
 }
 
 .calendar-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
   width: 100%;
+  overflow-x: auto;
 }
 
 .calendar-table {
   table-layout: fixed;
   width: 100%;
-  height: 100%;
   border-collapse: collapse;
   font-size: 0.78rem;
 
