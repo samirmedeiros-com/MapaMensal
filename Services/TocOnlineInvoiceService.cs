@@ -141,16 +141,11 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                // A anulação não é um PATCH normal ao documento: é uma sub-rota /void
-                // dedicada, com o corpo na estrutura type/id/attributes (não achatado).
-                // Confirmado na documentação depois de duas tentativas anteriores
-                // devolverem 200 sem anular nada de facto.
-                var body = new JsonObject
-                {
-                    ["type"] = "commercial_sales_documents",
-                    ["id"] = fatura.TocOnlineDocId,
-                    ["attributes"] = new JsonObject { ["status"] = 4, ["voided_reason"] = justificativa }
-                };
+                // A anulação é na sub-rota /void, com o corpo achatado (não em type/id/attributes
+                // JSON:API — isso devolvia 200 sem anular nada). Confirmado por teste direto: só
+                // este formato (PATCH .../void com {status,voided_reason} simples) mudou o
+                // documento real para status 4.
+                var body = new JsonObject { ["status"] = 4, ["voided_reason"] = justificativa };
                 var bodyBytes = Encoding.UTF8.GetBytes(body.ToJsonString());
                 var bodyContent = new ByteArrayContent(bodyBytes);
                 bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
