@@ -77,7 +77,12 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             var payload = BuildDocumentPayload(project, workedDays, ivaRate, month, year);
-            var content = new StringContent(payload.ToJsonString(), Encoding.UTF8, "application/json");
+            // TocOnline rejeita Content-Type com "charset" (415) — StringContent
+            // acrescenta-o sempre, por isso o corpo tem de ir por ByteArrayContent
+            // com o cabeçalho definido à mão (mesma solução usada no FleetDrive).
+            var bytes = Encoding.UTF8.GetBytes(payload.ToJsonString());
+            var content = new ByteArrayContent(bytes);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var postResp = await client.PostAsync($"{_opts.ApiUrl}/api/v1/commercial_sales_documents", content, ct);
             var postBody = await postResp.Content.ReadAsStringAsync(ct);
@@ -136,10 +141,13 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 var body = new JsonObject { ["status"] = "void" };
+                var bodyBytes = Encoding.UTF8.GetBytes(body.ToJsonString());
+                var bodyContent = new ByteArrayContent(bodyBytes);
+                bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 var req = new HttpRequestMessage(HttpMethod.Patch,
                     $"{_opts.ApiUrl}/api/v1/commercial_sales_documents/{fatura.TocOnlineDocId}")
                 {
-                    Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json")
+                    Content = bodyContent
                 };
                 var resp = await client.SendAsync(req, ct);
                 var respBody = await resp.Content.ReadAsStringAsync(ct);
