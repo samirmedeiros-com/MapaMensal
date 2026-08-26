@@ -141,15 +141,21 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                // TocOnline usa o inteiro 4 para "anulado" (não uma string "void") e exige
-                // "voided_reason" — confirmado na documentação, depois de o pedido anterior
-                // devolver 200 sem anular nada de facto (campo não reconhecido é ignorado).
-                var body = new JsonObject { ["status"] = 4, ["voided_reason"] = justificativa };
+                // A anulação não é um PATCH normal ao documento: é uma sub-rota /void
+                // dedicada, com o corpo na estrutura type/id/attributes (não achatado).
+                // Confirmado na documentação depois de duas tentativas anteriores
+                // devolverem 200 sem anular nada de facto.
+                var body = new JsonObject
+                {
+                    ["type"] = "commercial_sales_documents",
+                    ["id"] = fatura.TocOnlineDocId,
+                    ["attributes"] = new JsonObject { ["status"] = 4, ["voided_reason"] = justificativa }
+                };
                 var bodyBytes = Encoding.UTF8.GetBytes(body.ToJsonString());
                 var bodyContent = new ByteArrayContent(bodyBytes);
                 bodyContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 var req = new HttpRequestMessage(HttpMethod.Patch,
-                    $"{_opts.ApiUrl}/api/v1/commercial_sales_documents/{fatura.TocOnlineDocId}")
+                    $"{_opts.ApiUrl}/api/v1/commercial_sales_documents/{fatura.TocOnlineDocId}/void")
                 {
                     Content = bodyContent
                 };
