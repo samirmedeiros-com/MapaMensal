@@ -6,7 +6,7 @@ import {
   Expense, AnnualSummary, TreasurySummary, Tarefa,
   ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal,
   Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso,
-  TimesheetStatus, TimesheetFaturaDto
+  TimesheetStatus, TimesheetFaturaDto, TimesheetFaturaAnuladaDto
 } from '../models/models';
 import { environment } from '../../environments/environment';
 
@@ -61,6 +61,12 @@ export class ApiService {
   }
   anularFaturaTimesheet(projectId: number, year: number, month: number, justificativa: string): Observable<void> {
     return this.http.post<void>(`${this.base}/timesheet/anular-fatura`, { projectId, year, month, justificativa });
+  }
+  getFaturasAnuladas(projectId: number, year: number, month: number): Observable<TimesheetFaturaAnuladaDto[]> {
+    return this.http.get<TimesheetFaturaAnuladaDto[]>(`${this.base}/timesheet/faturas-anuladas/${projectId}/${year}/${month}`);
+  }
+  getFaturaAnuladaPdfBlob(faturaId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/timesheet/fatura-anulada/${faturaId}/pdf`, { responseType: 'blob' });
   }
   getFaturaPdfBlob(projectId: number, year: number, month: number): Observable<Blob> {
     return this.http.get(`${this.base}/timesheet/fatura/${projectId}/${year}/${month}/pdf`, { responseType: 'blob' });

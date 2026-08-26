@@ -125,7 +125,12 @@
                 —
               }
             </td>
-            <td>
+            <td class="pdf-cell">
+              @if (row.fatura?.temAnuladas) {
+                <button type="button" class="icon-btn-historico" (click)="abrirHistoricoAnuladas(row.projectId)" matTooltip="Há fatura(s) anulada(s) para este mês — ver histórico">
+                  <mat-icon>history</mat-icon>
+                </button>
+              }
               @if (row.fatura?.temPdf) {
                 <button type="button" class="btn-action btn-emitir" (click)="verPdf(row.projectId)">Ver PDF</button>
               }
@@ -231,6 +236,46 @@
           <button mat-icon-button (click)="fecharPdf()"><mat-icon>close</mat-icon></button>
         </div>
         <iframe [src]="url" class="pdf-frame"></iframe>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL HISTÓRICO DE FATURAS ANULADAS -->
+  @if (modalHistoricoProjectId() !== null) {
+    <div class="modal-overlay" (click)="fecharModalHistorico()">
+      <div class="modal-card historico-modal-card" (click)="$event.stopPropagation()">
+        <div class="pdf-modal-header">
+          <span class="modal-title">Histórico de faturas anuladas</span>
+          <button mat-icon-button (click)="fecharModalHistorico()"><mat-icon>close</mat-icon></button>
+        </div>
+        <div class="historico-body">
+          <div class="historico-lista">
+            @for (f of historicoAnuladas(); track f.id) {
+              <button type="button" class="historico-item" [class.selected]="historicoSelecionadaId() === f.id" (click)="selecionarHistoricoPdf(f.id)">
+                <div class="historico-item-topo">
+                  <mat-icon>{{ f.origem === 'Online' ? 'cloud_done' : 'upload_file' }}</mat-icon>
+                  <span class="historico-numero">{{ f.numeroFatura }}</span>
+                </div>
+                <div class="historico-data">Emitida: {{ formatDateTime(f.dataEmissao) }}</div>
+                <div class="historico-data">Anulada: {{ formatDateTime(f.anuladaEm) }}</div>
+                <div class="historico-justificativa">{{ f.justificativaAnulacao }}</div>
+                @if (!f.temPdf) {
+                  <div class="historico-sem-pdf">Sem PDF guardado</div>
+                }
+              </button>
+            }
+            @if (historicoAnuladas().length === 0) {
+              <div class="historico-vazio">Sem faturas anuladas.</div>
+            }
+          </div>
+          <div class="historico-visualizacao">
+            @if (historicoPdfUrl(); as url) {
+              <iframe [src]="url" class="pdf-frame"></iframe>
+            } @else {
+              <div class="historico-sem-selecao">Selecione uma fatura anulada com PDF para visualizar.</div>
+            }
+          </div>
+        </div>
       </div>
     </div>
   }

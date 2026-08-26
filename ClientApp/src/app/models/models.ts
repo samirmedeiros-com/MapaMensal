@@ -11,6 +11,7 @@ export interface Project {
   faturacaoCodigoPostal?: string | null;
   faturacaoLocalidade?: string | null;
   faturacaoPais?: string;
+  prazoVencimentoDias?: number;
 }
 
 export interface WorkDay {
@@ -46,6 +47,17 @@ export interface TimesheetFaturaDto {
   origem: 'Online' | 'Offline';
   anuladaEm: string | null;
   justificativaAnulacao: string | null;
+  temPdf: boolean;
+  temAnuladas: boolean;
+}
+
+export interface TimesheetFaturaAnuladaDto {
+  id: number;
+  numeroFatura: string;
+  dataEmissao: string;
+  anuladaEm: string;
+  justificativaAnulacao: string;
+  origem: 'Online' | 'Offline';
   temPdf: boolean;
 }
 

@@ -113,6 +113,7 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
                 Origem = "Online"
             };
             _db.TimesheetFaturas.Add(fatura);
+            await FaturaFinanceiroHelper.CriarPrevisaoAsync(_db, fatura, project, ct);
             await _db.SaveChangesAsync(ct);
 
             return new(true, null, fatura);
@@ -167,6 +168,7 @@ public class TocOnlineInvoiceService : ITocOnlineInvoiceService
         fatura.Estado = "Anulada";
         fatura.AnuladaEm = DateTime.UtcNow;
         fatura.JustificativaAnulacao = justificativa;
+        await FaturaFinanceiroHelper.RemoverPrevisaoAsync(_db, fatura.Id, ct);
         await _db.SaveChangesAsync(ct);
 
         return (true, null);

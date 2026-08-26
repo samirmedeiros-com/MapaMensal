@@ -102,6 +102,10 @@
                       <span>País</span>
                       <input class="inline-input" [(ngModel)]="editingProject!.faturacaoPais" placeholder="PT" />
                     </label>
+                    <label>
+                      <span>Prazo de vencimento (dias)</span>
+                      <input class="inline-input" type="number" min="0" [(ngModel)]="editingProject!.prazoVencimentoDias" placeholder="30" />
+                    </label>
                   </div>
                 </div>
               </td>

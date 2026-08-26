@@ -17,5 +17,8 @@ public class Project
     public string? FaturacaoLocalidade { get; set; }
     public string FaturacaoPais { get; set; } = "PT";
 
+    /// <summary>Dias após a emissão em que a fatura vence — usado para gerar a previsão de pagamento no Financeiro.</summary>
+    public int PrazoVencimentoDias { get; set; } = 30;
+
     public ICollection<WorkDay> WorkDays { get; set; } = [];
 }

@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
-import { Project, WorkDay, Holiday, MONTH_NAMES, DAY_NAMES, TimesheetStatus, TimesheetFaturaDto } from '../../models/models';
+import { Project, WorkDay, Holiday, MONTH_NAMES, DAY_NAMES, TimesheetStatus, TimesheetFaturaDto, TimesheetFaturaAnuladaDto } from '../../models/models';
 
 interface DayCell {
   day: number;
@@ -46,6 +46,12 @@ export class MapaDiasComponent implements OnInit, OnDestroy {
 
   faturas = signal<TimesheetFaturaDto[]>([]);
   emitindoProjectId = signal<number | null>(null);
+
+  modalHistoricoProjectId = signal<number | null>(null);
+  historicoAnuladas = signal<TimesheetFaturaAnuladaDto[]>([]);
+  historicoSelecionadaId = signal<number | null>(null);
+  historicoPdfUrl = signal<SafeResourceUrl | null>(null);
+  private historicoPdfObjectUrl: string | null = null;
 
   modalEmitirProjectId = signal<number | null>(null);
   modalEmitirModo = signal<'escolha' | 'offline'>('escolha');
@@ -391,7 +397,44 @@ export class MapaDiasComponent implements OnInit, OnDestroy {
     }
   }
 
+  abrirHistoricoAnuladas(projectId: number) {
+    this.modalHistoricoProjectId.set(projectId);
+    this.historicoAnuladas.set([]);
+    this.historicoSelecionadaId.set(null);
+    this.limparHistoricoPdf();
+    this.api.getFaturasAnuladas(projectId, this.year(), this.month()).subscribe(lista => {
+      this.historicoAnuladas.set(lista);
+      if (lista.length > 0 && lista[0].temPdf) this.selecionarHistoricoPdf(lista[0].id);
+    });
+  }
+
+  fecharModalHistorico() {
+    this.modalHistoricoProjectId.set(null);
+    this.limparHistoricoPdf();
+  }
+
+  selecionarHistoricoPdf(faturaId: number) {
+    this.historicoSelecionadaId.set(faturaId);
+    this.limparHistoricoPdf();
+    this.api.getFaturaAnuladaPdfBlob(faturaId).subscribe({
+      next: (blob) => {
+        this.historicoPdfObjectUrl = URL.createObjectURL(blob);
+        this.historicoPdfUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.historicoPdfObjectUrl));
+      },
+      error: () => this.snack.open('Não foi possível abrir o PDF.', 'Ok', { duration: 3000 })
+    });
+  }
+
+  private limparHistoricoPdf() {
+    this.historicoPdfUrl.set(null);
+    if (this.historicoPdfObjectUrl) {
+      URL.revokeObjectURL(this.historicoPdfObjectUrl);
+      this.historicoPdfObjectUrl = null;
+    }
+  }
+
   ngOnDestroy() {
     this.fecharPdf();
+    this.limparHistoricoPdf();
   }
 }

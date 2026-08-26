@@ -88,24 +88,59 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
 
         var atuais = todas
             .GroupBy(f => f.ProjectId)
-            .Select(g => g
-                .OrderBy(f => f.Estado == "Anulada" ? 1 : 0)
-                .ThenByDescending(f => f.DataEmissao)
-                .First())
-            .Select(f => new
+            .Select(g =>
             {
-                f.ProjectId,
-                f.NumeroFatura,
-                f.DataEmissao,
-                f.Estado,
-                f.DataRecebimento,
-                f.Origem,
-                f.AnuladaEm,
-                f.JustificativaAnulacao,
-                TemPdf = f.PdfBase64 != null
+                var atual = g
+                    .OrderBy(f => f.Estado == "Anulada" ? 1 : 0)
+                    .ThenByDescending(f => f.DataEmissao)
+                    .First();
+                return new
+                {
+                    atual.ProjectId,
+                    atual.NumeroFatura,
+                    atual.DataEmissao,
+                    atual.Estado,
+                    atual.DataRecebimento,
+                    atual.Origem,
+                    atual.AnuladaEm,
+                    atual.JustificativaAnulacao,
+                    TemPdf = atual.PdfBase64 != null,
+                    TemAnuladas = g.Any(f => f.Estado == "Anulada")
+                };
             });
 
         return Ok(atuais);
+    }
+
+    [HttpGet("faturas-anuladas/{projectId}/{year}/{month}")]
+    public async Task<IActionResult> GetFaturasAnuladas(int projectId, int year, int month)
+    {
+        var anuladas = await db.TimesheetFaturas
+            .Where(f => f.ProjectId == projectId && f.Year == year && f.Month == month && f.Estado == "Anulada")
+            .OrderByDescending(f => f.AnuladaEm)
+            .Select(f => new
+            {
+                f.Id,
+                f.NumeroFatura,
+                f.DataEmissao,
+                f.AnuladaEm,
+                f.JustificativaAnulacao,
+                f.Origem,
+                TemPdf = f.PdfBase64 != null
+            })
+            .ToListAsync();
+
+        return Ok(anuladas);
+    }
+
+    [HttpGet("fatura-anulada/{faturaId}/pdf")]
+    public async Task<IActionResult> GetFaturaAnuladaPdf(int faturaId)
+    {
+        var fatura = await db.TimesheetFaturas.FindAsync(faturaId);
+        if (fatura?.PdfBase64 is null) return NotFound();
+
+        var bytes = Convert.FromBase64String(fatura.PdfBase64);
+        return File(bytes, "application/pdf", $"Fatura_{fatura.NumeroFatura}.pdf");
     }
 
     [HttpPost("emitir-fatura")]
@@ -136,6 +171,9 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
         if (string.IsNullOrWhiteSpace(dto.NumeroFatura) || string.IsNullOrWhiteSpace(dto.DataEmissao))
             return BadRequest("Número da fatura e data de emissão são obrigatórios.");
 
+        var project = await db.Projects.FindAsync(dto.ProjectId);
+        if (project is null) return NotFound("Projeto não encontrado.");
+
         var fatura = new TimesheetFatura
         {
             ProjectId = dto.ProjectId,
@@ -148,6 +186,7 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
             Origem = "Offline"
         };
         db.TimesheetFaturas.Add(fatura);
+        await FaturaFinanceiroHelper.CriarPrevisaoAsync(db, fatura, project);
         await db.SaveChangesAsync();
 
         return Ok(new { fatura.NumeroFatura, fatura.DataEmissao, fatura.Estado });
@@ -190,37 +229,30 @@ public class TimesheetController(AppDbContext db, ITocOnlineInvoiceService invoi
         if (fatura is null) return NotFound("Fatura não encontrada.");
         if (fatura.Estado == "Recebida") return Ok();
 
-        var workedDays = await db.WorkDays
-            .Where(w => w.ProjectId == dto.ProjectId
-                && w.Date >= new DateOnly(dto.Year, dto.Month, 1)
-                && w.Date <= new DateOnly(dto.Year, dto.Month, 1).AddMonths(1).AddDays(-1)
-                && w.Mark > 0)
-            .SumAsync(w => w.Mark);
-
-        var ivaRateStr = await db.AppConfigs
-            .Where(c => c.Key == "IvaRate")
-            .Select(c => c.Value)
-            .FirstOrDefaultAsync() ?? "0.23";
-        var ivaRate = decimal.Parse(ivaRateStr, System.Globalization.CultureInfo.InvariantCulture);
-        var valorTotal = workedDays * fatura.Project.DailyRate;
-        var valorFatura = valorTotal * (1 + ivaRate);
-
         var hoje = DateOnly.FromDateTime(DateTime.UtcNow);
+        var lancamento = await db.ContasPessoais.FirstOrDefaultAsync(c => c.TimesheetFaturaId == fatura.Id);
 
-        db.ContasPessoais.Add(new ContaPessoal
+        if (lancamento is null)
         {
-            Tipo = "Entrada",
-            Descricao = $"Fatura {fatura.NumeroFatura} — {fatura.Project.Name}",
-            Categoria = "Faturação",
-            DataVencimento = hoje,
-            DataPagamento = hoje,
-            ValorPrevisto = valorFatura,
-            ValorPago = valorFatura,
-            Pago = true,
-            MesReferencia = dto.Month,
-            AnoReferencia = dto.Year,
-            TimesheetFaturaId = fatura.Id
-        });
+            // Fatura emitida antes desta funcionalidade existir — cria o lançamento agora.
+            var valorFatura = await FaturaFinanceiroHelper.CalcularValorFaturaAsync(db, dto.ProjectId, dto.Year, dto.Month);
+            lancamento = new ContaPessoal
+            {
+                Tipo = "Entrada",
+                Descricao = $"Fatura {fatura.NumeroFatura} — {fatura.Project.Name}",
+                Categoria = "Faturação",
+                DataVencimento = hoje,
+                ValorPrevisto = valorFatura,
+                MesReferencia = dto.Month,
+                AnoReferencia = dto.Year,
+                TimesheetFaturaId = fatura.Id
+            };
+            db.ContasPessoais.Add(lancamento);
+        }
+
+        lancamento.Pago = true;
+        lancamento.DataPagamento = hoje;
+        lancamento.ValorPago = lancamento.ValorPrevisto;
 
         fatura.Estado = "Recebida";
         fatura.DataRecebimento = DateTime.UtcNow;
