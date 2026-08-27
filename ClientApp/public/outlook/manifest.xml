@@ -2,7 +2,6 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
-           xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
 
   <Id>7d3f1a52-9c44-4d1e-b0f7-4b2c9e6a1c10</Id>
@@ -76,24 +75,6 @@
           </ExtensionPoint>
         </DesktopFormFactor>
 
-        <MobileFormFactor>
-          <ExtensionPoint xsi:type="MobileMessageReadCommandSurface">
-            <Group id="mmGroupMobile">
-              <Label resid="groupLabel"/>
-              <Control xsi:type="MobileButton" id="mmTaskpaneButtonMobile">
-                <Label resid="btnLabel"/>
-                <Icon>
-                  <bt:Image size="25" scale="1" resid="icon32"/>
-                  <bt:Image size="32" scale="1" resid="icon32"/>
-                  <bt:Image size="48" scale="1" resid="icon80"/>
-                </Icon>
-                <Action xsi:type="ShowTaskpane">
-                  <SourceLocation resid="taskpaneUrl"/>
-                </Action>
-              </Control>
-            </Group>
-          </ExtensionPoint>
-        </MobileFormFactor>
       </Host>
     </Hosts>
 
