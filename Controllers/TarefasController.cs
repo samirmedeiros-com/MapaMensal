@@ -30,7 +30,8 @@ public class TarefasController(AppDbContext db) : ControllerBase
                 t.Titulo, t.Descricao, t.Status,
                 CreatedAt = t.CreatedAt.ToString("yyyy-MM-dd"),
                 DataEntrega = t.DataEntrega.HasValue ? t.DataEntrega.Value.ToString("yyyy-MM-dd") : null,
-                t.HorasGastas, t.Arquivado
+                t.HorasGastas, t.Arquivado,
+                NumComentarios = t.Comentarios.Count()
             })
             .ToListAsync();
 
@@ -114,6 +115,59 @@ public class TarefasController(AppDbContext db) : ControllerBase
         return NoContent();
     }
 
+    // ── Comentários ───────────────────────────────────────────────────────────
+
+    [HttpGet("{id}/comentarios")]
+    public async Task<IActionResult> GetComentarios(int id)
+    {
+        if (!await db.Tarefas.AnyAsync(t => t.Id == id)) return NotFound();
+
+        var comentarios = await db.TarefaComentarios
+            .Where(c => c.TarefaId == id)
+            .OrderBy(c => c.CreatedAt)
+            .Select(c => new { c.Id, c.Texto, c.Autor, CreatedAt = c.CreatedAt })
+            .ToListAsync();
+
+        return Ok(comentarios);
+    }
+
+    [HttpPost("{id}/comentarios")]
+    public async Task<IActionResult> AddComentario(int id, [FromBody] ComentarioDto dto)
+    {
+        var texto = (dto.Texto ?? string.Empty).Trim();
+        if (texto.Length == 0)
+            return BadRequest(new { message = "O comentário não pode estar vazio." });
+        if (!await db.Tarefas.AnyAsync(t => t.Id == id)) return NotFound();
+
+        var comentario = new TarefaComentario
+        {
+            TarefaId = id,
+            Texto = texto,
+            Autor = User.Identity?.Name ?? "—",
+            CreatedAt = DateTime.UtcNow
+        };
+        db.TarefaComentarios.Add(comentario);
+        await db.SaveChangesAsync();
+
+        return Ok(new { comentario.Id, comentario.Texto, comentario.Autor, comentario.CreatedAt });
+    }
+
+    [HttpDelete("comentarios/{comentarioId}")]
+    public async Task<IActionResult> DeleteComentario(int comentarioId)
+    {
+        var comentario = await db.TarefaComentarios.FindAsync(comentarioId);
+        if (comentario is null) return NotFound();
+
+        // Só o autor apaga o próprio comentário; um Admin apaga qualquer um.
+        var euSou = User.Identity?.Name;
+        if (comentario.Autor != euSou && !User.IsInRole("Admin"))
+            return Forbid();
+
+        db.TarefaComentarios.Remove(comentario);
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
+
     private static object ToDto(Tarefa t) => new
     {
         t.Id, t.ProjectId,
@@ -121,9 +175,11 @@ public class TarefasController(AppDbContext db) : ControllerBase
         t.Titulo, t.Descricao, t.Status,
         CreatedAt = t.CreatedAt.ToString("yyyy-MM-dd"),
         DataEntrega = t.DataEntrega?.ToString("yyyy-MM-dd"),
-        t.HorasGastas, t.Arquivado
+        t.HorasGastas, t.Arquivado,
+        NumComentarios = t.Comentarios.Count
     };
 }
 
 public record TarefaDto(int ProjectId, string Titulo, string? Descricao, string? Status, string? DataEntrega, decimal HorasGastas);
 public record StatusDto(string Status);
+public record ComentarioDto(string Texto);

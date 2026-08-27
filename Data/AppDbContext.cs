@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<AppConfig> AppConfigs => Set<AppConfig>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Tarefa> Tarefas => Set<Tarefa>();
+    public DbSet<TarefaComentario> TarefaComentarios => Set<TarefaComentario>();
     public DbSet<ContaPessoal> ContasPessoais => Set<ContaPessoal>();
     public DbSet<CategoriaContaPessoal> CategoriasContasPessoais => Set<CategoriaContaPessoal>();
     public DbSet<Compromisso> Compromissos => Set<Compromisso>();
@@ -41,6 +42,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<AppConfig>().ToTable("mapa_appconfigs");
         modelBuilder.Entity<User>().ToTable("mapa_users");
         modelBuilder.Entity<Tarefa>().ToTable("mapa_tarefas");
+        modelBuilder.Entity<TarefaComentario>().ToTable("mapa_tarefa_comentarios");
+        modelBuilder.Entity<TarefaComentario>()
+            .HasOne(c => c.Tarefa)
+            .WithMany(t => t.Comentarios)
+            .HasForeignKey(c => c.TarefaId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ContaPessoal>().ToTable("mapa_contas_pessoais");
         modelBuilder.Entity<CategoriaContaPessoal>().ToTable("mapa_categorias_contas_pessoais");
         modelBuilder.Entity<Compromisso>().ToTable("mapa_compromissos");

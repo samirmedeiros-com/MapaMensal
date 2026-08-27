@@ -215,6 +215,14 @@ export interface Tarefa {
   dataEntrega?: string;
   horasGastas: number;
   arquivado: boolean;
+  numComentarios: number;
+}
+
+export interface TarefaComentario {
+  id: number;
+  texto: string;
+  autor: string;
+  createdAt: string;
 }
 
 export interface User {

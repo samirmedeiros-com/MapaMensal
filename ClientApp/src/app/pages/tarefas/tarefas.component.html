@@ -103,7 +103,7 @@
 
   <!-- KANBAN BOARD (tarefas ativas) -->
   @if (!viewArquivados()) {
-    <div class="kanban-board">
+    <div class="kanban-board" cdkDropListGroup>
       @for (col of columns; track col) {
         <div class="kanban-col">
           <div class="col-header" [class]="'col-' + col.toLowerCase()">
@@ -122,9 +122,10 @@
             </div>
           </div>
 
-          <div class="col-body">
+          <div class="col-body" cdkDropList [cdkDropListData]="col" (cdkDropListDropped)="onDrop($event, col)">
             @for (t of columnTasks()[col]; track t.id) {
-              <div class="task-card" [class.overdue]="isOverdue(t)">
+              <div class="task-card" [class.overdue]="isOverdue(t)" cdkDrag [cdkDragData]="t">
+                <div class="drag-placeholder" *cdkDragPlaceholder></div>
                 <div class="task-header">
                   <div class="task-project">{{ t.projectName }}</div>
                   <div class="task-actions">
@@ -146,6 +147,11 @@
                         <mat-icon>chevron_right</mat-icon>
                       </button>
                     }
+                    <button mat-icon-button class="comment-btn" (click)="abrirComentarios(t)"
+                            [matTooltip]="t.numComentarios ? t.numComentarios + ' comentário(s)' : 'Comentar'">
+                      <mat-icon>{{ t.numComentarios ? 'forum' : 'add_comment' }}</mat-icon>
+                      @if (t.numComentarios) { <span class="comment-count">{{ t.numComentarios }}</span> }
+                    </button>
                     <button mat-icon-button (click)="openEdit(t)" matTooltip="Editar">
                       <mat-icon>edit</mat-icon>
                     </button>
@@ -253,4 +259,52 @@
     </div>
   }
 
+  <!-- MODAL COMENTÁRIOS -->
+  @if (comentariosTarefa(); as ct) {
+    <div class="modal-overlay" (click)="fecharComentarios()">
+      <div class="modal-card comentarios-card" (click)="$event.stopPropagation()">
+        <div class="coment-title">
+          <mat-icon>forum</mat-icon>
+          <div>
+            <div class="coment-tarefa">{{ ct.titulo }}</div>
+            <div class="coment-projeto">{{ ct.projectName }}</div>
+          </div>
+        </div>
+
+        <div class="coment-lista">
+          @if (carregandoComentarios()) {
+            <p class="coment-vazio">A carregar…</p>
+          } @else if (comentarios().length === 0) {
+            <p class="coment-vazio">Ainda não há comentários nesta tarefa.</p>
+          } @else {
+            @for (c of comentarios(); track c.id) {
+              <div class="coment-item">
+                <div class="coment-meta">
+                  <strong>{{ c.autor }}</strong>
+                  <span>{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                  <button mat-icon-button class="coment-del" (click)="apagarComentario(c)" matTooltip="Eliminar">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+                <div class="coment-texto">{{ c.texto }}</div>
+              </div>
+            }
+          }
+        </div>
+
+        <textarea class="coment-input" rows="3" placeholder="Escrever um comentário…"
+                  [ngModel]="novoComentario()" (ngModelChange)="novoComentario.set($event)"
+                  (keydown.control.enter)="enviarComentario()" (keydown.meta.enter)="enviarComentario()"></textarea>
+
+        <div class="modal-actions">
+          <button mat-flat-button color="primary"
+                  [disabled]="enviandoComentario() || !novoComentario().trim()"
+                  (click)="enviarComentario()">
+            {{ enviandoComentario() ? 'A gravar…' : 'Comentar' }}
+          </button>
+          <button mat-button (click)="fecharComentarios()">Fechar</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

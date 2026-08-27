@@ -5,8 +5,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { CdkDrag, CdkDropList, CdkDropListGroup, CdkDragPlaceholder, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ApiService } from '../../services/api.service';
-import { Project, Tarefa } from '../../models/models';
+import { Project, Tarefa, TarefaComentario } from '../../models/models';
 
 type Status = 'Backlog' | 'EmProgresso' | 'Concluido';
 
@@ -30,7 +31,8 @@ const STATUS_PREV: Record<Status, Status | null> = {
 
 @Component({
   selector: 'app-tarefas',
-  imports: [FormsModule, DatePipe, MatIconModule, MatButtonModule, MatTooltipModule, MatSnackBarModule],
+  imports: [FormsModule, DatePipe, MatIconModule, MatButtonModule, MatTooltipModule, MatSnackBarModule,
+            CdkDrag, CdkDropList, CdkDropListGroup, CdkDragPlaceholder],
   templateUrl: './tarefas.component.html',
   styleUrl: './tarefas.component.scss'
 })
@@ -46,6 +48,12 @@ export class TarefasComponent implements OnInit {
   viewArquivados = signal(false);
 
   editingTarefa: Partial<Tarefa> & { dataEntrega?: string } = {};
+
+  comentariosTarefa = signal<Tarefa | null>(null);
+  comentarios = signal<TarefaComentario[]>([]);
+  novoComentario = signal('');
+  carregandoComentarios = signal(false);
+  enviandoComentario = signal(false);
   showForm = signal(false);
   isEditing = signal(false);
 
@@ -133,6 +141,75 @@ export class TarefasComponent implements OnInit {
     if (!newStatus) return;
     this.api.updateTarefaStatus(t.id, newStatus).subscribe(() => {
       this.tarefas.update(list => list.map(x => x.id === t.id ? { ...x, status: newStatus } : x));
+    });
+  }
+
+  /** Largar um cartão noutra coluna. O estado muda de imediato no ecrã e reverte se a API falhar. */
+  onDrop(event: CdkDragDrop<Status>, destino: Status) {
+    const t: Tarefa = event.item.data;
+    if (!t || t.status === destino) return;
+    if (this.viewArquivados()) return;
+
+    const anterior = t.status as Status;
+    this.tarefas.update(list => list.map(x => x.id === t.id ? { ...x, status: destino } : x));
+
+    this.api.updateTarefaStatus(t.id, destino).subscribe({
+      error: () => {
+        this.tarefas.update(list => list.map(x => x.id === t.id ? { ...x, status: anterior } : x));
+        this.snack.open('Não foi possível mover a tarefa.', '', { duration: 4000 });
+      }
+    });
+  }
+
+  // ── Comentários ───────────────────────────────────────────────────────────
+
+  abrirComentarios(t: Tarefa) {
+    this.comentariosTarefa.set(t);
+    this.comentarios.set([]);
+    this.novoComentario.set('');
+    this.carregandoComentarios.set(true);
+    this.api.getComentariosTarefa(t.id).subscribe({
+      next: c => { this.comentarios.set(c); this.carregandoComentarios.set(false); },
+      error: () => {
+        this.carregandoComentarios.set(false);
+        this.snack.open('Não foi possível carregar os comentários.', '', { duration: 4000 });
+      }
+    });
+  }
+
+  fecharComentarios() { this.comentariosTarefa.set(null); }
+
+  enviarComentario() {
+    const t = this.comentariosTarefa();
+    const texto = this.novoComentario().trim();
+    if (!t || !texto || this.enviandoComentario()) return;
+
+    this.enviandoComentario.set(true);
+    this.api.addComentarioTarefa(t.id, texto).subscribe({
+      next: c => {
+        this.enviandoComentario.set(false);
+        this.comentarios.update(list => [...list, c]);
+        this.novoComentario.set('');
+        this.tarefas.update(list => list.map(x =>
+          x.id === t.id ? { ...x, numComentarios: (x.numComentarios ?? 0) + 1 } : x));
+      },
+      error: err => {
+        this.enviandoComentario.set(false);
+        this.snack.open(err?.error?.message ?? 'Não foi possível gravar o comentário.', '', { duration: 4000 });
+      }
+    });
+  }
+
+  apagarComentario(c: TarefaComentario) {
+    const t = this.comentariosTarefa();
+    if (!t || !confirm('Eliminar este comentário?')) return;
+    this.api.deleteComentarioTarefa(c.id).subscribe({
+      next: () => {
+        this.comentarios.update(list => list.filter(x => x.id !== c.id));
+        this.tarefas.update(list => list.map(x =>
+          x.id === t.id ? { ...x, numComentarios: Math.max(0, (x.numComentarios ?? 1) - 1) } : x));
+      },
+      error: () => this.snack.open('Só podes eliminar os teus próprios comentários.', '', { duration: 4000 })
     });
   }
 

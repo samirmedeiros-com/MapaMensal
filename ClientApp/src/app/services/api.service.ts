@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   Project, WorkDay, WorkDayUpsertDto, Holiday,
-  Expense, AnnualSummary, TreasurySummary, Tarefa,
+  Expense, AnnualSummary, TreasurySummary, Tarefa, TarefaComentario,
   ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal, FaturaExtraidaDto, ConversaoMoedaDto,
   Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso,
   TimesheetStatus, TimesheetFaturaDto, TimesheetFaturaAnuladaDto
@@ -128,6 +128,15 @@ export class ApiService {
   }
   updateTarefaStatus(id: number, status: string): Observable<{ id: number; status: string }> {
     return this.http.patch<{ id: number; status: string }>(`${this.base}/tarefas/${id}/status`, { status });
+  }
+  getComentariosTarefa(id: number): Observable<TarefaComentario[]> {
+    return this.http.get<TarefaComentario[]>(`${this.base}/tarefas/${id}/comentarios`);
+  }
+  addComentarioTarefa(id: number, texto: string): Observable<TarefaComentario> {
+    return this.http.post<TarefaComentario>(`${this.base}/tarefas/${id}/comentarios`, { texto });
+  }
+  deleteComentarioTarefa(comentarioId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/tarefas/comentarios/${comentarioId}`);
   }
   arquivarTarefa(id: number): Observable<void> {
     return this.http.patch<void>(`${this.base}/tarefas/${id}/arquivar`, {});

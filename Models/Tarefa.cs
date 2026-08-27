@@ -12,4 +12,5 @@ public class Tarefa
     public DateOnly? DataEntrega { get; set; }
     public decimal HorasGastas { get; set; }
     public bool Arquivado { get; set; } = false;
+    public ICollection<TarefaComentario> Comentarios { get; set; } = [];
 }
