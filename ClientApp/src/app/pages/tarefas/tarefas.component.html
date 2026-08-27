@@ -326,9 +326,9 @@
                     [ngModel]="novoComentario()" (ngModelChange)="novoComentario.set($event)"
                     (keydown.control.enter)="enviarComentario()" (keydown.meta.enter)="enviarComentario()"></textarea>
           <div class="modal-actions">
-            <button mat-flat-button color="primary"
-                    [disabled]="enviandoComentario() || !novoComentario().trim()"
+            <button mat-flat-button color="primary" [disabled]="enviandoComentario()"
                     (click)="enviarComentario()">
+              <mat-icon>send</mat-icon>
               {{ enviandoComentario() ? 'A gravar…' : 'Comentar' }}
             </button>
             <button mat-button (click)="fecharComentarios()">Fechar</button>

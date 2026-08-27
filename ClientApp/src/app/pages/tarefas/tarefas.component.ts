@@ -192,7 +192,11 @@ export class TarefasComponent implements OnInit {
   enviarComentario() {
     const t = this.comentariosTarefa();
     const texto = this.novoComentario().trim();
-    if (!t || !texto || this.enviandoComentario()) return;
+    if (!t || this.enviandoComentario()) return;
+    if (!texto) {
+      this.snack.open('Escreve o comentário antes de gravar.', '', { duration: 3000 });
+      return;
+    }
 
     this.enviandoComentario.set(true);
     this.api.addComentarioTarefa(t.id, texto).subscribe({
