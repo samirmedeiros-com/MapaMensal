@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   Project, WorkDay, WorkDayUpsertDto, Holiday,
   Expense, AnnualSummary, TreasurySummary, Tarefa,
-  ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal,
+  ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal, FaturaExtraidaDto,
   Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso,
   TimesheetStatus, TimesheetFaturaDto, TimesheetFaturaAnuladaDto
 } from '../models/models';
@@ -149,11 +149,19 @@ export class ApiService {
   getResumoFinanceiro(inicio: string, fim: string): Observable<ResumoFinanceiro> {
     return this.http.get<ResumoFinanceiro>(`${this.base}/contaspessoais/resumo?inicio=${inicio}&fim=${fim}`);
   }
-  createContaPessoal(dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number }): Observable<ContaPessoal[]> {
+  createContaPessoal(dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null }): Observable<ContaPessoal[]> {
     return this.http.post<ContaPessoal[]>(`${this.base}/contaspessoais`, dto);
   }
-  updateContaPessoal(id: number, dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number }): Observable<ContaPessoal> {
+  updateContaPessoal(id: number, dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null }): Observable<ContaPessoal> {
     return this.http.put<ContaPessoal>(`${this.base}/contaspessoais/${id}`, dto);
+  }
+  extrairAnexoContaPessoal(ficheiro: File): Observable<FaturaExtraidaDto> {
+    const form = new FormData();
+    form.append('ficheiro', ficheiro);
+    return this.http.post<FaturaExtraidaDto>(`${this.base}/contaspessoais/extrair-anexo`, form);
+  }
+  getContaPessoalAnexoBlob(id: number): Observable<Blob> {
+    return this.http.get(`${this.base}/contaspessoais/${id}/anexo`, { responseType: 'blob' });
   }
   pagarConta(id: number, dto: { pago: boolean; valorPago?: number; dataPagamento?: string; metodoPagamento?: string }): Observable<ContaPessoal> {
     return this.http.patch<ContaPessoal>(`${this.base}/contaspessoais/${id}/pagar`, dto);

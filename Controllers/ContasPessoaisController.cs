@@ -1,5 +1,6 @@
 using MapaMensal.Data;
 using MapaMensal.Models;
+using MapaMensal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ namespace MapaMensal.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ContasPessoaisController(AppDbContext db) : ControllerBase
+public class ContasPessoaisController(AppDbContext db, ClaudeService claude, ILogger<ContasPessoaisController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -90,6 +91,52 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
         });
     }
 
+    [HttpPost("extrair-anexo")]
+    [RequestSizeLimit(15_000_000)]
+    public async Task<IActionResult> ExtrairAnexo(IFormFile ficheiro)
+    {
+        if (ficheiro.Length == 0) return BadRequest("Ficheiro vazio.");
+        var mimeType = ficheiro.ContentType;
+        if (mimeType != "application/pdf" && !mimeType.StartsWith("image/"))
+            return BadRequest("Só são aceites PDF ou imagens.");
+
+        using var ms = new MemoryStream();
+        await ficheiro.CopyToAsync(ms);
+        var base64 = Convert.ToBase64String(ms.ToArray());
+
+        FaturaExtraida? dados = null;
+        if (claude.Configurado)
+        {
+            try
+            {
+                dados = await claude.ExtrairFaturaAsync(mimeType, base64);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Falha ao extrair dados do anexo carregado.");
+            }
+        }
+
+        return Ok(new
+        {
+            dados?.Fornecedor,
+            dados?.DataVencimento,
+            dados?.Valor,
+            dados?.Entidade,
+            dados?.Referencia,
+            AnexoBase64 = base64,
+            AnexoMimeType = mimeType
+        });
+    }
+
+    [HttpGet("{id}/anexo")]
+    public async Task<IActionResult> GetAnexo(int id)
+    {
+        var c = await db.ContasPessoais.FindAsync(id);
+        if (c is null || c.AnexoBase64 is null || c.AnexoMimeType is null) return NotFound();
+        return File(Convert.FromBase64String(c.AnexoBase64), c.AnexoMimeType);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] ContaPessoalDto dto)
     {
@@ -112,7 +159,11 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
                 TotalRecorrencias = dto.TotalRecorrencias,
                 MesReferencia     = dataVenc.Month,
                 AnoReferencia     = dataVenc.Year,
-                CreatedAt         = DateTime.UtcNow
+                CreatedAt         = DateTime.UtcNow,
+                Entidade          = dto.Tipo == "Saida" ? dto.Entidade : null,
+                Referencia        = dto.Tipo == "Saida" ? dto.Referencia : null,
+                AnexoBase64       = dto.AnexoBase64,
+                AnexoMimeType     = dto.AnexoMimeType
             };
             db.ContasPessoais.Add(c);
             criadas.Add(c);
@@ -135,6 +186,13 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
         c.ValorPrevisto  = dto.ValorPrevisto;
         c.MesReferencia  = vencimento.Month;
         c.AnoReferencia  = vencimento.Year;
+        c.Entidade       = dto.Tipo == "Saida" ? dto.Entidade : null;
+        c.Referencia     = dto.Tipo == "Saida" ? dto.Referencia : null;
+        if (dto.AnexoBase64 is not null)
+        {
+            c.AnexoBase64 = dto.AnexoBase64;
+            c.AnexoMimeType = dto.AnexoMimeType;
+        }
         await db.SaveChangesAsync();
         return Ok(ToDtoAnon(c));
     }
@@ -185,13 +243,18 @@ public class ContasPessoaisController(AppDbContext db) : ControllerBase
         GrupoRecorrencia = c.GrupoRecorrencia?.ToString(),
         c.RecorrenciaAtual, c.TotalRecorrencias,
         c.MesReferencia, c.AnoReferencia, c.TimesheetFaturaId,
+        c.Entidade, c.Referencia,
+        TemAnexo = c.AnexoBase64 != null,
+        c.AnexoMimeType,
         CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd")
     };
 }
 
 public record ContaPessoalDto(
     string Tipo, string Descricao, string Categoria, string DataVencimento,
-    decimal ValorPrevisto, int TotalRecorrencias
+    decimal ValorPrevisto, int TotalRecorrencias,
+    string? Entidade = null, string? Referencia = null,
+    string? AnexoBase64 = null, string? AnexoMimeType = null
 );
 
 public record PagarDto(bool Pago, decimal? ValorPago, string? DataPagamento, string? MetodoPagamento = null);

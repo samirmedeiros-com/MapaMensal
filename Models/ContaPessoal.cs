@@ -23,4 +23,12 @@ public class ContaPessoal
 
     /// <summary>Preenchido quando o lançamento foi gerado automaticamente pela confirmação de recebimento de uma fatura.</summary>
     public int? TimesheetFaturaId { get; set; }
+
+    /// <summary>Dados de pagamento por referência Multibanco — só fazem sentido em lançamentos de Saída.</summary>
+    public string? Entidade { get; set; }
+    public string? Referencia { get; set; }
+
+    /// <summary>PDF ou imagem da fatura/recibo carregado pelo utilizador, guardado em base64.</summary>
+    public string? AnexoBase64 { get; set; }
+    public string? AnexoMimeType { get; set; }
 }

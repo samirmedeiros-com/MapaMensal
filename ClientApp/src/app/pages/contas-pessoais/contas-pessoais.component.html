@@ -172,6 +172,26 @@
             }
           </div>
         }
+        @if (form.tipo === 'Saida') {
+          <div class="form-group span2">
+            <label>Carregar fatura/recibo (PDF ou imagem)</label>
+            <input type="file" accept="application/pdf,image/*" (change)="onFicheiroAnexo($event)" [disabled]="extraindoAnexo()" />
+            @if (extraindoAnexo()) {
+              <span class="recorrencia-hint">A ler o documento…</span>
+            }
+            @if (form.anexoBase64 && !extraindoAnexo()) {
+              <span class="recorrencia-hint">Documento carregado — dados preenchidos abaixo, confira antes de guardar.</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Entidade</label>
+            <input type="text" [(ngModel)]="form.entidade" placeholder="Ex: 12345" />
+          </div>
+          <div class="form-group">
+            <label>Referência</label>
+            <input type="text" [(ngModel)]="form.referencia" placeholder="Ex: 123 456 789" />
+          </div>
+        }
       </div>
       <div class="form-actions">
         <button mat-flat-button color="primary" (click)="save()">
@@ -231,6 +251,23 @@
     </div>
   }
 
+  <!-- MODAL VER ANEXO -->
+  @if (anexoModalUrl(); as url) {
+    <div class="modal-overlay" (click)="fecharAnexo()">
+      <div class="modal-card anexo-modal-card" (click)="$event.stopPropagation()">
+        <div class="anexo-modal-header">
+          <span class="modal-title">Fatura / Recibo</span>
+          <button mat-icon-button (click)="fecharAnexo()"><mat-icon>close</mat-icon></button>
+        </div>
+        @if (anexoModalTipo() === 'pdf') {
+          <iframe [src]="url" class="anexo-frame"></iframe>
+        } @else {
+          <img [src]="url" class="anexo-img" alt="Fatura/recibo" />
+        }
+      </div>
+    </div>
+  }
+
   <!-- FILTROS -->
   <div class="filters-bar card">
     <div class="filter-group">
@@ -274,8 +311,10 @@
           <th>Pago</th>
           <th>Dt. Pagamento</th>
           <th>Método</th>
+          <th>Entidade</th>
+          <th>Referência</th>
           <th>Estado</th>
-          <th style="width:110px;text-align:center">Ações</th>
+          <th style="width:140px;text-align:center">Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -314,6 +353,8 @@
                 <span class="text-muted">—</span>
               }
             </td>
+            <td>{{ c.tipo === 'Saida' && c.entidade ? c.entidade : '—' }}</td>
+            <td>{{ c.tipo === 'Saida' && c.referencia ? c.referencia : '—' }}</td>
             <td>
               @if (c.pago) {
                 <span class="status-badge pago">Pago</span>
@@ -324,6 +365,11 @@
               }
             </td>
             <td class="acoes">
+              @if (c.temAnexo) {
+                <button mat-icon-button (click)="verAnexo(c)" matTooltip="Ver fatura/recibo">
+                  <mat-icon>{{ c.anexoMimeType === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon>
+                </button>
+              }
               @if (!c.pago) {
                 <button mat-icon-button color="primary" (click)="openPagar(c)" matTooltip="Registar pagamento/recebimento">
                   <mat-icon>payments</mat-icon>
@@ -343,7 +389,7 @@
           </tr>
         }
         @if (filtered().length === 0) {
-          <tr><td colspan="10" class="empty-row">Sem lançamentos no período. Clique em "Novo Lançamento" para adicionar.</td></tr>
+          <tr><td colspan="12" class="empty-row">Sem lançamentos no período. Clique em "Novo Lançamento" para adicionar.</td></tr>
         }
       </tbody>
     </table>

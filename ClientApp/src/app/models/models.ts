@@ -157,7 +157,21 @@ export interface ContaPessoal {
   mesReferencia?: number;
   anoReferencia?: number;
   timesheetFaturaId?: number | null;
+  entidade?: string | null;
+  referencia?: string | null;
+  temAnexo?: boolean;
+  anexoMimeType?: string | null;
   createdAt: string;
+}
+
+export interface FaturaExtraidaDto {
+  fornecedor?: string | null;
+  dataVencimento?: string | null;
+  valor?: number | null;
+  entidade?: string | null;
+  referencia?: string | null;
+  anexoBase64: string;
+  anexoMimeType: string;
 }
 
 export interface ResumoFinanceiro {

@@ -42,6 +42,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ClaudeService>();
 
 // ── TocOnline (emissão de faturas) ────────────────────────────────────────────
 builder.Services.Configure<TocOnlineOptions>(builder.Configuration.GetSection(TocOnlineOptions.Section));
