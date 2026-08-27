@@ -341,6 +341,7 @@
       <span class="status-legenda-item"><mat-icon class="status-icon vencida">error</mat-icon> Vencida</span>
       <span class="status-legenda-item"><mat-icon class="status-icon aberto">schedule</mat-icon> Em Aberto</span>
     </div>
+    <div class="table-scroll">
     <table class="summary-table cp-table">
       <thead>
         <tr>
@@ -350,12 +351,12 @@
           <th>Vencimento</th>
           <th>Previsto</th>
           <th>Pago</th>
-          <th>Dt. Pagamento</th>
-          <th>Método</th>
+          <th matTooltip="Data de Pagamento">Dt. Pag.</th>
+          <th style="text-align:center">Método</th>
           <th>Entidade</th>
           <th>Referência</th>
-          <th>Estado</th>
-          <th style="width:140px;text-align:center">Ações</th>
+          <th style="text-align:center">Estado</th>
+          <th style="width:160px;text-align:center">Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -367,7 +368,7 @@
               </span>
             </td>
             <td>
-              <div class="desc-cell">
+              <div class="desc-cell" [matTooltip]="c.descricao">
                 {{ c.descricao }}
                 @if (c.totalRecorrencias > 1) {
                   <span class="recorr-badge" [matTooltip]="'Recorrência ' + c.recorrenciaAtual + ' de ' + c.totalRecorrencias">
@@ -391,9 +392,8 @@
             <td>{{ c.dataPagamento ? (c.dataPagamento | date:'dd/MM/yyyy') : '—' }}</td>
             <td>
               @if (c.pago && c.metodoPagamento) {
-                <span class="metodo-badge metodo-{{ c.metodoPagamento === 'Dinheiro' ? 'dinheiro' : 'cartao' }}">
+                <span class="metodo-badge metodo-{{ c.metodoPagamento === 'Dinheiro' ? 'dinheiro' : 'cartao' }}" [matTooltip]="c.metodoPagamento">
                   <mat-icon>{{ c.metodoPagamento === 'Dinheiro' ? 'payments' : 'credit_card' }}</mat-icon>
-                  {{ c.metodoPagamento }}
                 </span>
               } @else {
                 <span class="text-muted">—</span>
@@ -411,26 +411,36 @@
               }
             </td>
             <td class="acoes">
-              @if (c.temAnexo) {
-                <button mat-icon-button (click)="verAnexo(c)" matTooltip="Ver fatura/recibo">
-                  <mat-icon>{{ c.anexoMimeType === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon>
-                </button>
-              }
-              @if (!c.pago) {
-                <button mat-icon-button color="primary" (click)="openPagar(c)" matTooltip="Registar pagamento/recebimento">
-                  <mat-icon>payments</mat-icon>
-                </button>
-              } @else {
-                <button mat-icon-button (click)="desmarcarPago(c)" matTooltip="Desmarcar">
-                  <mat-icon>undo</mat-icon>
-                </button>
-              }
-              <button mat-icon-button (click)="openEdit(c)" matTooltip="Editar">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="delete(c)" matTooltip="Eliminar">
-                <mat-icon>delete</mat-icon>
-              </button>
+              <div class="acoes-row">
+                <span class="acao-slot">
+                  @if (c.temAnexo) {
+                    <button mat-icon-button (click)="verAnexo(c)" matTooltip="Ver fatura/recibo">
+                      <mat-icon>{{ c.anexoMimeType === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon>
+                    </button>
+                  }
+                </span>
+                <span class="acao-slot">
+                  @if (!c.pago) {
+                    <button mat-icon-button color="primary" (click)="openPagar(c)" matTooltip="Registar pagamento/recebimento">
+                      <mat-icon>payments</mat-icon>
+                    </button>
+                  } @else {
+                    <button mat-icon-button (click)="desmarcarPago(c)" matTooltip="Desmarcar">
+                      <mat-icon>undo</mat-icon>
+                    </button>
+                  }
+                </span>
+                <span class="acao-slot">
+                  <button mat-icon-button (click)="openEdit(c)" matTooltip="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </span>
+                <span class="acao-slot">
+                  <button mat-icon-button color="warn" (click)="delete(c)" matTooltip="Eliminar">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </span>
+              </div>
             </td>
           </tr>
         }
@@ -439,6 +449,7 @@
         }
       </tbody>
     </table>
+    </div>
   </div>
 
   <!-- GRÁFICO -->

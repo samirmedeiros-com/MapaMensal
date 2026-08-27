@@ -460,7 +460,23 @@
 
 // --- TABELA ---
 .cp-table {
-  .desc-cell { display: flex; align-items: center; gap: 6px; }
+  table-layout: auto;
+
+  th, td {
+    white-space: nowrap;
+    padding: 5px 8px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .desc-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+  }
 
   .recorr-badge {
     background: #e8eaf6;
@@ -502,6 +518,19 @@
   .acoes {
     text-align: center !important;
     white-space: nowrap;
+  }
+
+  .acoes-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .acao-slot {
+    display: inline-flex;
+    width: 40px;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   tr.pago-row td    { background: #f9fbe7 !important; }
