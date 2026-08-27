@@ -161,6 +161,9 @@ export interface ContaPessoal {
   referencia?: string | null;
   temAnexo?: boolean;
   anexoMimeType?: string | null;
+  moeda?: string;
+  valorOriginal?: number | null;
+  observacoes?: string | null;
   createdAt: string;
 }
 
@@ -168,10 +171,18 @@ export interface FaturaExtraidaDto {
   fornecedor?: string | null;
   dataVencimento?: string | null;
   valor?: number | null;
+  valorOriginal?: number | null;
+  moeda?: string;
+  observacoes?: string | null;
   entidade?: string | null;
   referencia?: string | null;
   anexoBase64: string;
   anexoMimeType: string;
+}
+
+export interface ConversaoMoedaDto {
+  valorConvertido: number;
+  observacao: string;
 }
 
 export interface ResumoFinanceiro {

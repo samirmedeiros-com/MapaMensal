@@ -10,7 +10,7 @@ namespace MapaMensal.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ContasPessoaisController(AppDbContext db, ClaudeService claude, ILogger<ContasPessoaisController> logger) : ControllerBase
+public class ContasPessoaisController(AppDbContext db, ClaudeService claude, CurrencyService currency, ILogger<ContasPessoaisController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -117,16 +117,56 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, ILo
             }
         }
 
+        var moeda = string.IsNullOrWhiteSpace(dados?.Moeda) ? "EUR" : dados.Moeda.ToUpperInvariant();
+        decimal? valorConvertido = dados?.Valor;
+        string? observacao = null;
+
+        if (dados?.Valor is decimal valorOriginal && moeda != "EUR")
+        {
+            try
+            {
+                var conversao = await currency.ConverterParaEurAsync(valorOriginal, moeda);
+                valorConvertido = conversao.ValorConvertido;
+                observacao = currency.GerarObservacao(conversao, moeda);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Falha ao converter {Moeda} para EUR.", moeda);
+            }
+        }
+
         return Ok(new
         {
             dados?.Fornecedor,
             dados?.DataVencimento,
-            dados?.Valor,
+            Valor = valorConvertido,
+            ValorOriginal = moeda != "EUR" ? dados?.Valor : null,
+            Moeda = moeda,
+            Observacoes = observacao,
             dados?.Entidade,
             dados?.Referencia,
             AnexoBase64 = base64,
             AnexoMimeType = mimeType
         });
+    }
+
+    [HttpPost("converter-moeda")]
+    public async Task<IActionResult> ConverterMoeda([FromBody] ConverterMoedaDto dto)
+    {
+        try
+        {
+            var conversao = await currency.ConverterParaEurAsync(dto.Valor, dto.Moeda.ToUpperInvariant());
+            return Ok(new
+            {
+                ValorConvertido = conversao.ValorConvertido,
+                Observacao = currency.GerarObservacao(conversao, dto.Moeda.ToUpperInvariant())
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Falha ao converter {Moeda} para EUR.", dto.Moeda);
+            return UnprocessableEntity("Não foi possível obter a cotação da moeda. Tente novamente.");
+        }
     }
 
     [HttpGet("{id}/anexo")]
@@ -163,7 +203,10 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, ILo
                 Entidade          = dto.Tipo == "Saida" ? dto.Entidade : null,
                 Referencia        = dto.Tipo == "Saida" ? dto.Referencia : null,
                 AnexoBase64       = dto.AnexoBase64,
-                AnexoMimeType     = dto.AnexoMimeType
+                AnexoMimeType     = dto.AnexoMimeType,
+                Moeda             = string.IsNullOrWhiteSpace(dto.Moeda) ? "EUR" : dto.Moeda,
+                ValorOriginal     = dto.ValorOriginal,
+                Observacoes       = dto.Observacoes
             };
             db.ContasPessoais.Add(c);
             criadas.Add(c);
@@ -188,6 +231,9 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, ILo
         c.AnoReferencia  = vencimento.Year;
         c.Entidade       = dto.Tipo == "Saida" ? dto.Entidade : null;
         c.Referencia     = dto.Tipo == "Saida" ? dto.Referencia : null;
+        c.Moeda          = string.IsNullOrWhiteSpace(dto.Moeda) ? "EUR" : dto.Moeda;
+        c.ValorOriginal  = dto.ValorOriginal;
+        c.Observacoes    = dto.Observacoes;
         if (dto.AnexoBase64 is not null)
         {
             c.AnexoBase64 = dto.AnexoBase64;
@@ -246,6 +292,7 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, ILo
         c.Entidade, c.Referencia,
         TemAnexo = c.AnexoBase64 != null,
         c.AnexoMimeType,
+        c.Moeda, c.ValorOriginal, c.Observacoes,
         CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd")
     };
 }
@@ -254,7 +301,10 @@ public record ContaPessoalDto(
     string Tipo, string Descricao, string Categoria, string DataVencimento,
     decimal ValorPrevisto, int TotalRecorrencias,
     string? Entidade = null, string? Referencia = null,
-    string? AnexoBase64 = null, string? AnexoMimeType = null
+    string? AnexoBase64 = null, string? AnexoMimeType = null,
+    string? Moeda = null, decimal? ValorOriginal = null, string? Observacoes = null
 );
 
 public record PagarDto(bool Pago, decimal? ValorPago, string? DataPagamento, string? MetodoPagamento = null);
+
+public record ConverterMoedaDto(decimal Valor, string Moeda);

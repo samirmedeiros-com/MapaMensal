@@ -31,4 +31,10 @@ public class ContaPessoal
     /// <summary>PDF ou imagem da fatura/recibo carregado pelo utilizador, guardado em base64.</summary>
     public string? AnexoBase64 { get; set; }
     public string? AnexoMimeType { get; set; }
+
+    /// <summary>Moeda do lançamento — "EUR" (padrão) ou "BRL". ValorPrevisto está sempre em EUR;
+    /// se a moeda original for BRL, ValorOriginal guarda o valor em reais e Observacoes a nota da conversão.</summary>
+    public string Moeda { get; set; } = "EUR";
+    public decimal? ValorOriginal { get; set; }
+    public string? Observacoes { get; set; }
 }

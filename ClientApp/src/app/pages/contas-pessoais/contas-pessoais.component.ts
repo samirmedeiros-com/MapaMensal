@@ -70,10 +70,12 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   form = {
     tipo: 'Saida' as 'Entrada' | 'Saida', descricao: '', categoria: '', dataVencimento: '', valorPrevisto: 0, totalRecorrencias: 1,
     entidade: '', referencia: '',
-    anexoBase64: null as string | null, anexoMimeType: null as string | null
+    anexoBase64: null as string | null, anexoMimeType: null as string | null,
+    moeda: 'EUR' as 'EUR' | 'BRL', valorOriginal: 0, observacoes: ''
   };
   pagarForm = { valorPago: 0, dataPagamento: '', metodoPagamento: '' };
   extraindoAnexo = signal(false);
+  convertendoMoeda = signal(false);
 
   anexoModalUrl = signal<SafeResourceUrl | null>(null);
   anexoModalTipo = signal<'pdf' | 'imagem' | null>(null);
@@ -150,7 +152,8 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   openForm() {
     this.form = {
       tipo: 'Saida', descricao: '', categoria: this.categorias()[0]?.nome ?? '', dataVencimento: hoje(), valorPrevisto: 0, totalRecorrencias: 1,
-      entidade: '', referencia: '', anexoBase64: null, anexoMimeType: null
+      entidade: '', referencia: '', anexoBase64: null, anexoMimeType: null,
+      moeda: 'EUR', valorOriginal: 0, observacoes: ''
     };
     this.editMode.set(null);
     this.showForm.set(true);
@@ -159,10 +162,35 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   openEdit(c: ContaPessoal) {
     this.form = {
       tipo: c.tipo, descricao: c.descricao, categoria: c.categoria, dataVencimento: c.dataVencimento, valorPrevisto: c.valorPrevisto, totalRecorrencias: 1,
-      entidade: c.entidade ?? '', referencia: c.referencia ?? '', anexoBase64: null, anexoMimeType: null
+      entidade: c.entidade ?? '', referencia: c.referencia ?? '', anexoBase64: null, anexoMimeType: null,
+      moeda: (c.moeda as 'EUR' | 'BRL') ?? 'EUR', valorOriginal: c.valorOriginal ?? 0, observacoes: c.observacoes ?? ''
     };
     this.editMode.set(c);
     this.showForm.set(true);
+  }
+
+  onMoedaChange(moeda: 'EUR' | 'BRL') {
+    this.form.moeda = moeda;
+    if (moeda === 'EUR') {
+      this.form.valorOriginal = 0;
+      this.form.observacoes = '';
+    }
+  }
+
+  converterValorOriginal() {
+    if (!this.form.valorOriginal || this.form.moeda === 'EUR') return;
+    this.convertendoMoeda.set(true);
+    this.api.converterMoeda(this.form.valorOriginal, this.form.moeda).subscribe({
+      next: (r) => {
+        this.convertendoMoeda.set(false);
+        this.form.valorPrevisto = r.valorConvertido;
+        this.form.observacoes = r.observacao;
+      },
+      error: () => {
+        this.convertendoMoeda.set(false);
+        this.snack.open('Não foi possível obter a cotação da moeda.', 'Ok', { duration: 4000 });
+      }
+    });
   }
 
   onFicheiroAnexo(event: Event) {
@@ -181,6 +209,11 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
         if (r.valor) this.form.valorPrevisto = r.valor;
         if (r.entidade) this.form.entidade = r.entidade;
         if (r.referencia) this.form.referencia = r.referencia;
+        if (r.moeda && r.moeda !== 'EUR') {
+          this.form.moeda = 'BRL';
+          if (r.valorOriginal) this.form.valorOriginal = r.valorOriginal;
+          if (r.observacoes) this.form.observacoes = r.observacoes;
+        }
         const extraiuAlgo = r.fornecedor || r.dataVencimento || r.valor || r.entidade || r.referencia;
         this.snack.open(
           extraiuAlgo ? 'Dados extraídos do documento — confira antes de guardar.' : 'Documento anexado. Preencha os dados manualmente.',

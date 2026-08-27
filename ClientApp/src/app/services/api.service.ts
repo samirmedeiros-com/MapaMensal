@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
   Project, WorkDay, WorkDayUpsertDto, Holiday,
   Expense, AnnualSummary, TreasurySummary, Tarefa,
-  ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal, FaturaExtraidaDto,
+  ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal, FaturaExtraidaDto, ConversaoMoedaDto,
   Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso,
   TimesheetStatus, TimesheetFaturaDto, TimesheetFaturaAnuladaDto
 } from '../models/models';
@@ -149,10 +149,10 @@ export class ApiService {
   getResumoFinanceiro(inicio: string, fim: string): Observable<ResumoFinanceiro> {
     return this.http.get<ResumoFinanceiro>(`${this.base}/contaspessoais/resumo?inicio=${inicio}&fim=${fim}`);
   }
-  createContaPessoal(dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null }): Observable<ContaPessoal[]> {
+  createContaPessoal(dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null; moeda?: string; valorOriginal?: number | null; observacoes?: string | null }): Observable<ContaPessoal[]> {
     return this.http.post<ContaPessoal[]>(`${this.base}/contaspessoais`, dto);
   }
-  updateContaPessoal(id: number, dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null }): Observable<ContaPessoal> {
+  updateContaPessoal(id: number, dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null; moeda?: string; valorOriginal?: number | null; observacoes?: string | null }): Observable<ContaPessoal> {
     return this.http.put<ContaPessoal>(`${this.base}/contaspessoais/${id}`, dto);
   }
   extrairAnexoContaPessoal(ficheiro: File): Observable<FaturaExtraidaDto> {
@@ -162,6 +162,9 @@ export class ApiService {
   }
   getContaPessoalAnexoBlob(id: number): Observable<Blob> {
     return this.http.get(`${this.base}/contaspessoais/${id}/anexo`, { responseType: 'blob' });
+  }
+  converterMoeda(valor: number, moeda: string): Observable<ConversaoMoedaDto> {
+    return this.http.post<ConversaoMoedaDto>(`${this.base}/contaspessoais/converter-moeda`, { valor, moeda });
   }
   pagarConta(id: number, dto: { pago: boolean; valorPago?: number; dataPagamento?: string; metodoPagamento?: string }): Observable<ContaPessoal> {
     return this.http.patch<ContaPessoal>(`${this.base}/contaspessoais/${id}/pagar`, dto);

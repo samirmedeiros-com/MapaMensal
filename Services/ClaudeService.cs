@@ -26,9 +26,10 @@ public class ClaudeService(IConfiguration config, ILogger<ClaudeService> logger)
         "dataVencimento": { "type": ["string", "null"], "description": "Data de vencimento/pagamento no formato YYYY-MM-DD" },
         "valor": { "type": ["number", "null"], "description": "Valor total a pagar" },
         "entidade": { "type": ["string", "null"], "description": "Entidade do quadro de pagamento Multibanco (normalmente 5 dígitos) — NUNCA o Cód. Entidade / Código de Cliente / Nº de Cliente do fornecedor" },
-        "referencia": { "type": ["string", "null"], "description": "Referência Multibanco (normalmente 9 dígitos)" }
+        "referencia": { "type": ["string", "null"], "description": "Referência Multibanco (normalmente 9 dígitos)" },
+        "moeda": { "type": ["string", "null"], "description": "Código ISO da moeda do valor (EUR, BRL, USD, etc.). Se o documento usar R$ é BRL; se usar € é EUR." }
       },
-      "required": ["fornecedor", "dataVencimento", "valor", "entidade", "referencia"],
+      "required": ["fornecedor", "dataVencimento", "valor", "entidade", "referencia", "moeda"],
       "additionalProperties": false
     }
     """;
@@ -70,7 +71,7 @@ public class ClaudeService(IConfiguration config, ILogger<ClaudeService> logger)
                     Content = new List<ContentBlockParam>
                     {
                         ficheiro,
-                        new TextBlockParam { Text = "Extrai o fornecedor, a data de vencimento, o valor e os dados do quadro de pagamento (Entidade e Referência Multibanco, não o código de cliente) deste documento." },
+                        new TextBlockParam { Text = "Extrai o fornecedor, a data de vencimento, o valor, a moeda do valor e os dados do quadro de pagamento (Entidade e Referência Multibanco, não o código de cliente) deste documento." },
                     },
                 },
             ],
@@ -97,4 +98,4 @@ public class ClaudeService(IConfiguration config, ILogger<ClaudeService> logger)
     };
 }
 
-public record FaturaExtraida(string? Fornecedor, string? DataVencimento, decimal? Valor, string? Entidade, string? Referencia);
+public record FaturaExtraida(string? Fornecedor, string? DataVencimento, decimal? Valor, string? Entidade, string? Referencia, string? Moeda);

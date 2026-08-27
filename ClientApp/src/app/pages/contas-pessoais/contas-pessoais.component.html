@@ -174,9 +174,31 @@
           <input type="date" [(ngModel)]="form.dataVencimento" />
         </div>
         <div class="form-group">
-          <label>Valor Previsto (€) *</label>
-          <input type="number" [(ngModel)]="form.valorPrevisto" min="0" step="0.01" placeholder="0.00" />
+          <label>Moeda</label>
+          <div class="tipo-toggle">
+            <button type="button" class="tipo-btn" [class.active]="form.moeda === 'EUR'" (click)="onMoedaChange('EUR')">€ EUR</button>
+            <button type="button" class="tipo-btn" [class.active]="form.moeda === 'BRL'" (click)="onMoedaChange('BRL')">R$ BRL</button>
+          </div>
         </div>
+        @if (form.moeda === 'BRL') {
+          <div class="form-group">
+            <label>Valor Original (R$) *</label>
+            <input type="number" [(ngModel)]="form.valorOriginal" min="0" step="0.01" placeholder="0.00" (blur)="converterValorOriginal()" [disabled]="convertendoMoeda()" />
+            @if (convertendoMoeda()) {
+              <span class="recorrencia-hint">A obter cotação…</span>
+            }
+          </div>
+        }
+        <div class="form-group">
+          <label>Valor Previsto (€) *</label>
+          <input type="number" [(ngModel)]="form.valorPrevisto" min="0" step="0.01" placeholder="0.00" [readonly]="form.moeda === 'BRL'" />
+        </div>
+        @if (form.moeda === 'BRL' && form.observacoes) {
+          <div class="form-group span2">
+            <label>Observações</label>
+            <input type="text" [(ngModel)]="form.observacoes" />
+          </div>
+        }
         @if (!editMode()) {
           <div class="form-group">
             <label>Recorrência (meses)</label>
@@ -314,6 +336,11 @@
 
   <!-- TABELA -->
   <div class="card">
+    <div class="status-legenda">
+      <span class="status-legenda-item"><mat-icon class="status-icon pago">check_circle</mat-icon> Pago</span>
+      <span class="status-legenda-item"><mat-icon class="status-icon vencida">error</mat-icon> Vencida</span>
+      <span class="status-legenda-item"><mat-icon class="status-icon aberto">schedule</mat-icon> Em Aberto</span>
+    </div>
     <table class="summary-table cp-table">
       <thead>
         <tr>
@@ -354,7 +381,12 @@
             </td>
             <td><span class="cat-badge">{{ c.categoria }}</span></td>
             <td [class.vencida-date]="isVencida(c)">{{ c.dataVencimento | date:'dd/MM/yyyy' }}</td>
-            <td>{{ fmt(c.valorPrevisto) }} €</td>
+            <td>
+              {{ fmt(c.valorPrevisto) }} €
+              @if (c.moeda === 'BRL' && c.valorOriginal) {
+                <span class="text-muted" [matTooltip]="c.observacoes ?? ''">(R$ {{ fmt(c.valorOriginal) }})</span>
+              }
+            </td>
             <td>{{ c.pago ? fmt(c.valorPago ?? 0) + ' €' : '—' }}</td>
             <td>{{ c.dataPagamento ? (c.dataPagamento | date:'dd/MM/yyyy') : '—' }}</td>
             <td>
@@ -369,13 +401,13 @@
             </td>
             <td>{{ c.tipo === 'Saida' && c.entidade ? c.entidade : '—' }}</td>
             <td>{{ c.tipo === 'Saida' && c.referencia ? c.referencia : '—' }}</td>
-            <td>
+            <td class="status-cell">
               @if (c.pago) {
-                <span class="status-badge pago">Pago</span>
+                <mat-icon class="status-icon pago" matTooltip="Pago">check_circle</mat-icon>
               } @else if (isVencida(c)) {
-                <span class="status-badge vencida">Vencida</span>
+                <mat-icon class="status-icon vencida" matTooltip="Vencida">error</mat-icon>
               } @else {
-                <span class="status-badge aberto">Em Aberto</span>
+                <mat-icon class="status-icon aberto" matTooltip="Em Aberto">schedule</mat-icon>
               }
             </td>
             <td class="acoes">

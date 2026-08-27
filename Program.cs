@@ -43,6 +43,12 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ClaudeService>();
+builder.Services.AddHttpClient("frankfurter", c =>
+{
+    c.BaseAddress = new Uri("https://api.frankfurter.app");
+    c.Timeout = TimeSpan.FromSeconds(10);
+});
+builder.Services.AddScoped<CurrencyService>();
 
 // ── TocOnline (emissão de faturas) ────────────────────────────────────────────
 builder.Services.Configure<TocOnlineOptions>(builder.Configuration.GetSection(TocOnlineOptions.Section));
