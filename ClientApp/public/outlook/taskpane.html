@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MapaMensal — Criar tarefa</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<link rel="stylesheet" href="taskpane.css">
+</head>
+<body>
+  <header class="hd">
+    <h1>Criar tarefa</h1>
+    <button id="logout" class="link" hidden>Sair</button>
+  </header>
+
+  <section id="login" hidden>
+    <p class="muted">Entra com a tua conta MapaMensal.</p>
+    <label>Utilizador <input id="u" autocomplete="username"></label>
+    <label>Password <input id="p" type="password" autocomplete="current-password"></label>
+    <button id="doLogin" class="primary">Entrar</button>
+  </section>
+
+  <section id="form" hidden>
+    <label>Projeto <select id="projeto"></select></label>
+    <label>Título <input id="titulo" maxlength="200"></label>
+    <label>Data de entrega <input id="data" type="date"></label>
+    <label>Estado
+      <select id="status">
+        <option value="Backlog">Backlog</option>
+        <option value="EmProgresso">Em progresso</option>
+        <option value="Concluido">Concluído</option>
+      </select>
+    </label>
+    <label>Notas <textarea id="descricao" rows="6"></textarea></label>
+    <button id="criar" class="primary">Criar tarefa</button>
+  </section>
+
+  <p id="msg" class="msg" hidden></p>
+  <script src="taskpane.js"></script>
+</body>
+</html>
