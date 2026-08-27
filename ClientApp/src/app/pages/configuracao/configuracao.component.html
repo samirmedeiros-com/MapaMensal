@@ -97,12 +97,9 @@
           </tr>
         }
         <tr class="add-row">
-          <td><input class="inline-input" [(ngModel)]="newProject.name" placeholder="Nome do projeto" /></td>
-          <td><input class="inline-input" [(ngModel)]="newProject.client" placeholder="Cliente" /></td>
-          <td><input class="inline-input" type="number" [(ngModel)]="newProject.dailyRate" placeholder="0.00" /></td>
-          <td>
-            <button mat-flat-button color="accent" (click)="addProject()">
-              <mat-icon>add</mat-icon> Adicionar
+          <td colspan="4">
+            <button mat-flat-button color="accent" (click)="abrirNovoProjeto()">
+              <mat-icon>add</mat-icon> Novo projeto
             </button>
           </td>
         </tr>
@@ -328,6 +325,43 @@
         <div class="modal-actions">
           <button mat-flat-button color="primary" (click)="salvarFaturacao()">Guardar</button>
           <button mat-button (click)="fecharFaturacao()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL NOVO PROJETO -->
+  @if (novoProjetoAberto()) {
+    <div class="modal-overlay" (click)="fecharNovoProjeto()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="billing-title"><mat-icon>add_business</mat-icon> Novo projeto</div>
+
+        <div class="billing-grid">
+          <label class="span2">
+            <span>Nome do projeto</span>
+            <input class="inline-input" [(ngModel)]="newProject.name" placeholder="Ex: Portal do cliente"
+                   (keydown.enter)="addProject()" />
+          </label>
+          <label class="span2">
+            <span>Cliente</span>
+            <input class="inline-input" [(ngModel)]="newProject.client" placeholder="Ex: Zoom Positivo"
+                   (keydown.enter)="addProject()" />
+          </label>
+          <label>
+            <span>Valor/dia (€)</span>
+            <input class="inline-input" type="number" min="0" step="0.01" [(ngModel)]="newProject.dailyRate"
+                   placeholder="0.00" (keydown.enter)="addProject()" />
+          </label>
+        </div>
+        <p class="dia-vencimento-hint">
+          Só o nome é obrigatório. O valor/dia pode ficar a zero e ser preenchido depois na tabela.
+        </p>
+
+        <div class="modal-actions">
+          <button mat-flat-button color="primary" [disabled]="guardandoProjeto()" (click)="addProject()">
+            {{ guardandoProjeto() ? 'A guardar…' : 'Criar projeto' }}
+          </button>
+          <button mat-button (click)="fecharNovoProjeto()">Cancelar</button>
         </div>
       </div>
     </div>

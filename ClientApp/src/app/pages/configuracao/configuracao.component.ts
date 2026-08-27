@@ -35,7 +35,9 @@ export class ConfiguracaoComponent implements OnInit {
   bancoTitular = signal('');
   year = signal(new Date().getFullYear());
 
-  newProject: Partial<Project> = { name: '', dailyRate: 0 };
+  newProject: Partial<Project> = { name: '', client: '', dailyRate: 0 };
+  novoProjetoAberto = signal(false);
+  guardandoProjeto = signal(false);
   newHoliday: Partial<Holiday> = { date: '', name: '', isNational: true };
   newCategoria: Partial<CategoriaContaPessoal> = { nome: '', cor: '#5c6bc0', ordem: 0 };
   newCategoriaAgenda: { nome: string; cor: string } = { nome: '', cor: '#534AB7' };
@@ -105,12 +107,36 @@ export class ConfiguracaoComponent implements OnInit {
     );
   }
 
+  abrirNovoProjeto() {
+    this.newProject = { name: '', client: '', dailyRate: 0 };
+    this.novoProjetoAberto.set(true);
+  }
+
+  fecharNovoProjeto() {
+    this.novoProjetoAberto.set(false);
+  }
+
   addProject() {
-    if (!this.newProject.name || !this.newProject.dailyRate) return;
-    this.api.createProject(this.newProject).subscribe(p => {
-      this.projects.update(list => [...list, p]);
-      this.newProject = { name: '', dailyRate: 0 };
-      this.snack.open('Projeto adicionado', '', { duration: 2000 });
+    const nome = (this.newProject.name ?? '').trim();
+    if (!nome) {
+      this.snack.open('Indica o nome do projeto.', '', { duration: 3000 });
+      return;
+    }
+    if (this.guardandoProjeto()) return;
+
+    this.guardandoProjeto.set(true);
+    this.api.createProject({ ...this.newProject, name: nome, dailyRate: this.newProject.dailyRate || 0 }).subscribe({
+      next: p => {
+        this.guardandoProjeto.set(false);
+        this.projects.update(list => [...list, p]);
+        this.newProject = { name: '', client: '', dailyRate: 0 };
+        this.novoProjetoAberto.set(false);
+        this.snack.open('Projeto adicionado', '', { duration: 2000 });
+      },
+      error: err => {
+        this.guardandoProjeto.set(false);
+        this.snack.open(err?.error?.message ?? 'Não foi possível criar o projeto.', '', { duration: 5000 });
+      }
     });
   }
 
