@@ -54,6 +54,7 @@ export class TarefasComponent implements OnInit {
   novoComentario = signal('');
   carregandoComentarios = signal(false);
   enviandoComentario = signal(false);
+  comentariosLeitura = signal(false);
   showForm = signal(false);
   isEditing = signal(false);
 
@@ -163,7 +164,13 @@ export class TarefasComponent implements OnInit {
 
   // ── Comentários ───────────────────────────────────────────────────────────
 
-  abrirComentarios(t: Tarefa) {
+  /** Duplo clique no cartão: consulta em modo leitura, sem editar nem comentar. */
+  abrirDetalhe(t: Tarefa) {
+    this.abrirComentarios(t, true);
+  }
+
+  abrirComentarios(t: Tarefa, leitura = false) {
+    this.comentariosLeitura.set(leitura);
     this.comentariosTarefa.set(t);
     this.comentarios.set([]);
     this.novoComentario.set('');
@@ -177,7 +184,10 @@ export class TarefasComponent implements OnInit {
     });
   }
 
-  fecharComentarios() { this.comentariosTarefa.set(null); }
+  fecharComentarios() { this.comentariosTarefa.set(null); this.comentariosLeitura.set(false); }
+
+  /** Passar da consulta para o modo de escrita, sem recarregar os comentários. */
+  sairDeLeitura() { this.comentariosLeitura.set(false); }
 
   enviarComentario() {
     const t = this.comentariosTarefa();

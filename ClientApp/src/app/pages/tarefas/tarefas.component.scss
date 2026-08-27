@@ -471,56 +471,112 @@
   border-radius: 8px;
 }
 
-.comentarios-card { width: 540px; display: flex; flex-direction: column; }
+.comentarios-card {
+  width: 460px;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px 16px;
+}
 
 .coment-title {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 
-  .coment-tarefa { font-weight: 600; font-size: 1.02rem; }
-  .coment-projeto { font-size: 0.8rem; color: rgba(0, 0, 0, 0.55); }
+  > mat-icon { color: #534ab7; flex: none; margin-top: 2px; }
+  .coment-title-text { min-width: 0; flex: 1; }
+  .coment-tarefa {
+    font-weight: 600;
+    font-size: 0.98rem;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  .coment-projeto { font-size: 0.76rem; color: rgba(0, 0, 0, 0.52); margin-top: 2px; }
+  .coment-fechar { flex: none; transform: scale(0.8); margin: -4px -6px 0 0; }
+}
+
+.detalhe-campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 12px 0 10px;
+
+  > div { display: flex; flex-direction: column; gap: 1px; }
+  span { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: rgba(0, 0, 0, 0.45); }
+  strong { font-size: 0.86rem; font-weight: 600; }
+  strong.atraso { color: #c62828; }
+}
+
+.detalhe-descricao {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+}
+
+.coment-seccao {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0, 0.45);
+  margin: 14px 0 8px;
 }
 
 .coment-lista {
-  max-height: 44vh;
+  min-height: 60px;
+  max-height: 38vh;
   overflow-y: auto;
   padding-right: 4px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
-.coment-vazio { color: rgba(0, 0, 0, 0.5); font-size: 0.88rem; margin: 8px 0; }
+.coment-vazio { color: rgba(0, 0, 0, 0.45); font-size: 0.85rem; margin: 6px 0; }
 
 .coment-item {
-  padding: 10px 12px;
-  margin-bottom: 8px;
+  padding: 9px 11px;
+  margin-bottom: 7px;
   background: rgba(0, 0, 0, 0.035);
   border-radius: 8px;
+
+  &:last-child { margin-bottom: 0; }
 
   .coment-meta {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.76rem;
-    color: rgba(0, 0, 0, 0.55);
-    margin-bottom: 4px;
+    font-size: 0.72rem;
+    color: rgba(0, 0, 0, 0.5);
+    margin-bottom: 3px;
 
-    strong { color: rgba(0, 0, 0, 0.78); }
-    .coment-del { margin-left: auto; transform: scale(0.72); }
+    strong { color: rgba(0, 0, 0, 0.75); font-size: 0.76rem; }
+    .coment-del { margin-left: auto; transform: scale(0.66); }
   }
 
-  .coment-texto { font-size: 0.9rem; white-space: pre-wrap; word-break: break-word; }
+  .coment-texto { font-size: 0.87rem; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
 }
 
 .coment-input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 9px 11px;
   font: inherit;
-  font-size: 0.9rem;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  font-size: 0.87rem;
+  border: 1px solid rgba(0, 0, 0, 0.18);
   border-radius: 8px;
   resize: vertical;
+}
+
+.comentarios-card .modal-actions { margin-top: 12px; }
+
+@media (max-width: 520px) {
+  .comentarios-card { width: 100%; }
+  .coment-lista { max-height: 46vh; }
 }
 
 .modal-overlay {

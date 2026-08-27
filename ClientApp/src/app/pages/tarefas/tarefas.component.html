@@ -124,7 +124,8 @@
 
           <div class="col-body" cdkDropList [cdkDropListData]="col" (cdkDropListDropped)="onDrop($event, col)">
             @for (t of columnTasks()[col]; track t.id) {
-              <div class="task-card" [class.overdue]="isOverdue(t)" cdkDrag [cdkDragData]="t">
+              <div class="task-card" [class.overdue]="isOverdue(t)" cdkDrag [cdkDragData]="t"
+                   (dblclick)="abrirDetalhe(t)" matTooltip="Duplo clique para consultar">
                 <div class="drag-placeholder" *cdkDragPlaceholder></div>
                 <div class="task-header">
                   <div class="task-project">{{ t.projectName }}</div>
@@ -259,18 +260,37 @@
     </div>
   }
 
-  <!-- MODAL COMENTÁRIOS -->
+  <!-- MODAL COMENTÁRIOS / CONSULTA -->
   @if (comentariosTarefa(); as ct) {
     <div class="modal-overlay" (click)="fecharComentarios()">
       <div class="modal-card comentarios-card" (click)="$event.stopPropagation()">
         <div class="coment-title">
-          <mat-icon>forum</mat-icon>
-          <div>
+          <mat-icon>{{ comentariosLeitura() ? 'visibility' : 'forum' }}</mat-icon>
+          <div class="coment-title-text">
             <div class="coment-tarefa">{{ ct.titulo }}</div>
-            <div class="coment-projeto">{{ ct.projectName }}</div>
+            <div class="coment-projeto">{{ ct.projectName }} · {{ statusLabels[ct.status] }}</div>
           </div>
+          <button mat-icon-button class="coment-fechar" (click)="fecharComentarios()" matTooltip="Fechar">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
 
+        @if (comentariosLeitura()) {
+          <div class="detalhe-campos">
+            @if (ct.dataEntrega) {
+              <div><span>Entrega</span><strong [class.atraso]="isOverdue(ct)">{{ ct.dataEntrega | date:'dd/MM/yyyy' }}</strong></div>
+            }
+            @if (ct.horasGastas) {
+              <div><span>Horas</span><strong>{{ ct.horasGastas }}h</strong></div>
+            }
+            <div><span>Criada</span><strong>{{ ct.createdAt | date:'dd/MM/yyyy' }}</strong></div>
+          </div>
+          @if (ct.descricao) {
+            <div class="detalhe-descricao">{{ ct.descricao }}</div>
+          }
+        }
+
+        <div class="coment-seccao">Comentários</div>
         <div class="coment-lista">
           @if (carregandoComentarios()) {
             <p class="coment-vazio">A carregar…</p>
@@ -282,9 +302,11 @@
                 <div class="coment-meta">
                   <strong>{{ c.autor }}</strong>
                   <span>{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-                  <button mat-icon-button class="coment-del" (click)="apagarComentario(c)" matTooltip="Eliminar">
-                    <mat-icon>close</mat-icon>
-                  </button>
+                  @if (!comentariosLeitura()) {
+                    <button mat-icon-button class="coment-del" (click)="apagarComentario(c)" matTooltip="Eliminar">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  }
                 </div>
                 <div class="coment-texto">{{ c.texto }}</div>
               </div>
@@ -292,18 +314,26 @@
           }
         </div>
 
-        <textarea class="coment-input" rows="3" placeholder="Escrever um comentário…"
-                  [ngModel]="novoComentario()" (ngModelChange)="novoComentario.set($event)"
-                  (keydown.control.enter)="enviarComentario()" (keydown.meta.enter)="enviarComentario()"></textarea>
-
-        <div class="modal-actions">
-          <button mat-flat-button color="primary"
-                  [disabled]="enviandoComentario() || !novoComentario().trim()"
-                  (click)="enviarComentario()">
-            {{ enviandoComentario() ? 'A gravar…' : 'Comentar' }}
-          </button>
-          <button mat-button (click)="fecharComentarios()">Fechar</button>
-        </div>
+        @if (comentariosLeitura()) {
+          <div class="modal-actions">
+            <button mat-flat-button color="primary" (click)="sairDeLeitura()">
+              <mat-icon>add_comment</mat-icon> Comentar
+            </button>
+            <button mat-button (click)="fecharComentarios()">Fechar</button>
+          </div>
+        } @else {
+          <textarea class="coment-input" rows="3" placeholder="Escrever um comentário…"
+                    [ngModel]="novoComentario()" (ngModelChange)="novoComentario.set($event)"
+                    (keydown.control.enter)="enviarComentario()" (keydown.meta.enter)="enviarComentario()"></textarea>
+          <div class="modal-actions">
+            <button mat-flat-button color="primary"
+                    [disabled]="enviandoComentario() || !novoComentario().trim()"
+                    (click)="enviarComentario()">
+              {{ enviandoComentario() ? 'A gravar…' : 'Comentar' }}
+            </button>
+            <button mat-button (click)="fecharComentarios()">Fechar</button>
+          </div>
+        }
       </div>
     </div>
   }
