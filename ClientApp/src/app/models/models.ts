@@ -164,6 +164,7 @@ export interface ContaPessoal {
   moeda?: string;
   valorOriginal?: number | null;
   observacoes?: string | null;
+  lembreteCalendario?: boolean;
   createdAt: string;
 }
 

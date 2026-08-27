@@ -71,7 +71,8 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
     tipo: 'Saida' as 'Entrada' | 'Saida', descricao: '', categoria: '', dataVencimento: '', valorPrevisto: 0, totalRecorrencias: 1,
     entidade: '', referencia: '',
     anexoBase64: null as string | null, anexoMimeType: null as string | null,
-    moeda: 'EUR' as 'EUR' | 'BRL', valorOriginal: 0, observacoes: ''
+    moeda: 'EUR' as 'EUR' | 'BRL', valorOriginal: 0, observacoes: '',
+    lembreteCalendario: false
   };
   pagarForm = { valorPago: 0, dataPagamento: '', metodoPagamento: '' };
   extraindoAnexo = signal(false);
@@ -153,7 +154,8 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
     this.form = {
       tipo: 'Saida', descricao: '', categoria: this.categorias()[0]?.nome ?? '', dataVencimento: hoje(), valorPrevisto: 0, totalRecorrencias: 1,
       entidade: '', referencia: '', anexoBase64: null, anexoMimeType: null,
-      moeda: 'EUR', valorOriginal: 0, observacoes: ''
+      moeda: 'EUR', valorOriginal: 0, observacoes: '',
+      lembreteCalendario: false
     };
     this.editMode.set(null);
     this.showForm.set(true);
@@ -163,7 +165,8 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
     this.form = {
       tipo: c.tipo, descricao: c.descricao, categoria: c.categoria, dataVencimento: c.dataVencimento, valorPrevisto: c.valorPrevisto, totalRecorrencias: 1,
       entidade: c.entidade ?? '', referencia: c.referencia ?? '', anexoBase64: null, anexoMimeType: null,
-      moeda: (c.moeda as 'EUR' | 'BRL') ?? 'EUR', valorOriginal: c.valorOriginal ?? 0, observacoes: c.observacoes ?? ''
+      moeda: (c.moeda as 'EUR' | 'BRL') ?? 'EUR', valorOriginal: c.valorOriginal ?? 0, observacoes: c.observacoes ?? '',
+      lembreteCalendario: c.lembreteCalendario ?? false
     };
     this.editMode.set(c);
     this.showForm.set(true);

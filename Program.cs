@@ -50,6 +50,11 @@ builder.Services.AddHttpClient("frankfurter", c =>
 });
 builder.Services.AddScoped<CurrencyService>();
 
+// ── Lembretes no calendário Office 365 (Microsoft Graph) ─────────────────────
+builder.Services.AddHttpClient("graph-auth", c => c.Timeout = TimeSpan.FromSeconds(15));
+builder.Services.AddHttpClient("graph", c => c.Timeout = TimeSpan.FromSeconds(15));
+builder.Services.AddScoped<GraphCalendarService>();
+
 // ── TocOnline (emissão de faturas) ────────────────────────────────────────────
 builder.Services.Configure<TocOnlineOptions>(builder.Configuration.GetSection(TocOnlineOptions.Section));
 builder.Services.AddHttpClient("toconline", c => c.Timeout = TimeSpan.FromSeconds(30));

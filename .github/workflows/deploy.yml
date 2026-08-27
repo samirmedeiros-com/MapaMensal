@@ -53,7 +53,7 @@ jobs:
           username: root
           port: 22
           password: ${{ secrets.SSH_PASSWORD }}
-          envs: DB_CONNECTION,SMTP_USER,SMTP_PASSWORD,APP_BASE_URL,TOC_OAUTH_URL,TOC_API_URL,TOC_CLIENT_ID,TOC_CLIENT_SECRET,TOC_REDIRECT_URI,CLAUDE_API_KEY
+          envs: DB_CONNECTION,SMTP_USER,SMTP_PASSWORD,APP_BASE_URL,TOC_OAUTH_URL,TOC_API_URL,TOC_CLIENT_ID,TOC_CLIENT_SECRET,TOC_REDIRECT_URI,CLAUDE_API_KEY,GRAPH_TENANT_ID,GRAPH_CLIENT_ID,GRAPH_CLIENT_SECRET
           script: |
             kubectl create secret generic mapamensal-secrets \
               --from-literal=ConnectionStrings__Default="$DB_CONNECTION" \
@@ -66,6 +66,9 @@ jobs:
               --from-literal=TocOnline__ClientSecret="$TOC_CLIENT_SECRET" \
               --from-literal=TocOnline__RedirectUri="$TOC_REDIRECT_URI" \
               --from-literal=Claude__ApiKey="$CLAUDE_API_KEY" \
+              --from-literal=Graph__TenantId="$GRAPH_TENANT_ID" \
+              --from-literal=Graph__ClientId="$GRAPH_CLIENT_ID" \
+              --from-literal=Graph__ClientSecret="$GRAPH_CLIENT_SECRET" \
               --dry-run=client -o yaml | kubectl apply -f -
             kubectl apply -f ~/deploy-mapamensal/k8s/
             kubectl set image deployment/mapamensal mapamensal=${{ env.IMAGE }}:${{ github.sha }}
@@ -81,6 +84,9 @@ jobs:
           TOC_CLIENT_SECRET: ${{ secrets.TOCONLINE_CLIENT_SECRET }}
           TOC_REDIRECT_URI: ${{ secrets.TOCONLINE_REDIRECT_URI }}
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+          GRAPH_TENANT_ID: ${{ secrets.GRAPH_TENANT_ID }}
+          GRAPH_CLIENT_ID: ${{ secrets.GRAPH_CLIENT_ID }}
+          GRAPH_CLIENT_SECRET: ${{ secrets.GRAPH_CLIENT_SECRET }}
 
       # Mantém apenas as 10 versões mais recentes da imagem no GHCR. Sem isto,
       # cada commit acumula uma tag nova para sempre e enche o disco da VM.

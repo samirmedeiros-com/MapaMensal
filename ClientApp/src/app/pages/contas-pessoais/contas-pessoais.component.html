@@ -228,6 +228,12 @@
             <input type="text" [(ngModel)]="form.referencia" placeholder="Ex: 123 456 789" />
           </div>
         }
+        <div class="form-group span2">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="form.lembreteCalendario" />
+            Lembrete no calendário (Outlook / Office 365)
+          </label>
+        </div>
       </div>
       <div class="form-actions">
         <button mat-flat-button color="primary" (click)="save()">
@@ -377,6 +383,9 @@
                 }
                 @if (c.timesheetFaturaId) {
                   <span class="recorr-badge auto" matTooltip="Lançamento automático de fatura confirmada">auto</span>
+                }
+                @if (c.lembreteCalendario) {
+                  <mat-icon class="calendario-icon" matTooltip="Tem lembrete no calendário Office 365">event</mat-icon>
                 }
               </div>
             </td>

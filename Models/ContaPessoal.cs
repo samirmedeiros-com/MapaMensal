@@ -37,4 +37,9 @@ public class ContaPessoal
     public string Moeda { get; set; } = "EUR";
     public decimal? ValorOriginal { get; set; }
     public string? Observacoes { get; set; }
+
+    /// <summary>Se true, existe (ou deve existir) um lembrete criado no calendário Office 365.
+    /// GraphEventId guarda o id do evento no Graph para permitir apagar/atualizar ao editar ou desmarcar.</summary>
+    public bool LembreteCalendario { get; set; } = false;
+    public string? GraphEventId { get; set; }
 }

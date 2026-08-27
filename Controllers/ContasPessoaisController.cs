@@ -10,7 +10,7 @@ namespace MapaMensal.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ContasPessoaisController(AppDbContext db, ClaudeService claude, CurrencyService currency, ILogger<ContasPessoaisController> logger) : ControllerBase
+public class ContasPessoaisController(AppDbContext db, ClaudeService claude, CurrencyService currency, GraphCalendarService graph, ILogger<ContasPessoaisController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -206,13 +206,43 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, Cur
                 AnexoMimeType     = dto.AnexoMimeType,
                 Moeda             = string.IsNullOrWhiteSpace(dto.Moeda) ? "EUR" : dto.Moeda,
                 ValorOriginal     = dto.ValorOriginal,
-                Observacoes       = dto.Observacoes
+                Observacoes       = dto.Observacoes,
+                LembreteCalendario = dto.LembreteCalendario
             };
             db.ContasPessoais.Add(c);
             criadas.Add(c);
         }
         await db.SaveChangesAsync();
+
+        if (dto.LembreteCalendario && graph.Configurado)
+        {
+            foreach (var c in criadas)
+            {
+                try
+                {
+                    c.GraphEventId = await graph.CriarLembreteAsync(AssuntoLembrete(c), c.DataVencimento, CorpoLembrete(c));
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Falha ao criar lembrete no calendário para o lançamento {Id}.", c.Id);
+                }
+            }
+            await db.SaveChangesAsync();
+        }
+
         return Ok(criadas.Select(ToDtoAnon));
+    }
+
+    private static string AssuntoLembrete(ContaPessoal c) =>
+        $"{(c.Tipo == "Entrada" ? "Receber" : "Pagar")}: {c.Descricao} ({c.ValorPrevisto:N2} €)";
+
+    private static string CorpoLembrete(ContaPessoal c)
+    {
+        var linhas = new List<string> { $"Categoria: {c.Categoria}" };
+        if (c.Tipo == "Saida" && !string.IsNullOrWhiteSpace(c.Entidade)) linhas.Add($"Entidade: {c.Entidade}");
+        if (c.Tipo == "Saida" && !string.IsNullOrWhiteSpace(c.Referencia)) linhas.Add($"Referência: {c.Referencia}");
+        linhas.Add("Lançamento criado no MapaMensal — Financeiro.");
+        return string.Join("\n", linhas);
     }
 
     [HttpPut("{id}")]
@@ -239,6 +269,32 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, Cur
             c.AnexoBase64 = dto.AnexoBase64;
             c.AnexoMimeType = dto.AnexoMimeType;
         }
+
+        if (graph.Configurado)
+        {
+            try
+            {
+                if (dto.LembreteCalendario && c.GraphEventId is null)
+                {
+                    c.GraphEventId = await graph.CriarLembreteAsync(AssuntoLembrete(c), c.DataVencimento, CorpoLembrete(c));
+                }
+                else if (dto.LembreteCalendario && c.GraphEventId is not null)
+                {
+                    await graph.AtualizarLembreteAsync(c.GraphEventId, AssuntoLembrete(c), c.DataVencimento, CorpoLembrete(c));
+                }
+                else if (!dto.LembreteCalendario && c.GraphEventId is not null)
+                {
+                    await graph.RemoverLembreteAsync(c.GraphEventId);
+                    c.GraphEventId = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Falha ao sincronizar lembrete no calendário para o lançamento {Id}.", c.Id);
+            }
+        }
+        c.LembreteCalendario = dto.LembreteCalendario;
+
         await db.SaveChangesAsync();
         return Ok(ToDtoAnon(c));
     }
@@ -265,17 +321,24 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, Cur
         var c = await db.ContasPessoais.FindAsync(id);
         if (c is null) return NotFound();
 
+        var paraRemover = new List<ContaPessoal> { c };
         if (grupo && c.GrupoRecorrencia.HasValue)
         {
-            var todas = await db.ContasPessoais
+            paraRemover = await db.ContasPessoais
                 .Where(x => x.GrupoRecorrencia == c.GrupoRecorrencia && !x.Pago)
                 .ToListAsync();
-            db.ContasPessoais.RemoveRange(todas);
         }
-        else
+
+        if (graph.Configurado)
         {
-            db.ContasPessoais.Remove(c);
+            foreach (var item in paraRemover.Where(x => x.GraphEventId is not null))
+            {
+                try { await graph.RemoverLembreteAsync(item.GraphEventId!); }
+                catch (Exception ex) { logger.LogWarning(ex, "Falha ao remover lembrete do calendário para o lançamento {Id}.", item.Id); }
+            }
         }
+
+        db.ContasPessoais.RemoveRange(paraRemover);
         await db.SaveChangesAsync();
         return NoContent();
     }
@@ -293,6 +356,7 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, Cur
         TemAnexo = c.AnexoBase64 != null,
         c.AnexoMimeType,
         c.Moeda, c.ValorOriginal, c.Observacoes,
+        c.LembreteCalendario,
         CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd")
     };
 }
@@ -302,7 +366,8 @@ public record ContaPessoalDto(
     decimal ValorPrevisto, int TotalRecorrencias,
     string? Entidade = null, string? Referencia = null,
     string? AnexoBase64 = null, string? AnexoMimeType = null,
-    string? Moeda = null, decimal? ValorOriginal = null, string? Observacoes = null
+    string? Moeda = null, decimal? ValorOriginal = null, string? Observacoes = null,
+    bool LembreteCalendario = false
 );
 
 public record PagarDto(bool Pago, decimal? ValorPago, string? DataPagamento, string? MetodoPagamento = null);
