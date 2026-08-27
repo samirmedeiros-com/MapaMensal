@@ -382,10 +382,10 @@
             <td><span class="cat-badge">{{ c.categoria }}</span></td>
             <td [class.vencida-date]="isVencida(c)">{{ c.dataVencimento | date:'dd/MM/yyyy' }}</td>
             <td>
-              {{ fmt(c.valorPrevisto) }} €
               @if (c.moeda === 'BRL' && c.valorOriginal) {
-                <span class="text-muted" [matTooltip]="c.observacoes ?? ''">(R$ {{ fmt(c.valorOriginal) }})</span>
+                <mat-icon class="valor-original-icon" [matTooltip]="'Valor original: R$ ' + fmt(c.valorOriginal)">warning</mat-icon>
               }
+              {{ fmt(c.valorPrevisto) }} €
             </td>
             <td>{{ c.pago ? fmt(c.valorPago ?? 0) + ' €' : '—' }}</td>
             <td>{{ c.dataPagamento ? (c.dataPagamento | date:'dd/MM/yyyy') : '—' }}</td>

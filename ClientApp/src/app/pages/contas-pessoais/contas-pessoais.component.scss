@@ -402,6 +402,7 @@
 
   &.entrada.active { background: #2e7d32; border-color: #2e7d32; color: white; }
   &.saida.active    { background: #e65100; border-color: #e65100; color: white; }
+  &.active:not(.entrada):not(.saida) { background: var(--purple-500, #534AB7); border-color: var(--purple-500, #534AB7); color: white; }
 }
 
 .tipo-badge {
@@ -418,6 +419,16 @@
 
 
 .filter-count { font-size: 0.85rem; color: #888; }
+
+.valor-original-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  color: #e65100;
+  margin-right: 3px;
+  cursor: help;
+}
 
 .status-icon {
   font-size: 22px;
