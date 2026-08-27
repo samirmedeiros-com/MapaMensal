@@ -14,6 +14,29 @@
   .page-title { font-size: 1.5rem; font-weight: 600; color: #1a237e; }
 }
 
+.btn-novo-lancamento {
+  appearance: none;
+  border: none;
+  border-radius: 8px;
+  background: var(--purple-500, #534AB7);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(83, 74, 183, 0.3);
+  transition: filter 0.15s, box-shadow 0.15s, transform 0.1s;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+  &:hover { filter: brightness(0.94); box-shadow: 0 3px 10px rgba(83, 74, 183, 0.4); }
+  &:active { transform: translateY(1px); }
+}
+
 .periodo-bar {
   display: flex;
   align-items: flex-end;
@@ -58,6 +81,28 @@
   &.entrada  { border-color: #2e7d32; mat-icon { color: #2e7d32; } }
   &.saldo    { border-color: #00897b; mat-icon { color: #00897b; } &.neg { border-color: #e65100; mat-icon { color: #e65100; } } }
 }
+
+// --- CARD DESPESAS EM ATRASO ---
+.atraso-card {
+  background: #FDEDED;
+  border: 1px solid #F5C2C2;
+  border-left: 4px solid #c62828;
+  border-radius: 10px;
+  padding: 14px 20px;
+}
+
+.atraso-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  mat-icon { font-size: 30px; width: 30px; height: 30px; color: #c62828; flex-shrink: 0; }
+}
+
+.atraso-card-titles { flex: 1; }
+.atraso-card-title { font-size: 0.95rem; font-weight: 700; color: #7f1d1d; }
+.atraso-card-sub { font-size: 0.8rem; color: #9c3a3a; margin-top: 2px; }
+.atraso-card-valor { font-size: 1.3rem; font-weight: 700; color: #c62828; white-space: nowrap; }
 
 // --- CARD MÉTODO DE PAGAMENTO ---
 .metodo-card {

@@ -103,6 +103,9 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
     [...new Set(this.contas().map(c => c.categoria))].sort()
   );
 
+  despesasEmAtraso = computed(() => this.contas().filter(c => c.tipo === 'Saida' && this.isVencida(c)));
+  totalEmAtraso = computed(() => this.despesasEmAtraso().reduce((s, c) => s + c.valorPrevisto, 0));
+
   ngOnInit() {
     this.api.getCategoriasContasPessoais().subscribe(c => this.categorias.set(c));
     this.loadAll();

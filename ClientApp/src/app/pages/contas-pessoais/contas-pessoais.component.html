@@ -3,7 +3,7 @@
   <!-- HEADER -->
   <div class="page-header">
     <div class="page-title">Financeiro</div>
-    <button mat-flat-button color="primary" (click)="openForm()">
+    <button type="button" class="btn-novo-lancamento" (click)="openForm()">
       <mat-icon>add</mat-icon> Novo Lançamento
     </button>
   </div>
@@ -70,6 +70,20 @@
           <div class="sc-label">Previsão de Despesas</div>
           <div class="sc-value">{{ fmt(r.previsaoDespesas) }} €</div>
         </div>
+      </div>
+    </div>
+  }
+
+  <!-- Card despesas em atraso -->
+  @if (despesasEmAtraso().length > 0) {
+    <div class="atraso-card">
+      <div class="atraso-card-header">
+        <mat-icon>warning</mat-icon>
+        <div class="atraso-card-titles">
+          <div class="atraso-card-title">Despesas em Atraso</div>
+          <div class="atraso-card-sub">{{ despesasEmAtraso().length }} lançamento{{ despesasEmAtraso().length !== 1 ? 's' : '' }} vencido{{ despesasEmAtraso().length !== 1 ? 's' : '' }} por pagar</div>
+        </div>
+        <div class="atraso-card-valor">{{ fmt(totalEmAtraso()) }} €</div>
       </div>
     </div>
   }
