@@ -9,6 +9,10 @@ public class Project
     public bool IsActive { get; set; } = true;
     public int SortOrder { get; set; }
 
+    /// <summary>Se falso, o projeto não é faturável e não aparece no Mapa de Dias (timesheet).
+    /// Continua disponível em Tarefas e Agenda, para acompanhar trabalho que não se cobra.</summary>
+    public bool TemCusto { get; set; } = true;
+
     // Dados de faturação (compatíveis com a emissão de fatura via TocOnline)
     public string? FaturacaoNomeFiscal { get; set; }
     public string? FaturacaoNif { get; set; }

@@ -35,7 +35,7 @@ export class ConfiguracaoComponent implements OnInit {
   bancoTitular = signal('');
   year = signal(new Date().getFullYear());
 
-  newProject: Partial<Project> = { name: '', client: '', dailyRate: 0 };
+  newProject: Partial<Project> = { name: '', client: '', dailyRate: 0, temCusto: true };
   novoProjetoAberto = signal(false);
   guardandoProjeto = signal(false);
   newHoliday: Partial<Holiday> = { date: '', name: '', isNational: true };
@@ -108,7 +108,7 @@ export class ConfiguracaoComponent implements OnInit {
   }
 
   abrirNovoProjeto() {
-    this.newProject = { name: '', client: '', dailyRate: 0 };
+    this.newProject = { name: '', client: '', dailyRate: 0, temCusto: true };
     this.novoProjetoAberto.set(true);
   }
 
@@ -125,11 +125,15 @@ export class ConfiguracaoComponent implements OnInit {
     if (this.guardandoProjeto()) return;
 
     this.guardandoProjeto.set(true);
-    this.api.createProject({ ...this.newProject, name: nome, dailyRate: this.newProject.dailyRate || 0 }).subscribe({
+    this.api.createProject({
+      ...this.newProject,
+      name: nome,
+      dailyRate: this.newProject.temCusto ? (this.newProject.dailyRate || 0) : 0
+    }).subscribe({
       next: p => {
         this.guardandoProjeto.set(false);
         this.projects.update(list => [...list, p]);
-        this.newProject = { name: '', client: '', dailyRate: 0 };
+        this.newProject = { name: '', client: '', dailyRate: 0, temCusto: true };
         this.novoProjetoAberto.set(false);
         this.snack.open('Projeto adicionado', '', { duration: 2000 });
       },

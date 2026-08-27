@@ -161,7 +161,8 @@ export class MapaDiasComponent implements OnInit, OnDestroy {
 
   loadData() {
     this.api.getProjects().subscribe(p => {
-      this.projects.set(p);
+      // Projetos sem custo não são faturáveis — ficam fora do Mapa de Dias.
+      this.projects.set(p.filter(x => x.temCusto));
       this.loadMonth();
     });
     this.api.getHolidays().subscribe(h => this.holidays.set(h));

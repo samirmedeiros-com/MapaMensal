@@ -5,6 +5,7 @@ export interface Project {
   dailyRate: number;
   isActive: boolean;
   sortOrder: number;
+  temCusto: boolean;
   faturacaoNomeFiscal?: string | null;
   faturacaoNif?: string | null;
   faturacaoMorada?: string | null;
