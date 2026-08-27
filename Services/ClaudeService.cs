@@ -25,7 +25,7 @@ public class ClaudeService(IConfiguration config, ILogger<ClaudeService> logger)
         "fornecedor": { "type": ["string", "null"], "description": "Nome da entidade/empresa que emitiu o documento" },
         "dataVencimento": { "type": ["string", "null"], "description": "Data de vencimento/pagamento no formato YYYY-MM-DD" },
         "valor": { "type": ["number", "null"], "description": "Valor total a pagar" },
-        "entidade": { "type": ["string", "null"], "description": "Entidade Multibanco (normalmente 5 dígitos)" },
+        "entidade": { "type": ["string", "null"], "description": "Entidade do quadro de pagamento Multibanco (normalmente 5 dígitos) — NUNCA o Cód. Entidade / Código de Cliente / Nº de Cliente do fornecedor" },
         "referencia": { "type": ["string", "null"], "description": "Referência Multibanco (normalmente 9 dígitos)" }
       },
       "required": ["fornecedor", "dataVencimento", "valor", "entidade", "referencia"],
@@ -54,7 +54,13 @@ public class ClaudeService(IConfiguration config, ILogger<ClaudeService> logger)
             System = "Extrais dados de faturas, recibos e avisos de pagamento portugueses. "
                    + "Devolves apenas os campos pedidos, em JSON. Se um campo não existir no "
                    + "documento, devolve null nesse campo. A data de vencimento vem sempre no "
-                   + "formato YYYY-MM-DD. O valor é um número, sem símbolo de moeda.",
+                   + "formato YYYY-MM-DD. O valor é um número, sem símbolo de moeda.\n\n"
+                   + "Atenção à Entidade: só interessa a Entidade do quadro de pagamento "
+                   + "Multibanco/homebanking (o número, normalmente com 5 dígitos, que junto "
+                   + "com a Referência serve para pagar o documento). NÃO confundir com \"Cód. "
+                   + "Entidade\", \"Código de Cliente\", \"Nº de Cliente\" ou identificadores "
+                   + "semelhantes que identificam o cliente/destinatário da fatura — esses NÃO "
+                   + "são a Entidade de pagamento e devem ser ignorados.",
             OutputConfig = new OutputConfig { Format = new JsonOutputFormat { Schema = esquema } },
             Messages =
             [
@@ -64,7 +70,7 @@ public class ClaudeService(IConfiguration config, ILogger<ClaudeService> logger)
                     Content = new List<ContentBlockParam>
                     {
                         ficheiro,
-                        new TextBlockParam { Text = "Extrai o fornecedor, a data de vencimento, o valor e os dados de pagamento (Entidade/Referência Multibanco) deste documento." },
+                        new TextBlockParam { Text = "Extrai o fornecedor, a data de vencimento, o valor e os dados do quadro de pagamento (Entidade e Referência Multibanco, não o código de cliente) deste documento." },
                     },
                 },
             ],
