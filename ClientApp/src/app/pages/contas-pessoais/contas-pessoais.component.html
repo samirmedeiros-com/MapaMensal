@@ -7,6 +7,9 @@
       <button type="button" class="btn-exportar-pdf" [disabled]="exportandoPdf()" (click)="exportarExtratoPdf()" matTooltip="Exportar extrato do período em PDF">
         <mat-icon>picture_as_pdf</mat-icon> {{ exportandoPdf() ? 'A gerar…' : 'Exportar PDF' }}
       </button>
+      <button type="button" class="btn-exportar-pdf btn-exportar-pendencias" (click)="exportarPendenciasPdf()" matTooltip="Exportar contas por pagar e por receber em PDF">
+        <mat-icon>pending_actions</mat-icon> Pendências
+      </button>
       <button type="button" class="btn-novo-lancamento" (click)="openForm()">
         <mat-icon>add</mat-icon> Novo Lançamento
       </button>

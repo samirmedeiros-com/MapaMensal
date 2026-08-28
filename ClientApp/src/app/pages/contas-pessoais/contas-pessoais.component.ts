@@ -537,4 +537,112 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
 
     doc.save(`extrato-financeiro-${this.filtroInicio()}-a-${this.filtroFim()}.pdf`);
   }
+
+  exportarPendenciasPdf() {
+    const pendentes = this.contas().filter(c => !c.pago);
+    const doc = new jsPDF();
+
+    const aReceber = pendentes.filter(c => c.tipo === 'Entrada').sort((a, b) => a.dataVencimento.localeCompare(b.dataVencimento));
+    const aPagar = pendentes.filter(c => c.tipo === 'Saida').sort((a, b) => a.dataVencimento.localeCompare(b.dataVencimento));
+
+    const totalAReceber = aReceber.reduce((s, c) => s + c.valorPrevisto, 0);
+    const totalAPagar = aPagar.reduce((s, c) => s + c.valorPrevisto, 0);
+
+    doc.setFontSize(16);
+    doc.setTextColor(83, 74, 183);
+    doc.text('Pendências Financeiras', 14, 18);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Período: ${this.fmtDataBr(this.filtroInicio())} a ${this.fmtDataBr(this.filtroFim())}`, 14, 25);
+    doc.text(`Gerado em ${new Date().toLocaleString('pt-PT')}`, 14, 30);
+
+    let y = 38;
+
+    doc.setFontSize(12);
+    doc.setTextColor(46, 125, 50);
+    doc.text('A Receber (Entradas em aberto)', 14, y);
+    y += 4;
+    autoTable(doc, {
+      startY: y,
+      head: [['Vencimento', 'Descrição', 'Categoria', 'Situação', 'Valor']],
+      body: aReceber.length
+        ? aReceber.map(c => [
+            this.fmtDataBr(c.dataVencimento),
+            c.descricao,
+            c.categoria,
+            this.isVencida(c) ? `Vencida há ${this.diasEmAtraso(c.dataVencimento)} dias` : 'No prazo',
+            this.fmt(c.valorPrevisto) + ' €'
+          ])
+        : [['—', 'Sem entradas pendentes no período', '—', '—', '—']],
+      headStyles: { fillColor: [46, 125, 50] },
+      styles: { fontSize: 8 },
+      columnStyles: { 4: { halign: 'right' } },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 3 && String(data.cell.raw).startsWith('Vencida')) {
+          data.cell.styles.textColor = [198, 40, 40];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      }
+    });
+    y = (doc as any).lastAutoTable.finalY + 4;
+    doc.setFontSize(9);
+    doc.setTextColor(46, 125, 50);
+    doc.text(`Total a receber: ${this.fmt(totalAReceber)} €`, 14, y);
+    y += 12;
+
+    if (y > 230) { doc.addPage(); y = 20; }
+
+    doc.setFontSize(12);
+    doc.setTextColor(198, 40, 40);
+    doc.text('A Pagar (Saídas em aberto)', 14, y);
+    y += 4;
+    autoTable(doc, {
+      startY: y,
+      head: [['Vencimento', 'Descrição', 'Categoria', 'Entidade/Ref.', 'Situação', 'Valor']],
+      body: aPagar.length
+        ? aPagar.map(c => [
+            this.fmtDataBr(c.dataVencimento),
+            c.descricao,
+            c.categoria,
+            [c.entidade, c.referencia].filter(Boolean).join(' / ') || '—',
+            this.isVencida(c) ? `Vencida há ${this.diasEmAtraso(c.dataVencimento)} dias` : 'No prazo',
+            this.fmt(c.valorPrevisto) + ' €'
+          ])
+        : [['—', 'Sem saídas pendentes no período', '—', '—', '—', '—']],
+      headStyles: { fillColor: [198, 40, 40] },
+      styles: { fontSize: 8 },
+      columnStyles: { 5: { halign: 'right' } },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 4 && String(data.cell.raw).startsWith('Vencida')) {
+          data.cell.styles.textColor = [198, 40, 40];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      }
+    });
+    y = (doc as any).lastAutoTable.finalY + 4;
+    doc.setFontSize(9);
+    doc.setTextColor(198, 40, 40);
+    doc.text(`Total a pagar: ${this.fmt(totalAPagar)} €`, 14, y);
+    y += 12;
+
+    if (y > 240) { doc.addPage(); y = 20; }
+
+    doc.setFontSize(12);
+    doc.setTextColor(83, 74, 183);
+    doc.text('Resumo', 14, y);
+    y += 4;
+    autoTable(doc, {
+      startY: y,
+      body: [
+        ['Total a receber', this.fmt(totalAReceber) + ' €'],
+        ['Total a pagar', this.fmt(totalAPagar) + ' €'],
+        ['Saldo previsto (a receber − a pagar)', this.fmt(totalAReceber - totalAPagar) + ' €']
+      ],
+      theme: 'plain',
+      styles: { fontSize: 9 },
+      columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } }
+    });
+
+    doc.save(`pendencias-financeiras-${this.filtroInicio()}-a-${this.filtroFim()}.pdf`);
+  }
 }
