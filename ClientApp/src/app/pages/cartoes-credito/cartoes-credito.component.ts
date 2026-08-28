@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../services/api.service';
-import { CartaoCredito, FaturaCartaoDto, FaturaCartaoHistoricoDto, CategoriaContaPessoal, MONTH_NAMES } from '../../models/models';
+import { CartaoCredito, FaturaCartaoDto, FaturaCartaoHistoricoDto, CategoriaContaPessoal, PreviewFechamentoDto, MONTH_NAMES } from '../../models/models';
 
 function hoje(): Date { return new Date(); }
 
@@ -206,6 +206,9 @@ export class CartoesCreditoComponent implements OnInit {
     });
   }
 
+  previewFechamento = signal<PreviewFechamentoDto | null>(null);
+  carregandoPreview = signal(false);
+
   abrirConfirmarFechar() {
     const fatura = this.fatura();
     if (!fatura) return;
@@ -213,7 +216,19 @@ export class CartoesCreditoComponent implements OnInit {
       this.snack.open('Adicione pelo menos um lançamento antes de fechar a fatura.', 'Ok', { duration: 3500 });
       return;
     }
+    this.previewFechamento.set(null);
     this.showConfirmarFechar.set(true);
+    this.carregandoPreview.set(true);
+    this.api.previewFechamentoFaturaCartao(fatura.id).subscribe({
+      next: (p) => {
+        this.carregandoPreview.set(false);
+        this.previewFechamento.set(p);
+      },
+      error: () => {
+        this.carregandoPreview.set(false);
+        this.snack.open('Não foi possível obter a cotação atual da moeda.', 'Ok', { duration: 4000 });
+      }
+    });
   }
 
   fecharConfirmarFechar() {
@@ -246,5 +261,13 @@ export class CartoesCreditoComponent implements OnInit {
 
   formatarMoeda(valor: number, moeda: string): string {
     return moeda === 'BRL' ? `R$ ${this.fmt(valor)}` : `${this.fmt(valor)} €`;
+  }
+
+  labelPagamento(status?: string): string {
+    switch (status) {
+      case 'Pago': return 'Pago';
+      case 'Parcial': return 'Pagamento Parcial';
+      default: return 'Não Pago';
+    }
   }
 }

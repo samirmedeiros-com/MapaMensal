@@ -21,5 +21,11 @@ public class FaturaCartao
     /// <summary>Lançamento criado no Financeiro ao fechar a fatura.</summary>
     public int? ContaPessoalId { get; set; }
 
+    /// <summary>Reflete o pagamento do lançamento associado no Financeiro — "NaoPago", "Parcial" ou "Pago".</summary>
+    public string PagamentoStatus { get; set; } = "NaoPago";
+
+    /// <summary>Valor (em EUR) efetivamente pago, preenchido quando o lançamento no Financeiro é marcado como pago.</summary>
+    public decimal? ValorPagoEur { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

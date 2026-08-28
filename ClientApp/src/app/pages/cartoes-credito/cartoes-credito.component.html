@@ -58,6 +58,7 @@
               <tr>
                 <th>Mês</th>
                 <th>Estado</th>
+                <th>Pagamento</th>
                 <th>Fechada em</th>
                 <th>Total</th>
               </tr>
@@ -69,6 +70,13 @@
                   <td>
                     <span class="estado-badge" [class.fechada]="f.estado === 'Fechada'">{{ f.estado }}</span>
                   </td>
+                  <td>
+                    @if (f.estado === 'Fechada') {
+                      <span class="pagamento-badge" [class]="'pagamento-' + (f.pagamentoStatus ?? 'NaoPago')">
+                        {{ labelPagamento(f.pagamentoStatus) }}
+                      </span>
+                    } @else { — }
+                  </td>
                   <td>{{ f.dataFechamento ? (f.dataFechamento | date:'dd/MM/yyyy') : '—' }}</td>
                   <td>
                     @if (f.valorTotalEur !== null && f.valorTotalEur !== undefined) {
@@ -76,12 +84,15 @@
                       @if (f.valorTotalMoedaCartao !== null && cartao.moeda !== 'EUR') {
                         <span class="text-muted">({{ formatarMoeda(f.valorTotalMoedaCartao!, cartao.moeda) }})</span>
                       }
+                      @if (f.pagamentoStatus !== 'Pago' && f.valorPagoEur) {
+                        <span class="text-muted">— pago: {{ formatarMoeda(f.valorPagoEur, 'EUR') }}</span>
+                      }
                     } @else { — }
                   </td>
                 </tr>
               }
               @if (historico().length === 0) {
-                <tr><td colspan="4" class="empty-row">Sem faturas anteriores.</td></tr>
+                <tr><td colspan="5" class="empty-row">Sem faturas anteriores.</td></tr>
               }
             </tbody>
           </table>
@@ -93,7 +104,15 @@
         <div class="card">
           <div class="fatura-header">
             <div class="card-title">Fatura de {{ monthNames[f.month] }}/{{ f.year }}</div>
-            <span class="estado-badge" [class.fechada]="f.estado === 'Fechada'">{{ f.estado }}</span>
+            <div class="fatura-header-badges">
+              @if (f.estado === 'Fechada') {
+                <span class="pagamento-badge" [class]="'pagamento-' + (f.pagamentoStatus ?? 'NaoPago')">
+                  {{ labelPagamento(f.pagamentoStatus) }}
+                  @if (f.valorPagoEur) { — {{ formatarMoeda(f.valorPagoEur, 'EUR') }} }
+                </span>
+              }
+              <span class="estado-badge" [class.fechada]="f.estado === 'Fechada'">{{ f.estado }}</span>
+            </div>
           </div>
           <p class="fatura-vencimento">Vence a {{ f.dataVencimento | date:'dd/MM/yyyy' }}</p>
 
@@ -213,12 +232,27 @@
           Depois de fechada não pode adicionar nem remover lançamentos.
         </p>
         <div class="confirmar-resumo">
-          <div class="confirmar-linha">
-            <span>Total da fatura</span>
-            <span>{{ formatarMoeda(f.total, cartaoSelecionado()?.moeda ?? 'EUR') }}</span>
-          </div>
-          @if (cartaoSelecionado()?.moeda === 'BRL') {
-            <div class="confirmar-hint">O valor será convertido para EUR à cotação do dia e lançado como despesa no Financeiro.</div>
+          @if (carregandoPreview()) {
+            <div class="confirmar-linha"><span>A calcular…</span></div>
+          } @else if (previewFechamento(); as p) {
+            @if (p.moeda !== 'EUR') {
+              <div class="confirmar-linha-sec">
+                <span>Total na fatura</span>
+                <span>{{ formatarMoeda(p.totalMoedaCartao, p.moeda) }}</span>
+              </div>
+            }
+            <div class="confirmar-linha">
+              <span>Valor a lançar no Financeiro</span>
+              <span>{{ formatarMoeda(p.totalEur, 'EUR') }}</span>
+            </div>
+            @if (p.moeda === 'BRL') {
+              <div class="confirmar-hint">Convertido à cotação do dia.</div>
+            }
+          } @else {
+            <div class="confirmar-linha">
+              <span>Total da fatura</span>
+              <span>{{ formatarMoeda(f.total, cartaoSelecionado()?.moeda ?? 'EUR') }}</span>
+            </div>
           }
         </div>
         <p class="modal-desc">Vai criar uma despesa no Financeiro com vencimento a {{ f.dataVencimento | date:'dd/MM/yyyy' }}.</p>

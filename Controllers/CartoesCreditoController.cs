@@ -93,6 +93,8 @@ public class CartoesCreditoController(AppDbContext db, CurrencyService currency,
             fatura.ValorTotalMoedaCartao,
             fatura.ValorTotalEur,
             fatura.ContaPessoalId,
+            fatura.PagamentoStatus,
+            fatura.ValorPagoEur,
             DataVencimento = CalcularDataVencimento(year, month, cartao.DiaVencimento).ToString("yyyy-MM-dd"),
             Total = lancamentos.Sum(l => l.Valor),
             Lancamentos = lancamentos.Select(ToLancamentoDtoAnon)
@@ -112,8 +114,39 @@ public class CartoesCreditoController(AppDbContext db, CurrencyService currency,
         {
             f.Id, f.Year, f.Month, f.Estado,
             DataFechamento = f.DataFechamento?.ToString("yyyy-MM-dd"),
-            f.ValorTotalMoedaCartao, f.ValorTotalEur, f.ContaPessoalId
+            f.ValorTotalMoedaCartao, f.ValorTotalEur, f.ContaPessoalId,
+            f.PagamentoStatus, f.ValorPagoEur
         }));
+    }
+
+    /// <summary>Pré-visualiza o total (na moeda do cartão e convertido para EUR) sem fechar a fatura.</summary>
+    [HttpGet("faturas/{faturaId}/preview-fechamento")]
+    public async Task<IActionResult> PreviewFechamento(int faturaId)
+    {
+        var fatura = await db.FaturasCartao.FindAsync(faturaId);
+        if (fatura is null) return NotFound("Fatura não encontrada.");
+
+        var cartao = await db.CartoesCredito.FindAsync(fatura.CartaoId);
+        if (cartao is null) return NotFound("Cartão não encontrado.");
+
+        var totalCartao = await db.LancamentosCartao.Where(l => l.FaturaCartaoId == faturaId).SumAsync(l => l.Valor);
+        var totalEur = totalCartao;
+
+        if (cartao.Moeda != "EUR")
+        {
+            try
+            {
+                var conversao = await currency.ConverterParaEurAsync(totalCartao, cartao.Moeda);
+                totalEur = conversao.ValorConvertido;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Falha ao pré-visualizar conversão da fatura {FaturaId}.", faturaId);
+                return UnprocessableEntity("Não foi possível obter a cotação da moeda. Tente novamente.");
+            }
+        }
+
+        return Ok(new { TotalMoedaCartao = totalCartao, TotalEur = totalEur, Moeda = cartao.Moeda });
     }
 
     [HttpPost("faturas/{faturaId}/lancamentos")]

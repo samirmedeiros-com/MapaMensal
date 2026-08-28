@@ -315,6 +315,23 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, Cur
             ? DateOnly.Parse(dto.DataPagamento)
             : null;
         c.MetodoPagamento = dto.Pago ? dto.MetodoPagamento : null;
+
+        var faturaCartao = await db.FaturasCartao.FirstOrDefaultAsync(f => f.ContaPessoalId == c.Id);
+        if (faturaCartao is not null)
+        {
+            if (!dto.Pago)
+            {
+                faturaCartao.PagamentoStatus = "NaoPago";
+                faturaCartao.ValorPagoEur = null;
+            }
+            else
+            {
+                var valorPago = dto.ValorPago ?? 0;
+                faturaCartao.ValorPagoEur = valorPago;
+                faturaCartao.PagamentoStatus = valorPago >= c.ValorPrevisto ? "Pago" : "Parcial";
+            }
+        }
+
         await db.SaveChangesAsync();
         return Ok(ToDtoAnon(c));
     }

@@ -233,6 +233,8 @@ export interface FaturaCartaoDto {
   valorTotalMoedaCartao?: number | null;
   valorTotalEur?: number | null;
   contaPessoalId?: number | null;
+  pagamentoStatus?: 'NaoPago' | 'Parcial' | 'Pago';
+  valorPagoEur?: number | null;
   dataVencimento: string;
   total: number;
   lancamentos: LancamentoCartaoDto[];
@@ -247,6 +249,14 @@ export interface FaturaCartaoHistoricoDto {
   valorTotalMoedaCartao?: number | null;
   valorTotalEur?: number | null;
   contaPessoalId?: number | null;
+  pagamentoStatus?: 'NaoPago' | 'Parcial' | 'Pago';
+  valorPagoEur?: number | null;
+}
+
+export interface PreviewFechamentoDto {
+  totalMoedaCartao: number;
+  totalEur: number;
+  moeda: 'EUR' | 'BRL';
 }
 
 export interface Tarefa {

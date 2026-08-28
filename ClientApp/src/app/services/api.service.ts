@@ -7,7 +7,7 @@ import {
   ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal, FaturaExtraidaDto, ConversaoMoedaDto,
   Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso,
   TimesheetStatus, TimesheetFaturaDto, TimesheetFaturaAnuladaDto,
-  CartaoCredito, FaturaCartaoDto, FaturaCartaoHistoricoDto, LancamentoCartaoDto
+  CartaoCredito, FaturaCartaoDto, FaturaCartaoHistoricoDto, LancamentoCartaoDto, PreviewFechamentoDto
 } from '../models/models';
 import { environment } from '../../environments/environment';
 
@@ -210,6 +210,9 @@ export class ApiService {
   }
   fecharFaturaCartao(faturaId: number): Observable<any> {
     return this.http.post(`${this.base}/cartoescredito/faturas/${faturaId}/fechar`, {});
+  }
+  previewFechamentoFaturaCartao(faturaId: number): Observable<PreviewFechamentoDto> {
+    return this.http.get<PreviewFechamentoDto>(`${this.base}/cartoescredito/faturas/${faturaId}/preview-fechamento`);
   }
 
   // Categorias Contas Pessoais

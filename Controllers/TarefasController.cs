@@ -1,5 +1,6 @@
 using MapaMensal.Data;
 using MapaMensal.Models;
+using MapaMensal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ namespace MapaMensal.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class TarefasController(AppDbContext db) : ControllerBase
+public class TarefasController(AppDbContext db, GraphCalendarService graph, ILogger<TarefasController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int? projectId, [FromQuery] string? status, [FromQuery] bool arquivado = false)
@@ -54,6 +55,10 @@ public class TarefasController(AppDbContext db) : ControllerBase
         db.Tarefas.Add(tarefa);
         await db.SaveChangesAsync();
         await db.Entry(tarefa).Reference(t => t.Project).LoadAsync();
+
+        await SincronizarLembreteAsync(tarefa);
+        await db.SaveChangesAsync();
+
         return Ok(ToDto(tarefa));
     }
 
@@ -69,7 +74,10 @@ public class TarefasController(AppDbContext db) : ControllerBase
         tarefa.Status = dto.Status ?? tarefa.Status;
         tarefa.DataEntrega = dto.DataEntrega is not null ? DateOnly.Parse(dto.DataEntrega) : null;
         tarefa.HorasGastas = dto.HorasGastas;
+
+        await SincronizarLembreteAsync(tarefa);
         await db.SaveChangesAsync();
+
         return Ok(ToDto(tarefa));
     }
 
@@ -79,6 +87,21 @@ public class TarefasController(AppDbContext db) : ControllerBase
         var tarefa = await db.Tarefas.FindAsync(id);
         if (tarefa is null) return NotFound();
         tarefa.Status = dto.Status;
+
+        // Ao concluir a tarefa antes (ou depois) da data de entrega, o lembrete deixa de fazer sentido.
+        if (tarefa.Status == "Concluido" && tarefa.GraphEventId is not null && graph.Configurado)
+        {
+            try
+            {
+                await graph.RemoverLembreteAsync(tarefa.GraphEventId);
+                tarefa.GraphEventId = null;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Falha ao remover lembrete da tarefa {Id} no calendário.", tarefa.Id);
+            }
+        }
+
         await db.SaveChangesAsync();
         return Ok(new { tarefa.Id, tarefa.Status, tarefa.Arquivado });
     }
@@ -110,9 +133,52 @@ public class TarefasController(AppDbContext db) : ControllerBase
     {
         var tarefa = await db.Tarefas.FindAsync(id);
         if (tarefa is null) return NotFound();
+
+        if (tarefa.GraphEventId is not null && graph.Configurado)
+        {
+            try { await graph.RemoverLembreteAsync(tarefa.GraphEventId); }
+            catch (Exception ex) { logger.LogWarning(ex, "Falha ao remover lembrete da tarefa {Id} no calendário.", tarefa.Id); }
+        }
+
         db.Tarefas.Remove(tarefa);
         await db.SaveChangesAsync();
         return NoContent();
+    }
+
+    /// <summary>Cria, atualiza ou remove o lembrete no calendário conforme a data de entrega e o estado da tarefa.
+    /// Requer que tarefa.Project já esteja carregado.</summary>
+    private async Task SincronizarLembreteAsync(Tarefa tarefa)
+    {
+        if (!graph.Configurado) return;
+
+        try
+        {
+            var precisaLembrete = tarefa.DataEntrega is not null && tarefa.Status != "Concluido";
+
+            if (!precisaLembrete)
+            {
+                if (tarefa.GraphEventId is not null)
+                {
+                    await graph.RemoverLembreteAsync(tarefa.GraphEventId);
+                    tarefa.GraphEventId = null;
+                }
+                return;
+            }
+
+            var assunto = $"Tarefa: {tarefa.Titulo} — {tarefa.Project.Name}";
+            if (tarefa.GraphEventId is null)
+            {
+                tarefa.GraphEventId = await graph.CriarLembreteAsync(assunto, tarefa.DataEntrega!.Value, tarefa.Descricao);
+            }
+            else
+            {
+                await graph.AtualizarLembreteAsync(tarefa.GraphEventId, assunto, tarefa.DataEntrega!.Value, tarefa.Descricao);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Falha ao sincronizar lembrete da tarefa {Id} no calendário.", tarefa.Id);
+        }
     }
 
     // ── Comentários ───────────────────────────────────────────────────────────

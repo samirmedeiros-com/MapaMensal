@@ -13,4 +13,7 @@ public class Tarefa
     public decimal HorasGastas { get; set; }
     public bool Arquivado { get; set; } = false;
     public ICollection<TarefaComentario> Comentarios { get; set; } = [];
+
+    /// <summary>Id do evento no calendário Office 365 criado a partir da data de entrega.</summary>
+    public string? GraphEventId { get; set; }
 }
