@@ -72,7 +72,8 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
     entidade: '', referencia: '',
     anexoBase64: null as string | null, anexoMimeType: null as string | null,
     moeda: 'EUR' as 'EUR' | 'BRL', valorOriginal: 0, observacoes: '',
-    lembreteCalendario: false
+    lembreteCalendario: false,
+    jaPago: false, dataPagamento: hoje(), metodoPagamento: ''
   };
   pagarForm = { valorPago: 0, dataPagamento: '', metodoPagamento: '' };
   extraindoAnexo = signal(false);
@@ -155,7 +156,8 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
       tipo: 'Saida', descricao: '', categoria: this.categorias()[0]?.nome ?? '', dataVencimento: hoje(), valorPrevisto: 0, totalRecorrencias: 1,
       entidade: '', referencia: '', anexoBase64: null, anexoMimeType: null,
       moeda: 'EUR', valorOriginal: 0, observacoes: '',
-      lembreteCalendario: false
+      lembreteCalendario: false,
+      jaPago: false, dataPagamento: hoje(), metodoPagamento: ''
     };
     this.editMode.set(null);
     this.showForm.set(true);
@@ -166,7 +168,8 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
       tipo: c.tipo, descricao: c.descricao, categoria: c.categoria, dataVencimento: c.dataVencimento, valorPrevisto: c.valorPrevisto, totalRecorrencias: 1,
       entidade: c.entidade ?? '', referencia: c.referencia ?? '', anexoBase64: null, anexoMimeType: null,
       moeda: (c.moeda as 'EUR' | 'BRL') ?? 'EUR', valorOriginal: c.valorOriginal ?? 0, observacoes: c.observacoes ?? '',
-      lembreteCalendario: c.lembreteCalendario ?? false
+      lembreteCalendario: c.lembreteCalendario ?? false,
+      jaPago: false, dataPagamento: hoje(), metodoPagamento: ''
     };
     this.editMode.set(c);
     this.showForm.set(true);

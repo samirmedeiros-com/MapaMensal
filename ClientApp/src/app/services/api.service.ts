@@ -158,10 +158,10 @@ export class ApiService {
   getResumoFinanceiro(inicio: string, fim: string): Observable<ResumoFinanceiro> {
     return this.http.get<ResumoFinanceiro>(`${this.base}/contaspessoais/resumo?inicio=${inicio}&fim=${fim}`);
   }
-  createContaPessoal(dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null; moeda?: string; valorOriginal?: number | null; observacoes?: string | null; lembreteCalendario?: boolean }): Observable<ContaPessoal[]> {
+  createContaPessoal(dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null; moeda?: string; valorOriginal?: number | null; observacoes?: string | null; lembreteCalendario?: boolean; jaPago?: boolean; dataPagamento?: string | null; metodoPagamento?: string | null }): Observable<ContaPessoal[]> {
     return this.http.post<ContaPessoal[]>(`${this.base}/contaspessoais`, dto);
   }
-  updateContaPessoal(id: number, dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null; moeda?: string; valorOriginal?: number | null; observacoes?: string | null; lembreteCalendario?: boolean }): Observable<ContaPessoal> {
+  updateContaPessoal(id: number, dto: { tipo: string; descricao: string; categoria: string; dataVencimento: string; valorPrevisto: number; totalRecorrencias: number; entidade?: string | null; referencia?: string | null; anexoBase64?: string | null; anexoMimeType?: string | null; moeda?: string; valorOriginal?: number | null; observacoes?: string | null; lembreteCalendario?: boolean; jaPago?: boolean; dataPagamento?: string | null; metodoPagamento?: string | null }): Observable<ContaPessoal> {
     return this.http.put<ContaPessoal>(`${this.base}/contaspessoais/${id}`, dto);
   }
   extrairAnexoContaPessoal(ficheiro: File): Observable<FaturaExtraidaDto> {

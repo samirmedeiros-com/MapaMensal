@@ -234,6 +234,34 @@
             Lembrete no calendário (Outlook / Office 365)
           </label>
         </div>
+        @if (!editMode()) {
+          <div class="form-group span2">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="form.jaPago" />
+              Já foi pago / recebido
+            </label>
+          </div>
+          @if (form.jaPago) {
+            <div class="form-group">
+              <label>Data do pagamento *</label>
+              <input type="date" [(ngModel)]="form.dataPagamento" />
+            </div>
+            <div class="form-group">
+              <label>Forma de pagamento</label>
+              <div class="metodo-opts">
+                <button type="button" class="metodo-btn" [class.active]="form.metodoPagamento === ''" (click)="form.metodoPagamento = ''">
+                  <mat-icon>help_outline</mat-icon> Não especificado
+                </button>
+                <button type="button" class="metodo-btn" [class.active]="form.metodoPagamento === 'Dinheiro'" (click)="form.metodoPagamento = 'Dinheiro'">
+                  <mat-icon>payments</mat-icon> Dinheiro
+                </button>
+                <button type="button" class="metodo-btn" [class.active]="form.metodoPagamento === 'Cartão'" (click)="form.metodoPagamento = 'Cartão'">
+                  <mat-icon>credit_card</mat-icon> Cartão
+                </button>
+              </div>
+            </div>
+          }
+        }
       </div>
       <div class="form-actions">
         <button mat-flat-button color="primary" (click)="save()">

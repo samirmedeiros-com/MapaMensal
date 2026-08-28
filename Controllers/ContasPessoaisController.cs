@@ -207,7 +207,11 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, Cur
                 Moeda             = string.IsNullOrWhiteSpace(dto.Moeda) ? "EUR" : dto.Moeda,
                 ValorOriginal     = dto.ValorOriginal,
                 Observacoes       = dto.Observacoes,
-                LembreteCalendario = dto.LembreteCalendario
+                LembreteCalendario = dto.LembreteCalendario,
+                Pago              = dto.JaPago,
+                ValorPago         = dto.JaPago ? dto.ValorPrevisto : null,
+                DataPagamento     = dto.JaPago && dto.DataPagamento is not null ? DateOnly.Parse(dto.DataPagamento) : null,
+                MetodoPagamento   = dto.JaPago ? dto.MetodoPagamento : null
             };
             db.ContasPessoais.Add(c);
             criadas.Add(c);
@@ -367,7 +371,8 @@ public record ContaPessoalDto(
     string? Entidade = null, string? Referencia = null,
     string? AnexoBase64 = null, string? AnexoMimeType = null,
     string? Moeda = null, decimal? ValorOriginal = null, string? Observacoes = null,
-    bool LembreteCalendario = false
+    bool LembreteCalendario = false,
+    bool JaPago = false, string? DataPagamento = null, string? MetodoPagamento = null
 );
 
 public record PagarDto(bool Pago, decimal? ValorPago, string? DataPagamento, string? MetodoPagamento = null);
