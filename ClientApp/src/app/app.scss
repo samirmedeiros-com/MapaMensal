@@ -113,6 +113,13 @@
   }
 }
 
+.nav-item-sub {
+  padding-left: 30px;
+  font-size: 12px;
+
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+}
+
 /* ── Footer ── */
 .sidebar-footer {
   padding: 8px;

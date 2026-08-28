@@ -31,6 +31,14 @@
                 <mat-icon>{{ item.icon }}</mat-icon>
                 <span>{{ item.label }}</span>
               </a>
+              @if (item.children) {
+                @for (sub of item.children; track sub.path) {
+                  <a class="nav-item nav-item-sub" [routerLink]="sub.path" routerLinkActive="active" (click)="onNavClick()">
+                    <mat-icon>{{ sub.icon }}</mat-icon>
+                    <span>{{ sub.label }}</span>
+                  </a>
+                }
+              }
             }
           </div>
         }
