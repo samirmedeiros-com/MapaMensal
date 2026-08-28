@@ -43,6 +43,7 @@ export class CartoesCreditoComponent implements OnInit {
   formLancamento = { descricao: '', categoria: '', valor: 0, moeda: 'EUR' as 'EUR' | 'BRL', data: '' };
   salvandoLancamento = signal(false);
   fechandoFatura = signal(false);
+  showConfirmarFechar = signal(false);
 
   cartaoSelecionado = computed(() => this.cartoes().find(c => c.id === this.cartaoSelecionadoId()) ?? null);
 
@@ -205,24 +206,35 @@ export class CartoesCreditoComponent implements OnInit {
     });
   }
 
-  fecharFatura() {
+  abrirConfirmarFechar() {
     const fatura = this.fatura();
     if (!fatura) return;
     if (!fatura.lancamentos.length) {
       this.snack.open('Adicione pelo menos um lançamento antes de fechar a fatura.', 'Ok', { duration: 3500 });
       return;
     }
-    if (!confirm('Fechar esta fatura? Vai gerar uma despesa no Financeiro e não vai poder adicionar mais lançamentos.')) return;
+    this.showConfirmarFechar.set(true);
+  }
+
+  fecharConfirmarFechar() {
+    this.showConfirmarFechar.set(false);
+  }
+
+  confirmarFecharFatura() {
+    const fatura = this.fatura();
+    if (!fatura) return;
 
     this.fechandoFatura.set(true);
     this.api.fecharFaturaCartao(fatura.id).subscribe({
       next: () => {
         this.fechandoFatura.set(false);
+        this.showConfirmarFechar.set(false);
         this.loadFatura();
         this.snack.open('Fatura fechada e lançada no Financeiro', '', { duration: 3000 });
       },
       error: (err) => {
         this.fechandoFatura.set(false);
+        this.showConfirmarFechar.set(false);
         this.snack.open(err?.error ?? 'Não foi possível fechar a fatura.', 'Ok', { duration: 4000 });
       }
     });
@@ -231,4 +243,8 @@ export class CartoesCreditoComponent implements OnInit {
   fmt(v: number) { return v.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
   simboloMoeda(m: string) { return m === 'BRL' ? 'R$' : '€'; }
+
+  formatarMoeda(valor: number, moeda: string): string {
+    return moeda === 'BRL' ? `R$ ${this.fmt(valor)}` : `${this.fmt(valor)} €`;
+  }
 }

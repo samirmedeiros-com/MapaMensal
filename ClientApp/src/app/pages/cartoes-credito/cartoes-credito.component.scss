@@ -235,6 +235,28 @@
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 
   .modal-title { font-size: 1.1rem; font-weight: 700; color: #1a237e; margin-bottom: 12px; }
+  .modal-desc { font-size: 0.85rem; color: #555; margin: 0 0 12px; line-height: 1.4; }
+}
+
+.confirmar-resumo {
+  background: #f5f5fa;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.confirmar-linha {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  color: #1a237e;
+  font-size: 0.94rem;
+}
+
+.confirmar-hint {
+  font-size: 0.78rem;
+  color: #888;
+  margin-top: 6px;
 }
 
 .form-group {
