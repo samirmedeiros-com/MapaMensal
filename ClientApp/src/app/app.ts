@@ -65,6 +65,7 @@ export class App {
         { path: '/resumo',           icon: 'bar_chart',              label: 'Resumo' },
         { path: '/tarefas',          icon: 'task_alt',               label: 'Tarefas' },
         { path: '/contas-pessoais',  icon: 'credit_card',            label: 'Financeiro' },
+        { path: '/cartoes-credito',  icon: 'credit_score',           label: 'Cartões de Crédito' },
         { path: '/tesouraria',       icon: 'account_balance_wallet', label: 'Tesouraria' },
         { path: '/agenda',           icon: 'event',                  label: 'Agenda' },
       ]

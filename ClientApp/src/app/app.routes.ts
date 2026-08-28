@@ -33,6 +33,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/contas-pessoais/contas-pessoais.component').then(m => m.ContasPessoaisComponent)
   },
   {
+    path: 'cartoes-credito',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/cartoes-credito/cartoes-credito.component').then(m => m.CartoesCreditoComponent)
+  },
+  {
     path: 'tarefas',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/tarefas/tarefas.component').then(m => m.TarefasComponent)

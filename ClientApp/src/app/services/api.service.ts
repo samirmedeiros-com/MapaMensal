@@ -6,7 +6,8 @@ import {
   Expense, AnnualSummary, TreasurySummary, Tarefa, TarefaComentario,
   ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal, FaturaExtraidaDto, ConversaoMoedaDto,
   Compromisso, HorarioDisponivel, SlotPublico, StatusCompromisso,
-  TimesheetStatus, TimesheetFaturaDto, TimesheetFaturaAnuladaDto
+  TimesheetStatus, TimesheetFaturaDto, TimesheetFaturaAnuladaDto,
+  CartaoCredito, FaturaCartaoDto, FaturaCartaoHistoricoDto, LancamentoCartaoDto
 } from '../models/models';
 import { environment } from '../../environments/environment';
 
@@ -180,6 +181,35 @@ export class ApiService {
   }
   deleteContaPessoal(id: number, grupo = false): Observable<void> {
     return this.http.delete<void>(`${this.base}/contaspessoais/${id}?grupo=${grupo}`);
+  }
+
+  // Cartões de Crédito
+  getCartoesCredito(): Observable<CartaoCredito[]> {
+    return this.http.get<CartaoCredito[]>(`${this.base}/cartoescredito`);
+  }
+  createCartaoCredito(dto: { nome: string; moeda: string; diaVencimento: number }): Observable<CartaoCredito> {
+    return this.http.post<CartaoCredito>(`${this.base}/cartoescredito`, dto);
+  }
+  updateCartaoCredito(id: number, dto: { nome: string; moeda: string; diaVencimento: number; ativo: boolean }): Observable<CartaoCredito> {
+    return this.http.put<CartaoCredito>(`${this.base}/cartoescredito/${id}`, dto);
+  }
+  deleteCartaoCredito(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/cartoescredito/${id}`);
+  }
+  getOuCriarFaturaCartao(cartaoId: number, year: number, month: number): Observable<FaturaCartaoDto> {
+    return this.http.get<FaturaCartaoDto>(`${this.base}/cartoescredito/${cartaoId}/faturas/${year}/${month}`);
+  }
+  getHistoricoFaturasCartao(cartaoId: number): Observable<FaturaCartaoHistoricoDto[]> {
+    return this.http.get<FaturaCartaoHistoricoDto[]>(`${this.base}/cartoescredito/${cartaoId}/faturas`);
+  }
+  adicionarLancamentoCartao(faturaId: number, dto: { descricao: string; categoria: string; valor: number; moeda?: string; data?: string }): Observable<LancamentoCartaoDto> {
+    return this.http.post<LancamentoCartaoDto>(`${this.base}/cartoescredito/faturas/${faturaId}/lancamentos`, dto);
+  }
+  removerLancamentoCartao(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/cartoescredito/lancamentos/${id}`);
+  }
+  fecharFaturaCartao(faturaId: number): Observable<any> {
+    return this.http.post(`${this.base}/cartoescredito/faturas/${faturaId}/fechar`, {});
   }
 
   // Categorias Contas Pessoais

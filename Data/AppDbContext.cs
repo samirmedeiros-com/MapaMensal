@@ -23,6 +23,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<TimesheetApproval> TimesheetApprovals => Set<TimesheetApproval>();
     public DbSet<TimesheetFatura> TimesheetFaturas => Set<TimesheetFatura>();
     public DbSet<TocOnlineToken> TocOnlineTokens => Set<TocOnlineToken>();
+    public DbSet<CartaoCredito> CartoesCredito => Set<CartaoCredito>();
+    public DbSet<FaturaCartao> FaturasCartao => Set<FaturaCartao>();
+    public DbSet<LancamentoCartao> LancamentosCartao => Set<LancamentoCartao>();
 
     // Garante que todos os DateTime lidos do MySQL ficam com Kind=Utc.
     // Sem isto, o Pomelo devolve Kind=Unspecified e o System.Text.Json serializa
@@ -57,6 +60,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<TimesheetApproval>().ToTable("mapa_timesheet_approvals");
         modelBuilder.Entity<TimesheetFatura>().ToTable("mapa_timesheet_faturas");
         modelBuilder.Entity<TocOnlineToken>().ToTable("mapa_toconline_tokens");
+        modelBuilder.Entity<CartaoCredito>().ToTable("mapa_cartoes_credito");
+        modelBuilder.Entity<FaturaCartao>().ToTable("mapa_faturas_cartao");
+        modelBuilder.Entity<LancamentoCartao>().ToTable("mapa_lancamentos_cartao");
 
         // Precisão explícita (decimal sem isto dava NUMERIC(65,30) genérico no MySQL)
         modelBuilder.Entity<Project>().Property(p => p.DailyRate).HasColumnType("decimal(18,4)");
@@ -101,6 +107,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasIndex(f => new { f.ProjectId, f.Year, f.Month });
 
         modelBuilder.Entity<TimesheetFatura>().Property(f => f.PdfBase64).HasColumnType("LONGTEXT");
+
+        modelBuilder.Entity<FaturaCartao>()
+            .HasIndex(f => new { f.CartaoId, f.Year, f.Month })
+            .IsUnique();
 
         SeedData(modelBuilder);
     }

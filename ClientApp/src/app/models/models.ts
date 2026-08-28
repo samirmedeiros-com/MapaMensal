@@ -204,6 +204,51 @@ export interface CategoriaContaPessoal {
   ordem: number;
 }
 
+export interface CartaoCredito {
+  id: number;
+  nome: string;
+  moeda: 'EUR' | 'BRL';
+  diaVencimento: number;
+  ativo: boolean;
+}
+
+export interface LancamentoCartaoDto {
+  id: number;
+  faturaCartaoId: number;
+  descricao: string;
+  categoria: string;
+  data: string;
+  valor: number;
+  valorOriginal?: number | null;
+  moedaOriginal?: string | null;
+}
+
+export interface FaturaCartaoDto {
+  id: number;
+  cartaoId: number;
+  year: number;
+  month: number;
+  estado: 'Aberta' | 'Fechada';
+  dataFechamento?: string | null;
+  valorTotalMoedaCartao?: number | null;
+  valorTotalEur?: number | null;
+  contaPessoalId?: number | null;
+  dataVencimento: string;
+  total: number;
+  lancamentos: LancamentoCartaoDto[];
+}
+
+export interface FaturaCartaoHistoricoDto {
+  id: number;
+  year: number;
+  month: number;
+  estado: 'Aberta' | 'Fechada';
+  dataFechamento?: string | null;
+  valorTotalMoedaCartao?: number | null;
+  valorTotalEur?: number | null;
+  contaPessoalId?: number | null;
+}
+
 export interface Tarefa {
   id: number;
   projectId: number;

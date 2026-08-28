@@ -1,0 +1,252 @@
+<div class="cc-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-title">Cartões de Crédito</div>
+    <button type="button" class="btn-novo" (click)="abrirNovoCartao()">
+      <mat-icon>add</mat-icon> Novo Cartão
+    </button>
+  </div>
+
+  @if (cartoes().length === 0) {
+    <div class="card empty-state">
+      <mat-icon>credit_card_off</mat-icon>
+      <p>Ainda não tem cartões de crédito registados.</p>
+      <button type="button" class="btn-novo" (click)="abrirNovoCartao()">
+        <mat-icon>add</mat-icon> Registar Cartão
+      </button>
+    </div>
+  } @else {
+
+    <!-- SELETOR DE CARTÃO -->
+    <div class="cartoes-tabs">
+      @for (c of cartoes(); track c.id) {
+        <button type="button" class="cartao-tab" [class.active]="cartaoSelecionadoId() === c.id" [class.inativo]="!c.ativo" (click)="selecionarCartao(c.id)">
+          <mat-icon>credit_card</mat-icon>
+          <span class="cartao-tab-nome">{{ c.nome }}</span>
+          <span class="cartao-tab-moeda">{{ c.moeda }}</span>
+        </button>
+      }
+    </div>
+
+    @if (cartaoSelecionado(); as cartao) {
+      <div class="card cartao-info-card">
+        <div class="cartao-info-linha">
+          <span><b>{{ cartao.nome }}</b> — moeda {{ cartao.moeda }} — vencimento dia {{ cartao.diaVencimento }}</span>
+          <div class="cartao-info-acoes">
+            <button mat-icon-button (click)="abrirEditarCartao(cartao)" matTooltip="Editar cartão"><mat-icon>edit</mat-icon></button>
+            <button mat-icon-button color="warn" (click)="eliminarCartao(cartao)" matTooltip="Eliminar cartão"><mat-icon>delete</mat-icon></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SELETOR DE MÊS -->
+      <div class="year-selector">
+        <button mat-icon-button (click)="changeMonth(-1)"><mat-icon>chevron_left</mat-icon></button>
+        <span>{{ monthNames[month()] }} / {{ year() }}</span>
+        <button mat-icon-button (click)="changeMonth(1)"><mat-icon>chevron_right</mat-icon></button>
+        <button type="button" class="btn-historico" (click)="toggleHistorico()">
+          <mat-icon>history</mat-icon> {{ mostrarHistorico() ? 'Ocultar histórico' : 'Ver histórico' }}
+        </button>
+      </div>
+
+      @if (mostrarHistorico()) {
+        <div class="card">
+          <div class="card-title">Histórico de Faturas</div>
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th>Mês</th>
+                <th>Estado</th>
+                <th>Fechada em</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (f of historico(); track f.id) {
+                <tr>
+                  <td>{{ monthNames[f.month] }}/{{ f.year }}</td>
+                  <td>
+                    <span class="estado-badge" [class.fechada]="f.estado === 'Fechada'">{{ f.estado }}</span>
+                  </td>
+                  <td>{{ f.dataFechamento ? (f.dataFechamento | date:'dd/MM/yyyy') : '—' }}</td>
+                  <td>
+                    @if (f.valorTotalEur !== null && f.valorTotalEur !== undefined) {
+                      {{ fmt(f.valorTotalEur) }} €
+                      @if (f.valorTotalMoedaCartao !== null && cartao.moeda !== 'EUR') {
+                        <span class="text-muted">({{ simboloMoeda(cartao.moeda) }} {{ fmt(f.valorTotalMoedaCartao!) }})</span>
+                      }
+                    } @else { — }
+                  </td>
+                </tr>
+              }
+              @if (historico().length === 0) {
+                <tr><td colspan="4" class="empty-row">Sem faturas anteriores.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- FATURA DO MÊS -->
+      @if (fatura(); as f) {
+        <div class="card">
+          <div class="fatura-header">
+            <div class="card-title">Fatura de {{ monthNames[f.month] }}/{{ f.year }}</div>
+            <span class="estado-badge" [class.fechada]="f.estado === 'Fechada'">{{ f.estado }}</span>
+          </div>
+          <p class="fatura-vencimento">Vence a {{ f.dataVencimento | date:'dd/MM/yyyy' }}</p>
+
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th>Valor</th>
+                @if (f.estado === 'Aberta') { <th style="width:50px"></th> }
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of f.lancamentos; track l.id) {
+                <tr>
+                  <td>{{ l.data | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ l.descricao }}</td>
+                  <td><span class="cat-badge">{{ l.categoria }}</span></td>
+                  <td>
+                    {{ fmt(l.valor) }} {{ simboloMoeda(cartao.moeda) }}
+                    @if (l.valorOriginal && l.moedaOriginal) {
+                      <span class="text-muted">({{ simboloMoeda(l.moedaOriginal) }} {{ fmt(l.valorOriginal) }})</span>
+                    }
+                  </td>
+                  @if (f.estado === 'Aberta') {
+                    <td class="acoes">
+                      <button mat-icon-button color="warn" (click)="removerLancamento(l.id)" matTooltip="Remover">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  }
+                </tr>
+              }
+              @if (f.lancamentos.length === 0) {
+                <tr><td [attr.colspan]="f.estado === 'Aberta' ? 5 : 4" class="empty-row">Sem lançamentos nesta fatura.</td></tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="3">Total</td>
+                <td>
+                  {{ fmt(f.total) }} {{ simboloMoeda(cartao.moeda) }}
+                  @if (f.estado === 'Fechada' && f.valorTotalEur !== null && cartao.moeda !== 'EUR') {
+                    <span class="text-muted">= {{ fmt(f.valorTotalEur!) }} €</span>
+                  }
+                </td>
+                @if (f.estado === 'Aberta') { <td></td> }
+              </tr>
+            </tfoot>
+          </table>
+
+          @if (f.estado === 'Aberta') {
+            <div class="fatura-acoes">
+              <button type="button" class="btn-add-lancamento" (click)="abrirNovoLancamento()">
+                <mat-icon>add</mat-icon> Adicionar Lançamento
+              </button>
+              <button type="button" class="btn-fechar-fatura" [disabled]="fechandoFatura()" (click)="fecharFatura()">
+                <mat-icon>lock</mat-icon> {{ fechandoFatura() ? 'A fechar…' : 'Fechar Fatura' }}
+              </button>
+            </div>
+          } @else {
+            <p class="fatura-fechada-info">
+              <mat-icon>check_circle</mat-icon>
+              Fatura fechada em {{ f.dataFechamento | date:'dd/MM/yyyy' }} — lançada no Financeiro.
+            </p>
+          }
+        </div>
+      }
+    }
+  }
+
+  <!-- MODAL CARTÃO -->
+  @if (showFormCartao()) {
+    <div class="modal-overlay" (click)="fecharFormCartao()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-title">{{ editandoCartao() ? 'Editar Cartão' : 'Novo Cartão' }}</div>
+        <div class="form-group">
+          <label>Nome *</label>
+          <input type="text" [(ngModel)]="formCartao.nome" placeholder="Ex: Nubank, Millennium..." />
+        </div>
+        <div class="form-group">
+          <label>Moeda</label>
+          <div class="tipo-toggle">
+            <button type="button" class="tipo-btn" [class.active]="formCartao.moeda === 'EUR'" (click)="formCartao.moeda = 'EUR'">€ EUR</button>
+            <button type="button" class="tipo-btn" [class.active]="formCartao.moeda === 'BRL'" (click)="formCartao.moeda = 'BRL'">R$ BRL</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Dia de vencimento</label>
+          <input type="number" [(ngModel)]="formCartao.diaVencimento" min="1" max="31" />
+        </div>
+        @if (editandoCartao()) {
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="formCartao.ativo" />
+              Cartão ativo
+            </label>
+          </div>
+        }
+        <div class="modal-actions">
+          <button mat-flat-button color="primary" (click)="salvarCartao()">Guardar</button>
+          <button mat-button (click)="fecharFormCartao()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL LANÇAMENTO -->
+  @if (showFormLancamento()) {
+    <div class="modal-overlay" (click)="fecharFormLancamento()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-title">Novo Lançamento</div>
+        <div class="form-group">
+          <label>Descrição *</label>
+          <input type="text" [(ngModel)]="formLancamento.descricao" placeholder="Ex: Supermercado, Restaurante..." />
+        </div>
+        <div class="form-group">
+          <label>Categoria</label>
+          <select [(ngModel)]="formLancamento.categoria">
+            @for (cat of categorias(); track cat.id) {
+              <option [value]="cat.nome">{{ cat.nome }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data</label>
+          <input type="date" [(ngModel)]="formLancamento.data" />
+        </div>
+        @if (moedasLancamentoDisponiveis().length > 1) {
+          <div class="form-group">
+            <label>Moeda do lançamento</label>
+            <div class="tipo-toggle">
+              @for (m of moedasLancamentoDisponiveis(); track m) {
+                <button type="button" class="tipo-btn" [class.active]="formLancamento.moeda === m" (click)="formLancamento.moeda = m">
+                  {{ simboloMoeda(m) }} {{ m }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+        <div class="form-group">
+          <label>Valor ({{ simboloMoeda(formLancamento.moeda) }}) *</label>
+          <input type="number" [(ngModel)]="formLancamento.valor" min="0" step="0.01" placeholder="0.00" />
+        </div>
+        <div class="modal-actions">
+          <button mat-flat-button color="primary" [disabled]="salvandoLancamento()" (click)="salvarLancamento()">
+            {{ salvandoLancamento() ? 'A guardar…' : 'Guardar' }}
+          </button>
+          <button mat-button (click)="fecharFormLancamento()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

@@ -4,6 +4,9 @@
   <div class="page-header">
     <div class="page-title">Financeiro</div>
     <div class="page-header-actions">
+      <button type="button" class="btn-exportar-pdf" routerLink="/cartoes-credito" matTooltip="Gerir cartões de crédito e faturas">
+        <mat-icon>credit_score</mat-icon> Cartões de Crédito
+      </button>
       <button type="button" class="btn-exportar-pdf" [disabled]="exportandoPdf()" (click)="exportarExtratoPdf()" matTooltip="Exportar extrato do período em PDF">
         <mat-icon>picture_as_pdf</mat-icon> {{ exportandoPdf() ? 'A gerar…' : 'Exportar PDF' }}
       </button>

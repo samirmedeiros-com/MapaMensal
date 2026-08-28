@@ -3,6 +3,7 @@ import {
   inject, signal, computed, ViewChild, ElementRef
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
@@ -42,7 +43,7 @@ function ultimoDiaDoMes(): string {
 
 @Component({
   selector: 'app-contas-pessoais',
-  imports: [FormsModule, DatePipe, DecimalPipe, MatIconModule, MatButtonModule, MatTooltipModule, MatSnackBarModule],
+  imports: [FormsModule, RouterLink, DatePipe, DecimalPipe, MatIconModule, MatButtonModule, MatTooltipModule, MatSnackBarModule],
   templateUrl: './contas-pessoais.component.html',
   styleUrl: './contas-pessoais.component.scss'
 })
