@@ -67,6 +67,7 @@ html, body {
   padding: 16px;
   border: 0.5px solid var(--border);
   margin-bottom: 14px;
+  min-width: 0; // impede que uma tabela larga lá dentro alargue a página toda em vez de rolar só dentro do card
 }
 
 .card-title {
@@ -138,7 +139,7 @@ table.summary-table {
   }
 }
 
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
