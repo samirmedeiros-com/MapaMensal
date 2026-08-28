@@ -271,10 +271,12 @@ public class CartoesCreditoController(AppDbContext db, CurrencyService currency,
         });
     }
 
+    /// <summary>A fatura de um mês vence sempre no mês seguinte (comportamento normal de cartão de crédito).</summary>
     private static DateOnly CalcularDataVencimento(int year, int month, int diaVencimento)
     {
-        var diasNoMes = DateTime.DaysInMonth(year, month);
-        return new DateOnly(year, month, Math.Min(diaVencimento, diasNoMes));
+        var proximo = new DateOnly(year, month, 1).AddMonths(1);
+        var diasNoMes = DateTime.DaysInMonth(proximo.Year, proximo.Month);
+        return new DateOnly(proximo.Year, proximo.Month, Math.Min(diaVencimento, diasNoMes));
     }
 
     private static object ToDtoAnon(CartaoCredito c) => new { c.Id, c.Nome, c.Moeda, c.DiaVencimento, c.Ativo };

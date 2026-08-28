@@ -646,4 +646,52 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
 
     doc.save(`pendencias-financeiras-${this.filtroInicio()}-a-${this.filtroFim()}.pdf`);
   }
+
+  exportarDespesasPendentesPdf() {
+    const aPagar = this.contas()
+      .filter(c => !c.pago && c.tipo === 'Saida')
+      .sort((a, b) => a.dataVencimento.localeCompare(b.dataVencimento));
+
+    const doc = new jsPDF();
+    const totalAPagar = aPagar.reduce((s, c) => s + c.valorPrevisto, 0);
+
+    doc.setFontSize(16);
+    doc.setTextColor(198, 40, 40);
+    doc.text('Despesas Pendentes de Pagamento', 14, 18);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Período: ${this.fmtDataBr(this.filtroInicio())} a ${this.fmtDataBr(this.filtroFim())}`, 14, 25);
+    doc.text(`Gerado em ${new Date().toLocaleString('pt-PT')}`, 14, 30);
+
+    autoTable(doc, {
+      startY: 38,
+      head: [['Vencimento', 'Descrição', 'Categoria', 'Entidade/Ref.', 'Situação', 'Valor']],
+      body: aPagar.length
+        ? aPagar.map(c => [
+            this.fmtDataBr(c.dataVencimento),
+            c.descricao,
+            c.categoria,
+            [c.entidade, c.referencia].filter(Boolean).join(' / ') || '—',
+            this.isVencida(c) ? `Vencida há ${this.diasEmAtraso(c.dataVencimento)} dias` : 'No prazo',
+            this.fmt(c.valorPrevisto) + ' €'
+          ])
+        : [['—', 'Sem despesas pendentes no período', '—', '—', '—', '—']],
+      headStyles: { fillColor: [198, 40, 40] },
+      styles: { fontSize: 8 },
+      columnStyles: { 5: { halign: 'right' } },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 4 && String(data.cell.raw).startsWith('Vencida')) {
+          data.cell.styles.textColor = [198, 40, 40];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      }
+    });
+
+    const y = (doc as any).lastAutoTable.finalY + 8;
+    doc.setFontSize(11);
+    doc.setTextColor(198, 40, 40);
+    doc.text(`Total a pagar: ${this.fmt(totalAPagar)} €`, 14, y);
+
+    doc.save(`despesas-pendentes-${this.filtroInicio()}-a-${this.filtroFim()}.pdf`);
+  }
 }

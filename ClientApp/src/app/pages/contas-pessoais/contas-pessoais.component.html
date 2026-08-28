@@ -13,6 +13,9 @@
       <button type="button" class="btn-exportar-pdf btn-exportar-pendencias" (click)="exportarPendenciasPdf()" matTooltip="Exportar contas por pagar e por receber em PDF">
         <mat-icon>pending_actions</mat-icon> Pendências
       </button>
+      <button type="button" class="btn-exportar-pdf btn-exportar-pendencias" (click)="exportarDespesasPendentesPdf()" matTooltip="Exportar só as despesas (a pagar) pendentes do período em PDF">
+        <mat-icon>money_off</mat-icon> Só a Pagar
+      </button>
       <button type="button" class="btn-novo-lancamento" (click)="openForm()">
         <mat-icon>add</mat-icon> Novo Lançamento
       </button>
