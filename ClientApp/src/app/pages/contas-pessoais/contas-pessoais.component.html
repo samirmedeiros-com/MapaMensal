@@ -3,9 +3,14 @@
   <!-- HEADER -->
   <div class="page-header">
     <div class="page-title">Financeiro</div>
-    <button type="button" class="btn-novo-lancamento" (click)="openForm()">
-      <mat-icon>add</mat-icon> Novo Lançamento
-    </button>
+    <div class="page-header-actions">
+      <button type="button" class="btn-exportar-pdf" [disabled]="exportandoPdf()" (click)="exportarExtratoPdf()" matTooltip="Exportar extrato do período em PDF">
+        <mat-icon>picture_as_pdf</mat-icon> {{ exportandoPdf() ? 'A gerar…' : 'Exportar PDF' }}
+      </button>
+      <button type="button" class="btn-novo-lancamento" (click)="openForm()">
+        <mat-icon>add</mat-icon> Novo Lançamento
+      </button>
+    </div>
   </div>
 
   <!-- FILTRO DE PERÍODO -->

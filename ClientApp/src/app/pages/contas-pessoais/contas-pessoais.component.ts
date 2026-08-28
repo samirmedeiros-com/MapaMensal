@@ -10,6 +10,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Chart, registerables } from 'chart.js';
+import jsPDF from 'jspdf';
+import { autoTable } from 'jspdf-autotable';
 import { ApiService } from '../../services/api.service';
 import { ContaPessoal, ResumoFinanceiro, CategoriaContaPessoal } from '../../models/models';
 
@@ -368,5 +370,171 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   isVencida(c: ContaPessoal): boolean {
     if (c.pago) return false;
     return c.dataVencimento < hoje();
+  }
+
+  exportandoPdf = signal(false);
+
+  exportarExtratoPdf() {
+    this.exportandoPdf.set(true);
+    const diaAntes = new Date(this.filtroInicio() + 'T00:00:00');
+    diaAntes.setDate(diaAntes.getDate() - 1);
+    const antesIso = paraIso(diaAntes);
+
+    this.api.getContasPessoais('1900-01-01', antesIso, undefined, true).subscribe({
+      next: (anteriores) => {
+        const saldoInicial = anteriores.reduce((s, c) => s + (c.tipo === 'Entrada' ? (c.valorPago ?? 0) : -(c.valorPago ?? 0)), 0);
+        this.gerarPdfExtrato(saldoInicial);
+        this.exportandoPdf.set(false);
+      },
+      error: () => {
+        this.exportandoPdf.set(false);
+        this.snack.open('Não foi possível gerar o relatório.', 'Ok', { duration: 4000 });
+      }
+    });
+  }
+
+  private fmtDataBr(iso: string): string {
+    const [y, m, d] = iso.substring(0, 10).split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  private diasEmAtraso(dataVencimento: string): number {
+    const venc = new Date(dataVencimento + 'T00:00:00');
+    const hj = new Date(hoje() + 'T00:00:00');
+    return Math.max(0, Math.round((hj.getTime() - venc.getTime()) / 86400000));
+  }
+
+  private gerarGraficoCategoriasImagem(dados: { categoria: string; total: number }[]): string {
+    const canvas = document.createElement('canvas');
+    canvas.width = 500;
+    canvas.height = 350;
+    const colors = ['#3f51b5', '#e53935', '#fb8c00', '#43a047', '#8e24aa', '#00acc1', '#f4511e', '#6d4c41', '#546e7a', '#fdd835'];
+    const chart = new Chart(canvas, {
+      type: 'pie',
+      data: {
+        labels: dados.map(d => d.categoria),
+        datasets: [{ data: dados.map(d => d.total), backgroundColor: colors.slice(0, dados.length) }]
+      },
+      options: {
+        responsive: false,
+        animation: false,
+        plugins: { legend: { position: 'right', labels: { font: { size: 11 } } } }
+      }
+    });
+    const img = chart.toBase64Image();
+    chart.destroy();
+    return img;
+  }
+
+  private gerarPdfExtrato(saldoInicial: number) {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    const pagos = this.contas()
+      .filter(c => c.pago)
+      .slice()
+      .sort((a, b) => (a.dataPagamento ?? a.dataVencimento).localeCompare(b.dataPagamento ?? b.dataVencimento));
+
+    let saldo = saldoInicial;
+    const linhas = pagos.map(c => {
+      const valor = c.tipo === 'Entrada' ? (c.valorPago ?? 0) : -(c.valorPago ?? 0);
+      saldo += valor;
+      return [
+        this.fmtDataBr(c.dataPagamento ?? c.dataVencimento),
+        c.descricao,
+        c.categoria,
+        c.tipo === 'Entrada' ? 'Entrada' : 'Saída',
+        (valor >= 0 ? '+' : '') + this.fmt(valor) + ' €',
+        this.fmt(saldo) + ' €'
+      ];
+    });
+    const saldoFinal = saldo;
+
+    doc.setFontSize(16);
+    doc.setTextColor(83, 74, 183);
+    doc.text('Extrato Financeiro', 14, 18);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Período: ${this.fmtDataBr(this.filtroInicio())} a ${this.fmtDataBr(this.filtroFim())}`, 14, 25);
+    doc.text(`Gerado em ${new Date().toLocaleString('pt-PT')}`, 14, 30);
+
+    autoTable(doc, {
+      startY: 36,
+      head: [['Data', 'Descrição', 'Categoria', 'Tipo', 'Valor', 'Saldo']],
+      body: linhas.length ? linhas : [['—', 'Sem movimentos pagos no período', '—', '—', '—', this.fmt(saldoInicial) + ' €']],
+      headStyles: { fillColor: [83, 74, 183] },
+      styles: { fontSize: 8 },
+      columnStyles: { 4: { halign: 'right' }, 5: { halign: 'right' } }
+    });
+
+    let y = (doc as any).lastAutoTable.finalY + 10;
+
+    const totalEntradasPagas = pagos.filter(c => c.tipo === 'Entrada').reduce((s, c) => s + (c.valorPago ?? 0), 0);
+    const totalSaidasPagas = pagos.filter(c => c.tipo === 'Saida').reduce((s, c) => s + (c.valorPago ?? 0), 0);
+
+    doc.setFontSize(12);
+    doc.setTextColor(83, 74, 183);
+    doc.text('Balanço do Período', 14, y);
+    y += 4;
+
+    autoTable(doc, {
+      startY: y,
+      body: [
+        ['Saldo inicial (antes do período)', this.fmt(saldoInicial) + ' €'],
+        ['Total recebido no período', this.fmt(totalEntradasPagas) + ' €'],
+        ['Total pago no período', this.fmt(totalSaidasPagas) + ' €'],
+        ['Saldo do período', this.fmt(totalEntradasPagas - totalSaidasPagas) + ' €'],
+        ['Saldo final', this.fmt(saldoFinal) + ' €']
+      ],
+      theme: 'plain',
+      styles: { fontSize: 9 },
+      columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } }
+    });
+    y = (doc as any).lastAutoTable.finalY + 8;
+
+    const atrasados = this.despesasEmAtraso();
+    if (atrasados.length) {
+      if (y > 230) { doc.addPage(); y = 20; }
+      doc.setFontSize(12);
+      doc.setTextColor(198, 40, 40);
+      doc.text('Despesas em Atraso', 14, y);
+      y += 4;
+
+      autoTable(doc, {
+        startY: y,
+        head: [['Vencimento', 'Descrição', 'Categoria', 'Atraso', 'Valor']],
+        body: atrasados.map(c => [
+          this.fmtDataBr(c.dataVencimento),
+          c.descricao,
+          c.categoria,
+          `${this.diasEmAtraso(c.dataVencimento)} dias`,
+          this.fmt(c.valorPrevisto) + ' €'
+        ]),
+        headStyles: { fillColor: [198, 40, 40] },
+        styles: { fontSize: 8 },
+        columnStyles: { 4: { halign: 'right' } }
+      });
+      y = (doc as any).lastAutoTable.finalY + 6;
+      doc.setFontSize(9);
+      doc.setTextColor(198, 40, 40);
+      doc.text(`Total em atraso: ${this.fmt(this.totalEmAtraso())} €`, 14, y);
+      y += 10;
+    }
+
+    const r = this.resumo();
+    const categoriasComValor = r?.porCategoria.filter(c => c.total > 0) ?? [];
+    if (categoriasComValor.length) {
+      if (y > 200) { doc.addPage(); y = 20; }
+      doc.setFontSize(12);
+      doc.setTextColor(83, 74, 183);
+      doc.text('Despesas por Categoria', 14, y);
+      y += 6;
+
+      const imgData = this.gerarGraficoCategoriasImagem(categoriasComValor);
+      const imgWidth = Math.min(140, pageWidth - 28);
+      doc.addImage(imgData, 'PNG', 14, y, imgWidth, imgWidth * 0.7);
+    }
+
+    doc.save(`extrato-financeiro-${this.filtroInicio()}-a-${this.filtroFim()}.pdf`);
   }
 }
