@@ -8,6 +8,11 @@ export const routes: Routes = [
   },
   { path: '', redirectTo: 'mapa-dias', pathMatch: 'full' },
   {
+    path: 'mobile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/mobile-financeiro/mobile-financeiro.component').then(m => m.MobileFinanceiroComponent)
+  },
+  {
     path: 'mapa-dias',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/mapa-dias/mapa-dias.component').then(m => m.MapaDiasComponent)

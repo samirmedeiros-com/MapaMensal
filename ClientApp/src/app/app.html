@@ -1,4 +1,4 @@
-@if (isPublicRoute()) {
+@if (isPublicRoute() || isMobileShellRoute()) {
   <router-outlet />
 } @else if (auth.isLoggedIn()) {
   <mat-sidenav-container class="sidenav-container">

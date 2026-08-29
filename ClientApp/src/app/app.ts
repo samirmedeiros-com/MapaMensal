@@ -42,6 +42,7 @@ export class App {
   );
 
   isPublicRoute = computed(() => this.currentUrl().startsWith('/p/'));
+  isMobileShellRoute = computed(() => this.currentUrl().startsWith('/mobile'));
 
   @ViewChild('sidenav') sidenav!: MatSidenav;
 

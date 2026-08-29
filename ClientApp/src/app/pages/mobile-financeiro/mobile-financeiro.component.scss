@@ -1,0 +1,38 @@
+.mobile-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg, #F9F8F7);
+}
+
+.mobile-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--purple-500, #534AB7);
+  color: #fff;
+
+  button[mat-icon-button] { color: #fff; }
+}
+
+.mobile-topbar-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.mobile-content {
+  flex: 1;
+  overflow-x: hidden;
+
+  // A página do Financeiro foi feita para o layout de secretária (com sidebar);
+  // aqui ocupa o ecrã todo e o padding fica mais apertado.
+  ::ng-deep .cp-page {
+    padding: 10px;
+    max-width: 100%;
+    gap: 12px;
+  }
+}

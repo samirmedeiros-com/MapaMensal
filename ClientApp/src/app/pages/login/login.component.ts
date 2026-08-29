@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
@@ -14,6 +14,7 @@ import { AuthService } from '../../services/auth.service';
 export class LoginComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   username = '';
   password = '';
@@ -26,7 +27,10 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set('');
     this.auth.login(this.username, this.password).subscribe({
-      next: () => this.router.navigate(['/mapa-dias']),
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        this.router.navigateByUrl(returnUrl || '/mapa-dias');
+      },
       error: (err) => {
         this.error.set(err.error?.message ?? 'Erro ao iniciar sessão.');
         this.loading.set(false);
