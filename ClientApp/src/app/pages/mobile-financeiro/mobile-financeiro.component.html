@@ -1,12 +1,159 @@
 <div class="mobile-shell">
   <div class="mobile-topbar">
-    <span class="mobile-topbar-title">Financeiro</span>
+    <span class="mobile-topbar-title">Novo Lançamento</span>
     <button mat-icon-button (click)="auth.logout()" matTooltip="Terminar sessão">
       <mat-icon>logout</mat-icon>
     </button>
   </div>
 
   <div class="mobile-content">
-    <app-contas-pessoais></app-contas-pessoais>
+
+    <div class="m-card">
+      <div class="form-group">
+        <label>Tipo *</label>
+        <div class="tipo-toggle">
+          <button type="button" class="tipo-btn entrada" [class.active]="form.tipo === 'Entrada'" (click)="form.tipo = 'Entrada'">
+            <mat-icon>arrow_downward</mat-icon> Entrada
+          </button>
+          <button type="button" class="tipo-btn saida" [class.active]="form.tipo === 'Saida'" (click)="form.tipo = 'Saida'">
+            <mat-icon>arrow_upward</mat-icon> Saída
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição *</label>
+        <input type="text" [(ngModel)]="form.descricao" placeholder="Ex: Renda, Supermercado..." />
+      </div>
+
+      <div class="form-group">
+        <label>Categoria *</label>
+        <select [(ngModel)]="form.categoria">
+          @for (cat of categorias(); track cat.id) {
+            <option [value]="cat.nome">{{ cat.nome }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Data de Vencimento *</label>
+        <input type="date" [(ngModel)]="form.dataVencimento" />
+      </div>
+
+      @if (form.tipo === 'Saida') {
+        <div class="form-group">
+          <label>Moeda</label>
+          <div class="tipo-toggle">
+            <button type="button" class="tipo-btn" [class.active]="form.moeda === 'EUR'" (click)="onMoedaChange('EUR')">€ EUR</button>
+            <button type="button" class="tipo-btn" [class.active]="form.moeda === 'BRL'" (click)="onMoedaChange('BRL')">R$ BRL</button>
+          </div>
+        </div>
+        @if (form.moeda === 'BRL') {
+          <div class="form-group">
+            <label>Valor Original (R$) *</label>
+            <input type="number" [(ngModel)]="form.valorOriginal" min="0" step="0.01" placeholder="0.00" (blur)="converterValorOriginal()" [disabled]="convertendoMoeda()" />
+            @if (convertendoMoeda()) { <span class="hint">A obter cotação…</span> }
+          </div>
+        }
+      }
+
+      <div class="form-group">
+        <label>Valor Previsto (€) *</label>
+        <input type="number" [(ngModel)]="form.valorPrevisto" min="0" step="0.01" placeholder="0.00" [readonly]="form.moeda === 'BRL'" />
+      </div>
+
+      @if (form.tipo === 'Saida') {
+        <div class="form-group">
+          <label>Carregar fatura/recibo (PDF ou imagem)</label>
+          <input type="file" accept="application/pdf,image/*" (change)="onFicheiroAnexo($event)" [disabled]="extraindoAnexo()" />
+          @if (extraindoAnexo()) { <span class="hint">A ler o documento…</span> }
+          @if (form.anexoBase64 && !extraindoAnexo()) { <span class="hint">Documento carregado — confira os dados.</span> }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Entidade</label>
+            <input type="text" [(ngModel)]="form.entidade" placeholder="Ex: 12345" />
+          </div>
+          <div class="form-group">
+            <label>Referência</label>
+            <input type="text" [(ngModel)]="form.referencia" placeholder="Ex: 123 456 789" />
+          </div>
+        </div>
+      }
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="form.lembreteCalendario" />
+          Lembrete no calendário
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="form.jaPago" />
+          Já foi pago / recebido
+        </label>
+      </div>
+
+      @if (form.jaPago) {
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data do pagamento *</label>
+            <input type="date" [(ngModel)]="form.dataPagamento" />
+          </div>
+          <div class="form-group">
+            <label>Forma de pagamento</label>
+            <select [(ngModel)]="form.metodoPagamento">
+              <option value="">Não especificado</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão">Cartão</option>
+            </select>
+          </div>
+        </div>
+      }
+
+      <div class="form-group">
+        <label>Recorrência (meses)</label>
+        <input type="number" [(ngModel)]="form.totalRecorrencias" min="1" max="60" step="1" />
+        @if (form.totalRecorrencias > 1) {
+          <span class="hint">Cria {{ form.totalRecorrencias }} lançamentos mensais</span>
+        }
+      </div>
+
+      <button type="button" class="btn-guardar" [disabled]="guardando()" (click)="guardar()">
+        <mat-icon>add</mat-icon>
+        {{ guardando() ? 'A guardar…' : (form.totalRecorrencias > 1 ? 'Criar ' + form.totalRecorrencias + ' lançamentos' : 'Criar Lançamento') }}
+      </button>
+    </div>
+
+    <div class="m-card">
+      <div class="m-card-title">Últimos Lançamentos</div>
+      @if (carregandoUltimos()) {
+        <p class="hint">A carregar…</p>
+      } @else if (ultimos().length === 0) {
+        <p class="hint">Sem lançamentos recentes.</p>
+      } @else {
+        <div class="ultimos-lista">
+          @for (u of ultimos(); track u.id) {
+            <div class="ultimo-item">
+              <div class="ultimo-info">
+                <span class="ultimo-desc">{{ u.descricao }}</span>
+                <span class="ultimo-data">{{ u.dataVencimento | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="ultimo-valores">
+                <span class="ultimo-valor" [class.entrada]="u.tipo === 'Entrada'" [class.saida]="u.tipo === 'Saida'">
+                  {{ u.tipo === 'Entrada' ? '+' : '-' }}{{ fmt(u.valorPrevisto) }} €
+                </span>
+                <mat-icon class="ultimo-status" [class.pago]="u.pago" [matTooltip]="u.pago ? 'Pago' : 'Em aberto'">
+                  {{ u.pago ? 'check_circle' : 'schedule' }}
+                </mat-icon>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
   </div>
 </div>
