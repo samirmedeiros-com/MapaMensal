@@ -151,7 +151,7 @@ export interface ContaPessoal {
   valorPrevisto: number;
   valorPago?: number;
   pago: boolean;
-  metodoPagamento?: 'Dinheiro' | 'Cartão' | null;
+  metodoPagamento?: 'Dinheiro' | 'Conta' | null;
   grupoRecorrencia?: string;
   recorrenciaAtual: number;
   totalRecorrencias: number;

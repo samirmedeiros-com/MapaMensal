@@ -103,7 +103,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
 
   totalPago      = computed(() => this.filtered().filter(c => c.pago).reduce((s, c) => s + (c.valorPago ?? 0), 0));
   totalDinheiro  = computed(() => this.filtered().filter(c => c.pago && c.metodoPagamento === 'Dinheiro').reduce((s, c) => s + (c.valorPago ?? 0), 0));
-  totalCartao    = computed(() => this.filtered().filter(c => c.pago && c.metodoPagamento === 'Cartão').reduce((s, c) => s + (c.valorPago ?? 0), 0));
+  totalConta    = computed(() => this.filtered().filter(c => c.pago && c.metodoPagamento === 'Conta').reduce((s, c) => s + (c.valorPago ?? 0), 0));
   totalSemMetodo = computed(() => this.filtered().filter(c => c.pago && !c.metodoPagamento).reduce((s, c) => s + (c.valorPago ?? 0), 0));
 
   categoriasUsadas = computed(() =>

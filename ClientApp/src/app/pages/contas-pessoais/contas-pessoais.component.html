@@ -126,15 +126,15 @@
 
         <div class="metodo-row cartao">
           <mat-icon>credit_card</mat-icon>
-          <span class="metodo-nome">Cartão</span>
-          <span class="metodo-valor">{{ fmt(totalCartao()) }} €</span>
+          <span class="metodo-nome">Conta</span>
+          <span class="metodo-valor">{{ fmt(totalConta()) }} €</span>
           @if (totalPago() > 0) {
-            <span class="metodo-pct">{{ (totalCartao() / totalPago() * 100) | number:'1.0-0' }}%</span>
+            <span class="metodo-pct">{{ (totalConta() / totalPago() * 100) | number:'1.0-0' }}%</span>
           }
         </div>
         <div class="metodo-bar">
           <div class="metodo-bar-fill cartao-fill"
-            [style.width.%]="totalPago() > 0 ? (totalCartao() / totalPago() * 100) : 0">
+            [style.width.%]="totalPago() > 0 ? (totalConta() / totalPago() * 100) : 0">
           </div>
         </div>
 
@@ -269,8 +269,8 @@
                 <button type="button" class="metodo-btn" [class.active]="form.metodoPagamento === 'Dinheiro'" (click)="form.metodoPagamento = 'Dinheiro'">
                   <mat-icon>payments</mat-icon> Dinheiro
                 </button>
-                <button type="button" class="metodo-btn" [class.active]="form.metodoPagamento === 'Cartão'" (click)="form.metodoPagamento = 'Cartão'">
-                  <mat-icon>credit_card</mat-icon> Cartão
+                <button type="button" class="metodo-btn" [class.active]="form.metodoPagamento === 'Conta'" (click)="form.metodoPagamento = 'Conta'">
+                  <mat-icon>credit_card</mat-icon> Conta
                 </button>
               </div>
             </div>
@@ -319,9 +319,9 @@
               <mat-icon>payments</mat-icon> Dinheiro
             </button>
             <button type="button" class="metodo-btn"
-              [class.active]="pagarForm.metodoPagamento === 'Cartão'"
-              (click)="pagarForm.metodoPagamento = 'Cartão'">
-              <mat-icon>credit_card</mat-icon> Cartão
+              [class.active]="pagarForm.metodoPagamento === 'Conta'"
+              (click)="pagarForm.metodoPagamento = 'Conta'">
+              <mat-icon>credit_card</mat-icon> Conta
             </button>
           </div>
         </div>
