@@ -31,12 +31,12 @@
   .logo-icon-wrap {
     width: 48px;
     height: 48px;
-    border-radius: var(--radius-md);
-    background: var(--purple-50);
+    /* Sem fundo nem canto arredondado: a marca é o desenho, e pô-la dentro de
+       um quadrado colorido faz dela um ícone de aplicação, que é outra coisa. */
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 12px;
+    margin: 0 auto 10px;
 
     mat-icon {
       font-size: 26px;
@@ -44,6 +44,15 @@
       height: 26px;
       color: var(--purple-500);
     }
+  }
+
+  .marca-nome {
+    margin: 0 0 2px;
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--body-ink);
+
+    b { font-weight: 700; }
   }
 
   h1 {

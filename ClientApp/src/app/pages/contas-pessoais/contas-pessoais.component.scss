@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: space-between;
 
-  .page-title { font-size: 1.5rem; font-weight: 600; color: #1a237e; }
+  .page-title { font-size: 1.5rem; font-weight: 600; color: #1D4E89; }
 }
 
 .checkbox-label {
@@ -35,7 +35,7 @@
   appearance: none;
   border: none;
   border-radius: 8px;
-  background: var(--purple-500, #534AB7);
+  background: var(--purple-500);
   color: #fff;
   display: flex;
   align-items: center;
@@ -56,10 +56,10 @@
 
 .btn-exportar-pdf {
   appearance: none;
-  border: 1.5px solid var(--purple-500, #534AB7);
+  border: 1.5px solid var(--purple-500);
   border-radius: 8px;
   background: #fff;
-  color: var(--purple-500, #534AB7);
+  color: var(--purple-500);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -72,7 +72,7 @@
 
   mat-icon { font-size: 20px; width: 20px; height: 20px; }
 
-  &:hover:not(:disabled) { background: var(--purple-50, #EEEDFE); }
+  &:hover:not(:disabled) { background: var(--purple-50); }
   &:disabled { opacity: 0.6; cursor: default; }
 }
 
@@ -114,18 +114,18 @@
   .sc-label { font-size: 0.78rem; font-weight: 600; color: #888; text-transform: uppercase; }
   .sc-value { font-size: 1.15rem; font-weight: 700; color: #222; margin-top: 2px; }
 
-  &.previsto { border-color: #5c6bc0; mat-icon { color: #5c6bc0; } }
-  &.pago     { border-color: #43a047; mat-icon { color: #43a047; } &.neg { border-color: #e65100; mat-icon { color: #e65100; } } }
-  &.aberto   { border-color: #e65100; mat-icon { color: #e65100; } }
-  &.entrada  { border-color: #2e7d32; mat-icon { color: #2e7d32; } }
-  &.saldo    { border-color: #00897b; mat-icon { color: #00897b; } &.neg { border-color: #e65100; mat-icon { color: #e65100; } } }
+  &.previsto { border-color: #4A79B0; mat-icon { color: #4A79B0; } }
+  &.pago     { border-color: #1B6B4C; mat-icon { color: #1B6B4C; } &.neg { border-color: #A8451A; mat-icon { color: #A8451A; } } }
+  &.aberto   { border-color: #A8451A; mat-icon { color: #A8451A; } }
+  &.entrada  { border-color: #12695C; mat-icon { color: #12695C; } }
+  &.saldo    { border-color: #00897b; mat-icon { color: #00897b; } &.neg { border-color: #A8451A; mat-icon { color: #A8451A; } } }
 }
 
 // --- CARD DESPESAS EM ATRASO ---
 .atraso-card {
   background: #FDEDED;
   border: 1px solid #F5C2C2;
-  border-left: 4px solid #c62828;
+  border-left: 4px solid #A8331A;
   border-radius: 10px;
   padding: 14px 20px;
 }
@@ -135,13 +135,13 @@
   align-items: center;
   gap: 14px;
 
-  mat-icon { font-size: 30px; width: 30px; height: 30px; color: #c62828; flex-shrink: 0; }
+  mat-icon { font-size: 30px; width: 30px; height: 30px; color: #A8331A; flex-shrink: 0; }
 }
 
 .atraso-card-titles { flex: 1; }
 .atraso-card-title { font-size: 0.95rem; font-weight: 700; color: #7f1d1d; }
 .atraso-card-sub { font-size: 0.8rem; color: #9c3a3a; margin-top: 2px; }
-.atraso-card-valor { font-size: 1.3rem; font-weight: 700; color: #c62828; white-space: nowrap; }
+.atraso-card-valor { font-size: 1.3rem; font-weight: 700; color: #A8331A; white-space: nowrap; }
 
 // --- CARD MÉTODO DE PAGAMENTO ---
 .metodo-card {
@@ -188,7 +188,7 @@
     color: #999;
   }
 
-  &.dinheiro mat-icon { color: #2e7d32; }
+  &.dinheiro mat-icon { color: #12695C; }
   &.cartao   mat-icon { color: #1565c0; }
   &.sem-metodo mat-icon { color: #999; }
 }
@@ -206,7 +206,7 @@
   border-radius: 3px;
   transition: width 0.4s ease;
 
-  &.dinheiro-fill { background: #43a047; }
+  &.dinheiro-fill { background: #1B6B4C; }
   &.cartao-fill   { background: #1e88e5; }
   &.sem-fill      { background: #bdbdbd; }
 }
@@ -220,7 +220,7 @@
   color: #333;
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 2px solid #e8eaf6;
+  border-bottom: 2px solid #E1EAF5;
 }
 
 .form-grid {
@@ -244,23 +244,23 @@
 
     input, select {
       padding: 8px 10px;
-      border: 1px solid #c5cae9;
+      border: 1px solid #C3D3E6;
       border-radius: 4px;
       font-size: 0.9rem;
       font-family: inherit;
       outline: none;
 
-      &:focus { border-color: #1a237e; }
+      &:focus { border-color: #1D4E89; }
     }
   }
 }
 
 .recorrencia-hint {
   font-size: 0.75rem;
-  color: #5c6bc0;
+  color: #4A79B0;
   margin-top: 3px;
 
-  &.warn { color: #e65100; }
+  &.warn { color: #A8451A; }
 }
 
 .form-actions { display: flex; gap: 8px; margin-top: 16px; }
@@ -320,7 +320,7 @@
   width: 380px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 
-  .modal-title { font-size: 1.1rem; font-weight: 700; color: #1a237e; margin-bottom: 4px; }
+  .modal-title { font-size: 1.1rem; font-weight: 700; color: #1D4E89; margin-bottom: 4px; }
   .modal-desc { font-size: 0.95rem; color: #333; &.cat { color: #888; font-size: 0.82rem; margin-bottom: 4px; } }
 
   .form-group {
@@ -332,12 +332,12 @@
     label { font-size: 0.78rem; font-weight: 600; color: #555; text-transform: uppercase; }
     input {
       padding: 8px 10px;
-      border: 1px solid #c5cae9;
+      border: 1px solid #C3D3E6;
       border-radius: 4px;
       font-size: 0.9rem;
       font-family: inherit;
       outline: none;
-      &:focus { border-color: #1a237e; }
+      &:focus { border-color: #1D4E89; }
     }
   }
 
@@ -386,14 +386,14 @@
 
   select {
     padding: 6px 10px;
-    border: 1px solid #c5cae9;
+    border: 1px solid #C3D3E6;
     border-radius: 4px;
     font-size: 0.88rem;
     font-family: inherit;
     outline: none;
     min-width: 150px;
 
-    &:focus { border-color: #1a237e; }
+    &:focus { border-color: #1D4E89; }
   }
 }
 
@@ -402,7 +402,7 @@
 .chip {
   padding: 4px 12px;
   border-radius: 16px;
-  border: 1.5px solid #c5cae9;
+  border: 1.5px solid #C3D3E6;
   background: white;
   font-size: 0.82rem;
   font-weight: 500;
@@ -411,10 +411,10 @@
   color: #555;
   transition: all 0.15s;
 
-  &.active        { background: #1a237e; color: white; border-color: #1a237e; }
-  &.aberto-chip.active { background: #e65100; border-color: #e65100; color: white; }
-  &.pago-chip.active   { background: #43a047; border-color: #43a047; color: white; }
-  &.entrada-chip.active { background: #2e7d32; border-color: #2e7d32; color: white; }
+  &.active        { background: #1D4E89; color: white; border-color: #1D4E89; }
+  &.aberto-chip.active { background: #A8451A; border-color: #A8451A; color: white; }
+  &.pago-chip.active   { background: #1B6B4C; border-color: #1B6B4C; color: white; }
+  &.entrada-chip.active { background: #12695C; border-color: #12695C; color: white; }
 }
 
 .tipo-toggle {
@@ -439,9 +439,9 @@
 
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
-  &.entrada.active { background: #2e7d32; border-color: #2e7d32; color: white; }
-  &.saida.active    { background: #e65100; border-color: #e65100; color: white; }
-  &.active:not(.entrada):not(.saida) { background: var(--purple-500, #534AB7); border-color: var(--purple-500, #534AB7); color: white; }
+  &.entrada.active { background: #12695C; border-color: #12695C; color: white; }
+  &.saida.active    { background: #A8451A; border-color: #A8451A; color: white; }
+  &.active:not(.entrada):not(.saida) { background: var(--purple-500); border-color: var(--purple-500); color: white; }
 }
 
 .tipo-badge {
@@ -452,8 +452,8 @@
   font-weight: 700;
   text-transform: uppercase;
 
-  &.entrada { background: #e8f5e9; color: #2e7d32; }
-  &.saida   { background: #fff3e0; color: #e65100; }
+  &.entrada { background: #DCEDE8; color: #12695C; }
+  &.saida   { background: #F8E5DC; color: #A8451A; }
 }
 
 
@@ -463,7 +463,7 @@
   font-size: 15px;
   width: 15px;
   height: 15px;
-  color: #534AB7;
+  color: var(--purple-500);
   vertical-align: middle;
   flex-shrink: 0;
 }
@@ -473,7 +473,7 @@
   width: 16px;
   height: 16px;
   vertical-align: middle;
-  color: #e65100;
+  color: #A8451A;
   margin-right: 3px;
   cursor: help;
 }
@@ -484,9 +484,9 @@
   height: 22px;
   vertical-align: middle;
 
-  &.pago    { color: #2e7d32; }
-  &.vencida { color: #c62828; }
-  &.aberto  { color: #e65100; }
+  &.pago    { color: #12695C; }
+  &.vencida { color: #A8331A; }
+  &.aberto  { color: #A8451A; }
 }
 
 .status-legenda {
@@ -527,7 +527,7 @@
   }
 
   .recorr-badge {
-    background: #e8eaf6;
+    background: #E1EAF5;
     color: #3949ab;
     font-size: 0.72rem;
     font-weight: 700;
@@ -538,7 +538,7 @@
   }
 
   .cat-badge {
-    background: #f3e5f5;
+    background: #F0E6CC;
     color: #6a1b9a;
     font-size: 0.78rem;
     font-weight: 600;
@@ -557,7 +557,7 @@
     white-space: nowrap;
 
     mat-icon { font-size: 14px; width: 14px; height: 14px; }
-    &.metodo-dinheiro { background: #e8f5e9; color: #2e7d32; }
+    &.metodo-dinheiro { background: #DCEDE8; color: #12695C; }
     &.metodo-cartao   { background: #e3f2fd; color: #1565c0; }
   }
 
@@ -584,7 +584,7 @@
   tr.pago-row td    { background: #f9fbe7 !important; }
   tr.vencida-row td { background: #fff8f8 !important; }
 
-  .vencida-date { color: #c62828; font-weight: 600; }
+  .vencida-date { color: #A8331A; font-weight: 600; }
 
   .empty-row {
     text-align: center !important;
@@ -603,7 +603,7 @@
   justify-content: space-between;
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 2px solid #e8eaf6;
+  border-bottom: 2px solid #E1EAF5;
 }
 
 .graficos-grid {

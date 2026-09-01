@@ -39,8 +39,8 @@ export class ConfiguracaoComponent implements OnInit {
   novoProjetoAberto = signal(false);
   guardandoProjeto = signal(false);
   newHoliday: Partial<Holiday> = { date: '', name: '', isNational: true };
-  newCategoria: Partial<CategoriaContaPessoal> = { nome: '', cor: '#5c6bc0', ordem: 0 };
-  newCategoriaAgenda: { nome: string; cor: string } = { nome: '', cor: '#534AB7' };
+  newCategoria: Partial<CategoriaContaPessoal> = { nome: '', cor: '#4A79B0', ordem: 0 };
+  newCategoriaAgenda: { nome: string; cor: string } = { nome: '', cor: '#8A6B22' };
   editingProject: Project | null = null;
   editingCategoria: CategoriaContaPessoal | null = null;
   editingCategoriaAgenda: CategoriaCompromisso | null = null;
@@ -210,7 +210,7 @@ export class ConfiguracaoComponent implements OnInit {
     if (!this.newCategoria.nome?.trim()) return;
     this.api.createCategoriaContaPessoal(this.newCategoria as Omit<CategoriaContaPessoal, 'id'>).subscribe(c => {
       this.categorias.update(list => [...list, c]);
-      this.newCategoria = { nome: '', cor: '#5c6bc0', ordem: 0 };
+      this.newCategoria = { nome: '', cor: '#4A79B0', ordem: 0 };
       this.snack.open('Categoria adicionada', '', { duration: 2000 });
     });
   }
@@ -241,7 +241,7 @@ export class ConfiguracaoComponent implements OnInit {
     if (!this.newCategoriaAgenda.nome.trim()) return;
     this.api.createCategoriaCompromisso(this.newCategoriaAgenda).subscribe(c => {
       this.categoriasAgenda.update(list => [...list, c]);
-      this.newCategoriaAgenda = { nome: '', cor: '#534AB7' };
+      this.newCategoriaAgenda = { nome: '', cor: '#8A6B22' };
       this.snack.open('Categoria criada', '', { duration: 2000 });
     });
   }

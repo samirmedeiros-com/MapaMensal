@@ -66,27 +66,27 @@ export interface DeleteDialogResult {
     }
     .del-icon-wrap {
       width: 56px; height: 56px;
-      background: var(--coral-50, #FAECE7);
+      background: var(--coral-50);
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 16px;
     }
     .del-icon {
       font-size: 28px; width: 28px; height: 28px;
-      color: #D85A30;
+      color: var(--coral-500);
     }
     .del-titulo {
       font-size: 16px; font-weight: 700;
-      color: var(--text, #1A1A18);
+      color: var(--text);
       margin: 0 0 6px;
     }
     .del-nome {
-      font-size: 13px; color: var(--text-2, #6B6A65);
+      font-size: 13px; color: var(--text-2);
       margin: 0 0 12px;
       word-break: break-word;
     }
     .del-aviso {
-      font-size: 13px; color: var(--text-2, #6B6A65);
+      font-size: 13px; color: var(--text-2);
       margin: 0 0 16px;
     }
     .del-opts {
@@ -102,25 +102,25 @@ export interface DeleteDialogResult {
       transition: border-color .12s, background .12s;
 
       &.active {
-        border-color: #D85A30;
-        background: var(--coral-50, #FAECE7);
+        border-color: var(--coral-500);
+        background: var(--coral-50);
       }
 
       input[type="radio"] {
         margin-top: 2px; flex-shrink: 0;
-        accent-color: #D85A30;
+        accent-color: var(--coral-500);
       }
     }
     .del-opt-body { display: flex; flex-direction: column; gap: 2px; }
-    .del-opt-titulo { font-size: 13px; font-weight: 600; color: var(--text, #1A1A18); }
-    .del-opt-desc   { font-size: 11px; color: var(--text-2, #6B6A65); }
+    .del-opt-titulo { font-size: 13px; font-weight: 600; color: var(--text); }
+    .del-opt-desc   { font-size: 11px; color: var(--text-2); }
 
     .del-actions {
       display: flex; justify-content: flex-end; gap: 8px;
       margin-top: 4px;
     }
     .btn-danger {
-      background: #D85A30 !important;
+      background: var(--coral-500) !important;
       color: #fff !important;
     }
     .btn-danger mat-icon { font-size: 16px; width: 16px; height: 16px; vertical-align: middle; margin-right: 4px; }

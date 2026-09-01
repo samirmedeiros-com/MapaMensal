@@ -9,7 +9,7 @@ mat-dialog-content {
 }
 
 .cat-error {
-  background: var(--coral-50); color: #D85A30;
+  background: var(--coral-50); color: var(--coral-500);
   border-radius: 6px; padding: 8px 12px; font-size: 13px;
 }
 
@@ -39,7 +39,7 @@ mat-dialog-content {
   button[mat-icon-button] { width: 32px; height: 32px; color: var(--text-3); }
 }
 
-.btn-del mat-icon { color: #D85A30 !important; }
+.btn-del mat-icon { color: var(--coral-500) !important; }
 
 // Formulário edição / criação
 .cat-edit-row {

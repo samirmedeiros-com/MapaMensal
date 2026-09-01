@@ -2,37 +2,75 @@
 
 /* ── Design tokens ── */
 :root {
-  --purple-50:  #EEEDFE;
-  --purple-200: #AFA9EC;
-  --purple-500: #534AB7;
-  --purple-600: #453DA0;
-  --purple-800: #3C3489;
+  /* As cores são as de zoompositivo.pt: papel em vez de branco, tinta
+     azul-escura em vez de preto, e o dourado da marca como acento.
 
-  --teal-50:    #E1F5EE;
-  --teal-500:   #1D9E75;
-  --teal-800:   #085041;
+     Os nomes das variáveis ficam como estavam — «purple», «teal», «coral» —
+     de propósito. São usados em duas dezenas de ficheiros e renomeá-los era
+     mexer em tudo para não mudar nada; o que conta é o valor. Onde o nome
+     estorva a leitura, há um nome novo ao lado. */
 
-  --coral-50:   #FAECE7;
-  --coral-500:  #D85A30;
+  /* Papel e tinta */
+  --paper:      #F5F3EE;
+  --ink:        #0A1426;
+  --body-ink:   #28324A;
+  --muted-ink:  #6B7383;
+  --rule:       #DCD7CB;
+  --rule-2:     #C5BFB0;
 
-  --amber-50:   #FAEEDA;
-  --amber-800:  #854F0B;
+  /* Os quatro acentos do site: dourado (identidade), azul (técnico),
+     verde (o que corre bem) e terracota (risco e limites). */
+  --gold:       #8A6B22;
+  --gold-soft:  #F0E6CC;
+  --blue:       #1D4E89;
+  --blue-soft:  #E1EAF5;
+  --green:      #12695C;
+  --green-soft: #DCEDE8;
+  --clay:       #A8451A;
+  --clay-soft:  #F8E5DC;
+  --urgent:     #A8331A;
+  --urgent-soft:#F7E2DB;
 
-  --green-50:   #EAF3DE;
-  --green-500:  #639922;
+  /* O acento principal é o dourado, e leva texto quase branco por cima —
+     é o que o site faz nos seus próprios botões. */
+  --purple-50:  var(--gold-soft);
+  --purple-200: #C9B37A;
+  --purple-500: var(--gold);
+  --purple-600: #775C1D;
+  --purple-800: #5E4817;
 
-  --bg:         #F5F4F2;
-  --surface:    #FFFFFF;
-  --surface-2:  #F9F8F7;
-  --text:       #1A1A18;
-  --text-2:     #6B6A65;
-  --text-3:     #9E9D98;
-  --border:     rgba(0, 0, 0, 0.10);
-  --border-2:   rgba(0, 0, 0, 0.18);
+  --teal-50:    var(--green-soft);
+  --teal-500:   var(--green);
+  --teal-800:   #0C4C43;
+
+  --coral-50:   var(--urgent-soft);
+  --coral-500:  var(--urgent);
+
+  --amber-50:   var(--gold-soft);
+  --amber-800:  #7A4A12;
+
+  --green-50:   var(--green-soft);
+  --green-500:  var(--green);
+
+  --bg:         var(--paper);
+  --surface:    #FCFBF8;
+  --surface-2:  #EFEDE6;
+  --text:       var(--ink);
+  --text-2:     var(--muted-ink);
+  --text-3:     #9AA0AC;
+  --border:     var(--rule);
+  --border-2:   var(--rule-2);
   --radius-sm:  6px;
   --radius-md:  8px;
   --radius-lg:  12px;
 }
+
+/* A marca da ZoomPositivo. As cores vêm de regras e não de atributos: uma
+   variável de CSS dentro de um atributo de apresentação não é lida por todos
+   os browsers. */
+.marca-zp { display: block; }
+.marca-zp .anel { stroke: #8A8F98; }
+.marca-zp .cruz { stroke: var(--gold); }
 
 /* dark mode removido — aplicação usa sempre tema claro */
 

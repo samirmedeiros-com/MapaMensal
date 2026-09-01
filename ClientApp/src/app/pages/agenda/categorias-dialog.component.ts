@@ -25,7 +25,7 @@ export class CategoriasDialogComponent implements OnInit {
   // Formulário de nova / edição
   editandoId: number | null = null;
   novoNome = '';
-  novaCor = '#534AB7';
+  novaCor = '#8A6B22';
 
   readonly CORES = CORES_PALETA;
 
@@ -38,7 +38,7 @@ export class CategoriasDialogComponent implements OnInit {
   iniciarNova() {
     this.editandoId = null;
     this.novoNome = '';
-    this.novaCor = '#534AB7';
+    this.novaCor = '#8A6B22';
   }
 
   iniciarEdicao(c: CategoriaCompromisso) {

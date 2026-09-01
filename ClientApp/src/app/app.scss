@@ -38,13 +38,20 @@
 .logo-icon-wrap {
   width: 34px;
   height: 34px;
-  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
   svg { display: block; border-radius: 6px; }
+}
+
+.logo-marca {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
 }
 
 .logo-info {

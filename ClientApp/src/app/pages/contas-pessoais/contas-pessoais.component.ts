@@ -349,7 +349,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
 
     this.pieChart?.destroy();
     const cats = r.porCategoria.filter(c => c.total > 0);
-    const colors = ['#3f51b5','#e53935','#fb8c00','#43a047','#8e24aa','#00acc1','#f4511e','#6d4c41','#546e7a','#fdd835'];
+    const colors = ['#3f51b5','#e53935','#fb8c00','#1B6B4C','#8e24aa','#00acc1','#f4511e','#6d4c41','#6B7383','#fdd835'];
     this.pieChart = new Chart(this.pieCanvas.nativeElement, {
       type: 'doughnut',
       data: {
@@ -409,7 +409,7 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
     const canvas = document.createElement('canvas');
     canvas.width = 500;
     canvas.height = 350;
-    const colors = ['#3f51b5', '#e53935', '#fb8c00', '#43a047', '#8e24aa', '#00acc1', '#f4511e', '#6d4c41', '#546e7a', '#fdd835'];
+    const colors = ['#3f51b5', '#e53935', '#fb8c00', '#1B6B4C', '#8e24aa', '#00acc1', '#f4511e', '#6d4c41', '#6B7383', '#fdd835'];
     const chart = new Chart(canvas, {
       type: 'pie',
       data: {

@@ -271,7 +271,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #D85A30;
+  background: var(--coral-500);
   flex-shrink: 0;
   margin-left: -4px;
 }
@@ -279,7 +279,7 @@
 .now-line {
   flex: 1;
   height: 2px;
-  background: #D85A30;
+  background: var(--coral-500);
 }
 
 // ── Eventos na grade ──────────────────────────────────────────────────────
@@ -546,7 +546,7 @@
 .status-concluido { background: var(--teal-50);    color: var(--teal-800); }
 
 .card-actions button[mat-icon-button] { color: var(--text-3); }
-button.danger { color: #D85A30 !important; }
+button.danger { color: var(--coral-500) !important; }
 
 // ── Responsivo ────────────────────────────────────────────────────────────
 @media (max-width: 700px) {

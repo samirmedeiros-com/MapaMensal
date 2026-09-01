@@ -311,10 +311,14 @@ export const DAY_NAMES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 // ── Agenda ────────────────────────────────────────────────────────────────
 
+// As cores das categorias são **dados**, não estilo: ficam gravadas em cada
+// categoria e vêm da base já escolhidas. Por isso são valores literais e não
+// variáveis de CSS — uma variável guardada na base fica sem significado no dia
+// em que o tema mudar, e nem sequer se desenha fora de uma folha de estilos.
 export const CORES_PALETA = [
-  { hex: '#534AB7', label: 'Roxo'      },
-  { hex: '#1D9E75', label: 'Verde'     },
-  { hex: '#D85A30', label: 'Coral'     },
+  { hex: '#8A6B22', label: 'Dourado'   },
+  { hex: '#12695C', label: 'Verde'     },
+  { hex: '#A8331A', label: 'Terracota' },
   { hex: '#D97706', label: 'Âmbar'     },
   { hex: '#2563EB', label: 'Azul'      },
   { hex: '#DC2626', label: 'Vermelho'  },

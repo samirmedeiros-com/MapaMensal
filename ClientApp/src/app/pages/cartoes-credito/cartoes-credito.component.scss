@@ -11,14 +11,14 @@
   align-items: center;
   justify-content: space-between;
 
-  .page-title { font-size: 1.5rem; font-weight: 600; color: #1a237e; }
+  .page-title { font-size: 1.5rem; font-weight: 600; color: #1D4E89; }
 }
 
 .btn-novo {
   appearance: none;
   border: none;
   border-radius: 8px;
-  background: var(--purple-500, #534AB7);
+  background: var(--purple-500);
   color: #fff;
   display: flex;
   align-items: center;
@@ -52,7 +52,7 @@
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
-.card-title { font-size: 1rem; font-weight: 700; color: #1a237e; margin-bottom: 10px; }
+.card-title { font-size: 1rem; font-weight: 700; color: #1D4E89; margin-bottom: 10px; }
 
 .cartoes-tabs {
   display: flex;
@@ -78,7 +78,7 @@
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
   .cartao-tab-moeda { font-size: 0.7rem; font-weight: 700; opacity: 0.6; }
 
-  &.active { background: var(--purple-500, #534AB7); border-color: var(--purple-500, #534AB7); color: white; }
+  &.active { background: var(--purple-500); border-color: var(--purple-500); color: white; }
   &.inativo { opacity: 0.5; }
 }
 
@@ -104,7 +104,7 @@
   border: 1.5px solid var(--border-2, #ddd);
   border-radius: 8px;
   background: transparent;
-  color: var(--purple-500, #534AB7);
+  color: var(--purple-500);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -116,7 +116,7 @@
   margin-left: auto;
 
   mat-icon { font-size: 16px; width: 16px; height: 16px; }
-  &:hover { background: var(--purple-50, #EEEDFE); }
+  &:hover { background: var(--purple-50); }
 }
 
 .estado-badge {
@@ -124,10 +124,10 @@
   border-radius: 10px;
   font-size: 0.75rem;
   font-weight: 600;
-  background: #fff3e0;
-  color: #e65100;
+  background: #F8E5DC;
+  color: #A8451A;
 
-  &.fechada { background: #e8f5e9; color: #2e7d32; }
+  &.fechada { background: #DCEDE8; color: #12695C; }
 }
 
 .pagamento-badge {
@@ -137,9 +137,9 @@
   font-weight: 600;
   white-space: nowrap;
 
-  &.pagamento-NaoPago { background: #ffebee; color: #c62828; }
-  &.pagamento-Parcial { background: #fff8e1; color: #f57f17; }
-  &.pagamento-Pago    { background: #e8f5e9; color: #2e7d32; }
+  &.pagamento-NaoPago { background: #F7E2DB; color: #A8331A; }
+  &.pagamento-Parcial { background: #fff8e1; color: #8A6B22; }
+  &.pagamento-Pago    { background: #DCEDE8; color: #12695C; }
 }
 
 .fatura-header {
@@ -162,7 +162,7 @@
 }
 
 .cat-badge {
-  background: #f3e5f5;
+  background: #F0E6CC;
   color: #6a1b9a;
   font-size: 0.78rem;
   font-weight: 600;
@@ -185,10 +185,10 @@
 
 .btn-add-lancamento {
   appearance: none;
-  border: 1.5px solid var(--purple-500, #534AB7);
+  border: 1.5px solid var(--purple-500);
   border-radius: 8px;
   background: #fff;
-  color: var(--purple-500, #534AB7);
+  color: var(--purple-500);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -199,14 +199,14 @@
   cursor: pointer;
 
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
-  &:hover { background: var(--purple-50, #EEEDFE); }
+  &:hover { background: var(--purple-50); }
 }
 
 .btn-fechar-fatura {
   appearance: none;
   border: none;
   border-radius: 8px;
-  background: #2e7d32;
+  background: #12695C;
   color: #fff;
   display: flex;
   align-items: center;
@@ -226,7 +226,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #2e7d32;
+  color: #12695C;
   font-size: 0.85rem;
   margin: 14px 0 0;
 
@@ -252,7 +252,7 @@
   max-width: 90vw;
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 
-  .modal-title { font-size: 1.1rem; font-weight: 700; color: #1a237e; margin-bottom: 12px; }
+  .modal-title { font-size: 1.1rem; font-weight: 700; color: #1D4E89; margin-bottom: 12px; }
   .modal-desc { font-size: 0.85rem; color: #555; margin: 0 0 12px; line-height: 1.4; }
 }
 
@@ -267,7 +267,7 @@
   display: flex;
   justify-content: space-between;
   font-weight: 700;
-  color: #1a237e;
+  color: #1D4E89;
   font-size: 0.94rem;
 }
 
@@ -294,12 +294,12 @@
   label { font-size: 0.78rem; font-weight: 600; color: #555; text-transform: uppercase; }
   input, select {
     padding: 8px 10px;
-    border: 1px solid #c5cae9;
+    border: 1px solid #C3D3E6;
     border-radius: 4px;
     font-size: 0.9rem;
     font-family: inherit;
     outline: none;
-    &:focus { border-color: #1a237e; }
+    &:focus { border-color: #1D4E89; }
   }
 }
 
@@ -334,7 +334,7 @@
   color: #666;
   transition: all 0.15s;
 
-  &.active { background: var(--purple-500, #534AB7); border-color: var(--purple-500, #534AB7); color: white; }
+  &.active { background: var(--purple-500); border-color: var(--purple-500); color: white; }
 }
 
 .modal-actions { display: flex; gap: 8px; margin-top: 8px; }
