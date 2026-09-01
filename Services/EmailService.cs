@@ -19,11 +19,23 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
     private string From => config["Smtp:From"] ?? "";
     private string SenderName => config["Smtp:SenderName"] ?? "Mapa Mensal";
 
+    /// Quem fica em cópia de cada fatura que sai.
+    ///
+    /// O envio é por relay SMTP, e o que sai por relay **não passa pela caixa
+    /// de quem envia**: não fica em «Enviados» nem em lado nenhum. Sem esta
+    /// cópia, a única prova de que a fatura foi mesmo enviada era o registo do
+    /// servidor. Com ela, fica numa caixa, com o PDF anexado.
+    ///
+    /// Não é a `contabilidade@`, que já é o remetente destas mensagens: uma
+    /// cópia para o próprio remetente não acrescenta caixa nenhuma.
+    private string CopiaFaturas =>
+        config["Smtp:CopiaFaturas"] ?? "zoompositivo@zoompositivo.pt";
+
     public Task SendAsync(string to, string subject, string htmlBody) =>
         SendAsync(to, subject, htmlBody, null, null);
 
     private async Task SendAsync(string to, string subject, string htmlBody, string? anexoNome, byte[]? anexoBytes,
-        string? remetenteNome = null, string? remetenteEmail = null)
+        string? remetenteNome = null, string? remetenteEmail = null, string? copia = null)
     {
         if (string.IsNullOrWhiteSpace(User) || string.IsNullOrWhiteSpace(Password))
         {
@@ -34,6 +46,19 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
         var msg = new MimeMessage();
         msg.From.Add(new MailboxAddress(remetenteNome ?? SenderName, remetenteEmail ?? From));
         msg.To.Add(MailboxAddress.Parse(to));
+
+        // Cópia — e não cópia oculta: quem recebe a fatura tem o direito de ver
+        // que a contabilidade a recebeu também, e é isso que torna natural
+        // responder-lhes a ambos.
+        //
+        // Não se põe em cópia quem já está no destinatário: a mesma mensagem
+        // duas vezes na mesma caixa é uma mensagem a mais para arrumar.
+        if (!string.IsNullOrWhiteSpace(copia)
+            && !string.Equals(copia.Trim(), to.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            msg.Cc.Add(MailboxAddress.Parse(copia.Trim()));
+        }
+
         msg.Subject = subject;
 
         // Alternativa em texto simples: além de servir quem lê sem HTML, uma
@@ -52,7 +77,9 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
         await client.SendAsync(msg);
         await client.DisconnectAsync(true);
 
-        logger.LogInformation("Email enviado para {To}: {Subject}", to, subject);
+        logger.LogInformation(
+            "Email enviado para {To}{Copia}: {Subject}",
+            to, string.IsNullOrWhiteSpace(copia) ? "" : $" (cópia para {copia})", subject);
     }
 
     /// Reduz o HTML a texto legível para a parte alternativa da mensagem.
@@ -82,19 +109,19 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
         var linkIcs = linkAceitar?.Replace("/aceitar/", "/ics/");
         var html = $@"
 <div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto"">
-  <h2 style=""color:#534AB7"">Convite para compromisso</h2>
+  <h2 style=""color:#8A6B22"">Convite para compromisso</h2>
   <p>Olá <strong>{nomeDestinatario}</strong>,</p>
   <p>Foi adicionado/a como participante no seguinte compromisso:</p>
-  <div style=""background:#EEEDFE;border-left:4px solid #534AB7;border-radius:6px;padding:16px 20px;margin:20px 0"">
-    <p style=""margin:0 0 8px;font-size:18px;font-weight:600;color:#3C3489"">{tituloCompromisso}</p>
-    <p style=""margin:0 0 4px;color:#6B6A65"">📅 {inicioStr} – {fimStr}</p>
-    {(string.IsNullOrEmpty(local) ? "" : $@"<p style=""margin:0 0 4px;color:#6B6A65"">📍 {local}</p>")}
-    {(string.IsNullOrEmpty(descricao) ? "" : $@"<p style=""margin:8px 0 0;color:#6B6A65"">{descricao}</p>")}
+  <div style=""background:#F0E6CC;border-left:4px solid #8A6B22;border-radius:6px;padding:16px 20px;margin:20px 0"">
+    <p style=""margin:0 0 8px;font-size:18px;font-weight:600;color:#5E4817"">{tituloCompromisso}</p>
+    <p style=""margin:0 0 4px;color:#6B7383"">📅 {inicioStr} – {fimStr}</p>
+    {(string.IsNullOrEmpty(local) ? "" : $@"<p style=""margin:0 0 4px;color:#6B7383"">📍 {local}</p>")}
+    {(string.IsNullOrEmpty(descricao) ? "" : $@"<p style=""margin:8px 0 0;color:#6B7383"">{descricao}</p>")}
   </div>
   {(linkAceitar is not null ? BtnPrimario(linkAceitar, "✓ Aceitar convite") : "")}
   {CalendarButtons(tituloCompromisso, descricao, inicio, fim, local, linkIcs)}
   <hr/>
-  <p style=""color:#9E9D98;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
+  <p style=""color:#9AA0AC;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
 </div>";
 
         await SendAsync(to, $"Convite: {tituloCompromisso}", html);
@@ -109,19 +136,19 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
         var linkIcs = linkAceitar?.Replace("/aceitar/", "/ics/");
         var html = $@"
 <div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto"">
-  <h2 style=""color:#D85A30"">Compromisso actualizado</h2>
+  <h2 style=""color:#A8331A"">Compromisso actualizado</h2>
   <p>Olá <strong>{nomeDestinatario}</strong>,</p>
   <p>O seguinte compromisso foi alterado. Por favor verifique os novos detalhes:</p>
-  <div style=""background:#FAECE7;border-left:4px solid #D85A30;border-radius:6px;padding:16px 20px;margin:20px 0"">
-    <p style=""margin:0 0 8px;font-size:18px;font-weight:600;color:#854F0B"">{tituloCompromisso}</p>
-    <p style=""margin:0 0 4px;color:#6B6A65"">📅 {inicioStr} – {fimStr}</p>
-    {(string.IsNullOrEmpty(local) ? "" : $@"<p style=""margin:0 0 4px;color:#6B6A65"">📍 {local}</p>")}
-    {(string.IsNullOrEmpty(descricao) ? "" : $@"<p style=""margin:8px 0 0;color:#6B6A65"">{descricao}</p>")}
+  <div style=""background:#F7E2DB;border-left:4px solid #A8331A;border-radius:6px;padding:16px 20px;margin:20px 0"">
+    <p style=""margin:0 0 8px;font-size:18px;font-weight:600;color:#7A4A12"">{tituloCompromisso}</p>
+    <p style=""margin:0 0 4px;color:#6B7383"">📅 {inicioStr} – {fimStr}</p>
+    {(string.IsNullOrEmpty(local) ? "" : $@"<p style=""margin:0 0 4px;color:#6B7383"">📍 {local}</p>")}
+    {(string.IsNullOrEmpty(descricao) ? "" : $@"<p style=""margin:8px 0 0;color:#6B7383"">{descricao}</p>")}
   </div>
-  {(linkAceitar is not null ? BtnPrimario(linkAceitar, "✓ Confirmar nova data", "#D85A30") : "")}
+  {(linkAceitar is not null ? BtnPrimario(linkAceitar, "✓ Confirmar nova data", "#A8331A") : "")}
   {CalendarButtons(tituloCompromisso, descricao, inicio, fim, local, linkIcs)}
   <hr/>
-  <p style=""color:#9E9D98;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
+  <p style=""color:#9AA0AC;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
 </div>";
 
         await SendAsync(to, $"Actualização: {tituloCompromisso}", html);
@@ -134,17 +161,17 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
         var fimStr = fim.ToString("HH:mm");
         var html = $@"
 <div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto"">
-  <h2 style=""color:#534AB7"">Marcação confirmada!</h2>
+  <h2 style=""color:#8A6B22"">Marcação confirmada!</h2>
   <p>Olá <strong>{nomeParticipante}</strong>,</p>
   <p>A sua marcação foi recebida com sucesso. Aguardamos por si!</p>
-  <div style=""background:#EEEDFE;border-left:4px solid #534AB7;border-radius:6px;padding:16px 20px;margin:20px 0"">
-    <p style=""margin:0 0 8px;font-size:18px;font-weight:600;color:#3C3489"">{titulo}</p>
-    <p style=""margin:0 0 4px;color:#6B6A65"">📅 {inicioStr} – {fimStr}</p>
-    {(string.IsNullOrEmpty(local) ? "" : $@"<p style=""margin:0 0 4px;color:#6B6A65"">📍 {local}</p>")}
+  <div style=""background:#F0E6CC;border-left:4px solid #8A6B22;border-radius:6px;padding:16px 20px;margin:20px 0"">
+    <p style=""margin:0 0 8px;font-size:18px;font-weight:600;color:#5E4817"">{titulo}</p>
+    <p style=""margin:0 0 4px;color:#6B7383"">📅 {inicioStr} – {fimStr}</p>
+    {(string.IsNullOrEmpty(local) ? "" : $@"<p style=""margin:0 0 4px;color:#6B7383"">📍 {local}</p>")}
   </div>
   {CalendarButtons(titulo, null, inicio, fim, local, linkIcs)}
   <hr/>
-  <p style=""color:#9E9D98;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
+  <p style=""color:#9AA0AC;font-size:12px"">Mapa Mensal — Gestão Pessoal</p>
 </div>";
 
         await SendAsync(to, $"Marcação confirmada: {titulo}", html);
@@ -154,29 +181,30 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
         string? iban = null, string? bic = null, string? titular = null)
     {
         var dadosPagamento = string.IsNullOrWhiteSpace(iban) ? "" : $@"
-  <div style=""background:#EEEDFE;border-left:4px solid #534AB7;border-radius:6px;padding:16px 20px;margin:20px 0"">
-    {(string.IsNullOrEmpty(titular) ? "" : $@"<p style=""margin:0 0 4px;color:#6B6A65"">Titular: {titular}</p>")}
-    <p style=""margin:0 0 4px;color:#6B6A65"">IBAN: {iban}</p>
-    {(string.IsNullOrEmpty(bic) ? "" : $@"<p style=""margin:0;color:#6B6A65"">BIC/SWIFT: {bic}</p>")}
+  <div style=""background:#F0E6CC;border-left:4px solid #8A6B22;border-radius:6px;padding:16px 20px;margin:20px 0"">
+    {(string.IsNullOrEmpty(titular) ? "" : $@"<p style=""margin:0 0 4px;color:#6B7383"">Titular: {titular}</p>")}
+    <p style=""margin:0 0 4px;color:#6B7383"">IBAN: {iban}</p>
+    {(string.IsNullOrEmpty(bic) ? "" : $@"<p style=""margin:0;color:#6B7383"">BIC/SWIFT: {bic}</p>")}
   </div>";
 
         var html = $@"
-<div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#1A1A18"">
+<div style=""font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#0A1426"">
   <p>Segue em anexo fatura {numeroFatura} referente aos serviços prestados. Agradeço o pagamento na conta bancária abaixo:</p>
   {dadosPagamento}
   <p>Com os melhores cumprimentos,<br/>Samir Medeiros</p>
-  <hr style=""border:none;border-top:1px solid #e5e5e5;margin:24px 0 16px""/>
-  <a href=""https://zoompositivo.pt"" target=""_blank"" rel=""noopener"" style=""display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#6B6A65;font-size:12px"">
+  <hr style=""border:none;border-top:1px solid #DCD7CB;margin:24px 0 16px""/>
+  <a href=""https://zoompositivo.pt"" target=""_blank"" rel=""noopener"" style=""display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#6B7383;font-size:12px"">
     <img src=""https://app.zoompositivo.pt/zoompositivo-logo.png"" width=""20"" height=""20"" alt="""" style=""display:inline-block;vertical-align:middle""/>
     <span><b>Zoom</b>Positivo</span>
   </a>
 </div>";
 
         await SendAsync(to, $"Fatura Mensal - {numeroFatura}", html, $"Fatura_{numeroFatura}.pdf", pdfBytes,
-            remetenteNome: "Samir Medeiros (ZoomPositivo)", remetenteEmail: "contabilidade@zoompositivo.pt");
+            remetenteNome: "Samir Medeiros (ZoomPositivo)", remetenteEmail: "contabilidade@zoompositivo.pt",
+            copia: CopiaFaturas);
     }
 
-    private static string BtnPrimario(string link, string texto, string cor = "#534AB7") =>
+    private static string BtnPrimario(string link, string texto, string cor = "#8A6B22") =>
         $@"<div style=""margin:20px 0"">
   <a href=""{link}"" style=""display:inline-block;background:{cor};color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600"">
     {texto}
@@ -206,14 +234,14 @@ public partial class EmailService(IConfiguration config, ILogger<EmailService> l
             + (string.IsNullOrEmpty(desc) ? "" : $"&body={enc(desc)}")
             + (string.IsNullOrEmpty(local) ? "" : $"&location={enc(local)}");
 
-        var btnStyle = "display:inline-block;border:1px solid #d1d5db;border-radius:6px;padding:8px 16px;margin:4px;text-decoration:none;font-size:13px;color:#374151;background:#fff";
+        var btnStyle = "display:inline-block;border:1px solid #C5BFB0;border-radius:6px;padding:8px 16px;margin:4px;text-decoration:none;font-size:13px;color:#28324A;background:#fff";
 
         var icsBtn = linkIcs is not null
             ? $@"<a href=""{linkIcs}"" style=""{btnStyle}"">⬇ Descarregar .ics</a>"
             : "";
 
         return $@"<div style=""margin:20px 0"">
-  <p style=""margin:0 0 10px;color:#6B6A65;font-size:13px"">Adicionar ao calendário:</p>
+  <p style=""margin:0 0 10px;color:#6B7383;font-size:13px"">Adicionar ao calendário:</p>
   <a href=""{googleUrl}"" target=""_blank"" style=""{btnStyle}"">📅 Google Calendar</a>
   <a href=""{outlookUrl}"" target=""_blank"" style=""{btnStyle}"">📅 Outlook</a>
   {icsBtn}
