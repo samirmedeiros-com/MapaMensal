@@ -24,6 +24,9 @@ export class ConfiguracaoComponent implements OnInit {
   tocOnlineCodigo = signal('');
   tocOnlineAuthUrl = signal<string | null>(null);
   tocOnlineLigando = signal(false);
+  /// Quando já há autorização, o campo de colar o código só aparece depois de
+  /// alguém pedir para reautorizar — o estado normal é o sossegado.
+  aColarCodigo = signal(false);
 
   projects = signal<Project[]>([]);
   holidays = signal<Holiday[]>([]);
@@ -68,10 +71,32 @@ export class ConfiguracaoComponent implements OnInit {
   }
 
   abrirAutorizacaoTocOnline() {
-    this.api.getTocOnlineAuthUrl().subscribe(r => {
-      this.tocOnlineAuthUrl.set(r.url);
-      window.open(r.url, '_blank');
+    // O separador abre-se agora, dentro do clique. Abri-lo quando a resposta
+    // chegar seria abri-lo fora de um gesto da pessoa, e o browser bloqueia —
+    // o botão parecia não fazer nada.
+    const separador = window.open('', '_blank');
+    if (separador) separador.opener = null;
+
+    // O campo de colar o código aparece já: quem vai buscar o código tem de
+    // ter onde o pôr quando voltar.
+    this.aColarCodigo.set(true);
+
+    this.api.getTocOnlineAuthUrl().subscribe({
+      next: r => {
+        this.tocOnlineAuthUrl.set(r.url);
+        if (separador) separador.location.replace(r.url);
+      },
+      error: () => {
+        separador?.close();
+        this.snack.open('Não foi possível obter o endereço de autorização.', '', { duration: 5000 });
+      }
     });
+  }
+
+  cancelarReautorizacao() {
+    this.aColarCodigo.set(false);
+    this.tocOnlineCodigo.set('');
+    this.tocOnlineAuthUrl.set(null);
   }
 
   ligarTocOnline() {
@@ -82,6 +107,8 @@ export class ConfiguracaoComponent implements OnInit {
         this.tocOnlineLigando.set(false);
         this.tocOnlineConfigurado.set(true);
         this.tocOnlineCodigo.set('');
+        this.aColarCodigo.set(false);
+        this.tocOnlineAuthUrl.set(null);
         this.snack.open('TocOnline autorizado com sucesso.', '', { duration: 3000 });
       },
       error: (err) => {

@@ -1,6 +1,12 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="7" fill="#534AB7"/>
-  <rect x="5" y="19" width="5" height="8" rx="1.5" fill="white"/>
-  <rect x="13" y="10" width="5" height="17" rx="1.5" fill="white"/>
-  <rect x="21" y="14" width="5" height="13" rx="1.5" fill="white"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="32" height="32" role="img" aria-label="ZoomPositivo">
+  <!-- A marca sobre fundo escuro, e não sobre papel: a um centímetro de lado,
+       cinzento sobre branco desaparece. Os traços são mais grossos do que na
+       marca grande pela mesma razão — o que se desenha para 16 píxeis não é o
+       mesmo desenho, é o mesmo símbolo. -->
+  <rect width="120" height="120" rx="26" fill="#0A1426"/>
+  <g transform="translate(60,60)" fill="none" stroke-linecap="round">
+    <circle r="40" stroke="#C9CDD3" stroke-width="9" stroke-dasharray="212 39.5" transform="rotate(118)"/>
+    <circle r="27" stroke="#C9CDD3" stroke-width="9" stroke-dasharray="146 23.8" transform="rotate(-28)"/>
+    <path d="M-13 0H13M0 -13V13" stroke="#C6A04E" stroke-width="14"/>
+  </g>
 </svg>

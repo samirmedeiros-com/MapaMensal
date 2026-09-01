@@ -37,17 +37,45 @@
   <!-- TocOnline -->
   <div class="card">
     <div class="card-title">TocOnline (emissão de faturas)</div>
-    @if (tocOnlineConfigurado()) {
+    @if (tocOnlineConfigurado() && !aColarCodigo()) {
       <p class="toc-status ok">✓ Autorizado — pronto para emitir faturas.</p>
       <button mat-stroked-button (click)="abrirAutorizacaoTocOnline()">Reautorizar</button>
     } @else {
-      <p class="toc-status">Ainda não autorizado. Passos: 1) abrir a autorização, 2) iniciar sessão no TocOnline,
-        3) copiar o código da página de callback e colar abaixo.</p>
+      <!-- O campo de colar aparece nos dois casos. Antes existia só enquanto
+           não houvesse autorização: quem carregava em «Reautorizar» abria a
+           página do TocOnline, vinha com o código na mão e não tinha onde o
+           pôr. -->
+      <p class="toc-status">
+        {{ tocOnlineConfigurado() ? 'A reautorizar.' : 'Ainda não autorizado.' }}
+        Passos: 1) abrir a autorização, 2) iniciar sessão no TocOnline,
+        3) copiar o código da página de callback e colar abaixo.
+      </p>
       <div class="toc-row">
-        <button mat-flat-button color="primary" (click)="abrirAutorizacaoTocOnline()">Abrir autorização TocOnline</button>
-        <input class="inline-input toc-code" [(ngModel)]="tocOnlineCodigo" placeholder="Colar código aqui" />
-        <button mat-flat-button color="accent" [disabled]="tocOnlineLigando()" (click)="ligarTocOnline()">Ligar</button>
+        <button mat-flat-button color="primary" (click)="abrirAutorizacaoTocOnline()">
+          {{ tocOnlineConfigurado() ? 'Abrir autorização de novo' : 'Abrir autorização TocOnline' }}
+        </button>
+        <input
+          class="inline-input toc-code"
+          [ngModel]="tocOnlineCodigo()"
+          (ngModelChange)="tocOnlineCodigo.set($event)"
+          placeholder="Colar código aqui"
+        />
+        <button mat-flat-button color="accent"
+                [disabled]="tocOnlineLigando() || !tocOnlineCodigo().trim()"
+                (click)="ligarTocOnline()">Ligar</button>
+        @if (tocOnlineConfigurado()) {
+          <button mat-button (click)="cancelarReautorizacao()">Cancelar</button>
+        }
       </div>
+
+      @if (tocOnlineAuthUrl(); as url) {
+        <!-- Se o browser bloquear a janela, o endereço fica aqui à mão: sem
+             isto, o botão parecia não fazer nada. -->
+        <p class="toc-status">
+          Não abriu?
+          <a [href]="url" target="_blank" rel="noopener">Abrir a autorização do TocOnline</a>
+        </p>
+      }
     }
   </div>
 
