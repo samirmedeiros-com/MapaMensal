@@ -16,6 +16,59 @@ jobs:
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+        with:
+          # O histórico todo: o passo seguinte descreve os commits desde o último push.
+          fetch-depth: 0
+      - name: Descrever o que entra neste deploy
+        # Para a página Atualizações do ZoomLog. Nunca trava o deploy: se falhar,
+        # segue sem descrição (continue-on-error e «|| true»).
+        continue-on-error: true
+        run: |
+          cat > /tmp/atualizacoes.py <<'PY'
+          import json
+          import subprocess
+          import sys
+
+          pasta, intervalo, repositorio, origem = sys.argv[1:5]
+
+
+          def git(*args):
+              return subprocess.run(["git", "-C", pasta, *args], capture_output=True, text=True).stdout
+
+
+          if intervalo != "--tudo":
+              antes = intervalo.split("..")[0]
+              # Sem «antes» conhecido, só o commit que se está a publicar.
+              if not antes.strip("0") or not git("cat-file", "-t", antes).strip():
+                  intervalo = "-1"
+
+          formato = "%x1e%H%x1f%an%x1f%aI%x1f%s%x1f%b%x1d"
+          args = ["log", "--numstat", "--format=" + formato]
+          if intervalo != "--tudo":
+              args.append(intervalo)
+
+          commits = []
+          for registo in git(*args).split("\x1e")[1:]:
+              cabeca, _, resto = registo.partition("\x1d")
+              sha, autor, data, titulo, corpo = cabeca.split("\x1f", 4)
+              ficheiros = []
+              for linha in resto.strip().splitlines():
+                  partes = linha.split("\t")
+                  if len(partes) == 3:
+                      # Binários aparecem com «-» em vez de números.
+                      a, r, caminho = partes
+                      ficheiros.append({"c": caminho, "a": int(a) if a.isdigit() else 0, "r": int(r) if r.isdigit() else 0})
+              commits.append({
+                  "commit": sha, "titulo": titulo, "descricao": corpo.strip(), "autor": autor,
+                  "commitUtc": data, "ficheiros": ficheiros,
+              })
+
+          # Do mais antigo para o mais recente: é a ordem em que entram e ganham Id.
+          commits.reverse()
+          json.dump({"repositorio": repositorio, "origem": origem, "commits": commits}, sys.stdout, ensure_ascii=False)
+          PY
+          python3 /tmp/atualizacoes.py . "${{ github.event.before }}..${{ github.sha }}" "${{ github.repository }}" deploy > /tmp/atualizacao.json || echo "{}" > /tmp/atualizacao.json
+          echo "ATUALIZACAO=$(base64 < /tmp/atualizacao.json | tr -d '\n')" >> "$GITHUB_ENV" || true
 
       - name: Definir nome da imagem em minúsculo
         run: echo "IMAGE=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
@@ -53,7 +106,7 @@ jobs:
           username: root
           port: 22
           password: ${{ secrets.SSH_PASSWORD }}
-          envs: DB_CONNECTION,SMTP_USER,SMTP_PASSWORD,APP_BASE_URL,TOC_OAUTH_URL,TOC_API_URL,TOC_CLIENT_ID,TOC_CLIENT_SECRET,TOC_REDIRECT_URI,CLAUDE_API_KEY,GRAPH_TENANT_ID,GRAPH_CLIENT_ID,GRAPH_CLIENT_SECRET
+          envs: DB_CONNECTION,SMTP_USER,SMTP_PASSWORD,APP_BASE_URL,TOC_OAUTH_URL,TOC_API_URL,TOC_CLIENT_ID,TOC_CLIENT_SECRET,TOC_REDIRECT_URI,CLAUDE_API_KEY,GRAPH_TENANT_ID,GRAPH_CLIENT_ID,GRAPH_CLIENT_SECRET,ATUALIZACAO
           script: |
             kubectl create secret generic mapamensal-secrets \
               --from-literal=ConnectionStrings__Default="$DB_CONNECTION" \
@@ -73,6 +126,17 @@ jobs:
             kubectl apply -f ~/deploy-mapamensal/k8s/
             kubectl set image deployment/mapamensal mapamensal=${{ env.IMAGE }}:${{ github.sha }}
             kubectl rollout status deployment/mapamensal --timeout=180s
+            # A página Atualizações do ZoomLog: os commits que acabaram de entrar.
+            # Depois do deploy aplicado e dentro de um bloco que nunca falha — se o
+            # ZoomLog estiver em baixo, o deploy fica feito na mesma.
+            (
+              CHAVE=$(kubectl get secret mapamensal-secrets -o jsonpath='{.data.ZoomLog__Chave}' 2>/dev/null | base64 -d 2>/dev/null)
+              if [ -n "$CHAVE" ] && [ -n "$ATUALIZACAO" ]; then
+                echo "$ATUALIZACAO" | base64 -d | curl -s -m 20 -X POST http://10.96.200.10/api/atualizacoes \
+                  -H "X-ZoomLog-Chave: $CHAVE" -H "Content-Type: application/json" --data-binary @- \
+                  && echo " ← ZoomLog: atualização registada" || echo "ZoomLog: atualização por registar (o deploy está feito)"
+              fi
+            ) || true
         env:
           DB_CONNECTION: ${{ secrets.MAPAMENSAL_DB_CONNECTION }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
