@@ -1,3 +1,4 @@
+using ZoomLog.Cliente;
 using MapaMensal.Data;
 using MapaMensal.Helpers;
 using MapaMensal.Models;
@@ -10,6 +11,11 @@ using System.Text;
 // Azure App Service define PORT; localmente usa 5016 via launchSettings
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5016";
 var builder = WebApplication.CreateBuilder(args);
+
+// ZoomLog: pedidos, chamadas para fora (TOConline, Microsoft Graph, Claude,
+// câmbios) e logs para log.zoompositivo.pt. Sem ZoomLog__Endereco/
+// ZoomLog__Chave fica inerte.
+builder.AddZoomLog();
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 builder.Services.AddControllers()
@@ -111,6 +117,7 @@ app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseAuthentication();
+app.UseZoomLog();
 app.UseAuthorization();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
