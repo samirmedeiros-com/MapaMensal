@@ -129,16 +129,32 @@ public sealed class ChamadasZoomLog(FilaZoomLog fila, Mascara mascara) : Delegat
         }
     }
 
-    /// Lê só o princípio de um conteúdo já em memória. Cada `ReadAsStream` de
-    /// um conteúdo carregado dá um fluxo novo sobre o mesmo buffer, por isso
-    /// quem chamou continua a poder ler tudo desde o início.
+    /// Lê só o princípio de um conteúdo já em memória, sem o estragar para
+    /// quem vem a seguir.
+    ///
+    /// O `ReadAsStreamAsync` de um conteúdo carregado devolve **sempre o mesmo
+    /// fluxo** — o .NET guarda-o. Fechá-lo (um `using`) ou deixá-lo no fim
+    /// partia a leitura de quem chamou: foi o `ObjectDisposedException: Cannot
+    /// access a closed Stream` no `ReadFromJsonAsync` da sincronização com o
+    /// ZoomTicket. Por isso: não se fecha, e volta à posição onde estava.
     private static async Task<string?> Ler(HttpContent conteudo, int maximo, CancellationToken ct)
     {
-        await using var fluxo = await conteudo.ReadAsStreamAsync(ct);
-        using var leitor = new StreamReader(fluxo, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-        var buffer = new char[maximo];
-        var lidos = await leitor.ReadBlockAsync(buffer.AsMemory(), ct);
-        return lidos == 0 ? null : new string(buffer, 0, lidos);
+        var fluxo = await conteudo.ReadAsStreamAsync(ct);
+        if (!fluxo.CanSeek) return null; // não carregado: ler aqui era roubá-lo a quem chamou
+
+        var inicio = fluxo.Position;
+        try
+        {
+            using var leitor = new StreamReader(fluxo, Encoding.UTF8, detectEncodingFromByteOrderMarks: true,
+                bufferSize: 4096, leaveOpen: true);
+            var buffer = new char[maximo];
+            var lidos = await leitor.ReadBlockAsync(buffer.AsMemory(), ct);
+            return lidos == 0 ? null : new string(buffer, 0, lidos);
+        }
+        finally
+        {
+            fluxo.Position = inicio;
+        }
     }
 
     private static string? SpanDoTraceparent(HttpRequestMessage pedido) =>
