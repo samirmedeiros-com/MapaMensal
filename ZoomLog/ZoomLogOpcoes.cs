@@ -31,6 +31,10 @@ public sealed class ZoomLogOpcoes
         ["Microsoft"] = LogLevel.Warning,
         ["System"] = LogLevel.Warning,
         ["Microsoft.Hosting.Lifetime"] = LogLevel.Information,
+        // Dois avisos em cada arranque («No XML encryptor configured», «Storing
+        // keys in a directory…») sobre chaves que nenhuma aplicação da casa usa:
+        // todas entram por JWT, sem cookies de sessão. Só um erro interessa.
+        ["Microsoft.AspNetCore.DataProtection"] = LogLevel.Error,
     };
 
     // ---------------------------------------------------------------- pedidos
