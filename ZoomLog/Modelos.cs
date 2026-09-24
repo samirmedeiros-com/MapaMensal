@@ -49,7 +49,7 @@ public sealed class EventoZoomLog
     public string? Versao { get; set; }
 }
 
-/// Os corpos já mascarados e cortados. Só vão quando uma regra os pede.
+/// O JSON (ou XML) do pedido e da resposta, já mascarado e cortado. Vai sempre.
 public sealed class CorpoZoomLog
 {
     public string? PedidoCabecalhos { get; set; }

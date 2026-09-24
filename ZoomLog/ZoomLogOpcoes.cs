@@ -40,28 +40,11 @@ public sealed class ZoomLogOpcoes
     public List<string> CaminhosRegistados { get; set; } = ["/api"];
     public List<string> CaminhosIgnorados { get; set; } = ["/api/saude", "/api/health", "/healthz"];
 
-    /// Corpo do pedido e da resposta de quem entra, para caminhos começados por
-    /// um destes. Vazio por omissão: custa memória em cada pedido.
-    public List<string> CorposEntrada { get; set; } = [];
-
-    /// Guarda o corpo do pedido que entrou quando a resposta foi um erro (≥ 500).
-    /// Barato: só se lê o que já está em memória e só quando falhou.
-    public bool CorpoEntradaEmErro { get; set; } = true;
-
     // --------------------------------------------------------------- chamadas
 
-    /// Anfitriões cujas chamadas levam sempre o corpo — `nfe.prefeitura.sp.gov.br`.
-    /// Aceita `*.dominio` para os subdomínios.
-    public List<string> CorposSaida { get; set; } = [];
-
-    /// Guarda o corpo de uma chamada que falhou (exceção ou estado ≥ 400).
-    public bool CorpoSaidaEmErro { get; set; } = true;
-
-    /// Nunca se guarda o corpo destes, nem em erro. Os tribunais estão aqui
-    /// por omissão: o MNI leva a senha dentro do XML e as respostas trazem
-    /// processos, alguns em segredo de justiça. Para os ligar é preciso tirá-los
-    /// desta lista *e* pô-los em `CorposSaida` — duas decisões, de propósito.
-    public List<string> SemCorpo { get; set; } = ["*.jus.br"];
+    // O JSON do pedido e o da resposta guardam-se sempre — em quem entra e em
+    // cada chamada para fora. É obrigatório, por decisão do utilizador; o que
+    // se escolhe aqui é só o que se tapa (`CamposSensiveis`) e o corte.
 
     /// Anfitriões que não se registam de todo (o próprio ZoomLog entra sempre).
     public List<string> SaidaIgnorada { get; set; } = [];
@@ -74,7 +57,7 @@ public sealed class ZoomLogOpcoes
 
     // ------------------------------------------------------------------ limites
 
-    /// Corte de cada corpo, em caracteres.
+    /// Corte de cada corpo (o JSON do pedido ou da resposta), em caracteres.
     public int CorpoMaximo { get; set; } = 32 * 1024;
 
     /// Eventos à espera de envio. Cheia, perde-se o mais antigo e conta-se.

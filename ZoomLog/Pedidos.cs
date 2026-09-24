@@ -22,22 +22,16 @@ public sealed class PedidosZoomLog(RequestDelegate seguinte, FilaZoomLog fila, M
             return;
         }
 
-        var corpos = o.CorposEntrada.Any(p => ctx.Request.Path.StartsWithSegments(p, StringComparison.OrdinalIgnoreCase));
+        // O JSON do pedido e o da resposta guardam-se sempre. Ler o pedido
+        // duas vezes obriga a guardá-lo em memória: só quando é texto e
+        // pequeno — um upload passa ao lado. A resposta é copiada enquanto
+        // sai, até ao limite do corte (em bytes, com folga para acentos).
         var pedidoPequeno = ctx.Request.ContentLength is > 0 and <= 256 * 1024 && Mascara.ETexto(ctx.Request.ContentType);
+        if (pedidoPequeno) ctx.Request.EnableBuffering();
 
-        // Guardar o corpo do pedido obriga a poder lê-lo duas vezes. Só se
-        // paga isso quando pode vir a ser preciso — e nunca num upload.
-        if (pedidoPequeno && (corpos || o.CorpoEntradaEmErro))
-            ctx.Request.EnableBuffering();
-
-        Stream? original = null;
-        MemoryStream? copia = null;
-        if (corpos)
-        {
-            original = ctx.Response.Body;
-            copia = new MemoryStream();
-            ctx.Response.Body = new Espelho(original, copia, o.CorpoMaximo * 4);
-        }
+        var original = ctx.Response.Body;
+        var copia = new MemoryStream();
+        ctx.Response.Body = new Espelho(original, copia, o.CorpoMaximo * 2);
 
         var inicio = Stopwatch.GetTimestamp();
         Exception? falha = null;
@@ -53,11 +47,11 @@ public sealed class PedidosZoomLog(RequestDelegate seguinte, FilaZoomLog fila, M
         }
         finally
         {
-            if (original is not null) ctx.Response.Body = original;
+            ctx.Response.Body = original;
 
             try
             {
-                await Registar(ctx, inicio, falha, corpos, pedidoPequeno, copia);
+                await Registar(ctx, inicio, falha, pedidoPequeno, copia);
             }
             catch
             {
@@ -65,7 +59,7 @@ public sealed class PedidosZoomLog(RequestDelegate seguinte, FilaZoomLog fila, M
             }
             finally
             {
-                copia?.Dispose();
+                copia.Dispose();
             }
         }
     }
@@ -75,7 +69,7 @@ public sealed class PedidosZoomLog(RequestDelegate seguinte, FilaZoomLog fila, M
         && !o.CaminhosIgnorados.Any(p => caminho.StartsWithSegments(p, StringComparison.OrdinalIgnoreCase));
 
     private async Task Registar(
-        HttpContext ctx, long inicio, Exception? falha, bool corpos, bool pedidoPequeno, MemoryStream? copia)
+        HttpContext ctx, long inicio, Exception? falha, bool pedidoPequeno, MemoryStream copia)
     {
         var duracao = (int)Stopwatch.GetElapsedTime(inicio).TotalMilliseconds;
         // Uma exceção que escapou é um 500, mesmo que a resposta ainda diga 200:
@@ -116,13 +110,12 @@ public sealed class PedidosZoomLog(RequestDelegate seguinte, FilaZoomLog fila, M
         if (agent.Length > 0)
             evento.Propriedades = new() { ["userAgent"] = agent.Length > 300 ? agent[..300] : agent };
 
-        if (corpos || (o.CorpoEntradaEmErro && estado >= 500))
-            evento.Corpo = await Corpo(ctx, pedidoPequeno, copia);
+        evento.Corpo = await Corpo(ctx, pedidoPequeno, copia);
 
         fila.Escrever(evento);
     }
 
-    private async Task<CorpoZoomLog> Corpo(HttpContext ctx, bool pedidoPequeno, MemoryStream? copia)
+    private async Task<CorpoZoomLog> Corpo(HttpContext ctx, bool pedidoPequeno, MemoryStream copia)
     {
         var corpo = new CorpoZoomLog
         {
@@ -133,7 +126,7 @@ public sealed class PedidosZoomLog(RequestDelegate seguinte, FilaZoomLog fila, M
             RespostaCabecalhos = mascara.Cabecalhos(ctx.Response.Headers.Select(h =>
                 new KeyValuePair<string, IEnumerable<string>>(h.Key, h.Value.Select(v => v ?? "")))),
             TipoResposta = ctx.Response.ContentType,
-            RespostaTamanho = ctx.Response.ContentLength ?? copia?.Length,
+            RespostaTamanho = ctx.Response.ContentLength ?? copia.Length,
         };
 
         var truncado = false;
@@ -146,10 +139,10 @@ public sealed class PedidosZoomLog(RequestDelegate seguinte, FilaZoomLog fila, M
             corpo.Pedido = mascara.Texto(Mascara.Cortar(texto, o.CorpoMaximo, ref truncado));
         }
 
-        if (copia is { Length: > 0 } && Mascara.ETexto(ctx.Response.ContentType))
+        if (copia.Length > 0 && Mascara.ETexto(ctx.Response.ContentType))
         {
             var texto = Encoding.UTF8.GetString(copia.GetBuffer(), 0, (int)copia.Length);
-            if (copia.Length >= o.CorpoMaximo * 4) truncado = true;
+            if (copia.Length >= o.CorpoMaximo * 2) truncado = true;
             corpo.Resposta = mascara.Texto(Mascara.Cortar(texto, o.CorpoMaximo, ref truncado));
         }
 

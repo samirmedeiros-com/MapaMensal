@@ -6,6 +6,8 @@ namespace ZoomLog.Cliente;
 /// Um evento por chamada que a aplicação faz a outro serviço — a NFS-e de São
 /// Paulo, o MNI de um tribunal, o DataJud, outra aplicação da casa.
 ///
+/// Guarda sempre o JSON do pedido e o da resposta (tapado e cortado).
+///
 /// Entra em todos os `HttpClient` da fábrica (`ConfigureHttpClientDefaults`).
 /// Um `new HttpClient()` feito à mão passa ao lado: esses têm de receber o
 /// handler explicitamente (`ZoomLog.Handler(servicos)`).
@@ -19,15 +21,11 @@ public sealed class ChamadasZoomLog(FilaZoomLog fila, Mascara mascara) : Delegat
         if (!o.Ativo || Casa(host, o.SaidaIgnorada) || EOProprioZoomLog(pedido.RequestUri))
             return await base.SendAsync(pedido, ct);
 
-        var semCorpo = Casa(host, o.SemCorpo);
-        var sempre = !semCorpo && Casa(host, o.CorposSaida);
-        var emErro = !semCorpo && o.CorpoSaidaEmErro;
-
         // O corpo do pedido lê-se antes de sair: depois de enviado, um
         // StreamContent já foi consumido e não há volta.
         string? corpoPedido = null;
         var truncado = false;
-        if ((sempre || emErro) && pedido.Content is { } c && Mascara.ETexto(c.Headers.ContentType?.MediaType)
+        if (pedido.Content is { } c && Mascara.ETexto(c.Headers.ContentType?.MediaType)
             && c.Headers.ContentLength is null or <= 1024 * 1024)
         {
             await c.LoadIntoBufferAsync(ct);
@@ -55,7 +53,6 @@ public sealed class ChamadasZoomLog(FilaZoomLog fila, Mascara mascara) : Delegat
             {
                 var duracao = (int)Stopwatch.GetElapsedTime(inicio).TotalMilliseconds;
                 var estado = resposta is null ? (int?)null : (int)resposta.StatusCode;
-                var falhou = falha is not null || estado >= 400;
 
                 var evento = new EventoZoomLog
                 {
@@ -89,7 +86,7 @@ public sealed class ChamadasZoomLog(FilaZoomLog fila, Mascara mascara) : Delegat
                     evento.Excecao = falha.ToString();
                 }
 
-                if (sempre || (emErro && falhou))
+                // O JSON do pedido e da resposta vai sempre.
                 {
                     var corpo = new CorpoZoomLog
                     {
