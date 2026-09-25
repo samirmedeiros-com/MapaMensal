@@ -1,0 +1,15 @@
+# Atualizações do cliente do ZoomLog (ZoomPositivo.ZoomLog.Cliente, no nuget.org).
+# Quando sai uma versão nova, o Dependabot abre um pull request com a subida;
+# fazer merge publica esta aplicação (o workflow de deploy corre no push a main).
+# Só este pacote: as outras dependências continuam a ser atualizadas à mão.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: daily
+    allow:
+      - dependency-name: "ZoomPositivo.ZoomLog.Cliente"
+    commit-message:
+      prefix: "ZoomLog"
+    labels: []
