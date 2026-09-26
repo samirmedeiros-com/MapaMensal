@@ -81,6 +81,12 @@
      (laranja na ação principal, contorno teal na secundária). */
   --mat-sys-primary: var(--zp-teal);
   --mat-sys-on-primary: #fff;
+  /* Sem tema, as opacidades dos estados ficam indefinidas e a camada do
+     hover/foco/clique cobre o botão com opacidade 1 — o botão «some». */
+  --mat-sys-hover-state-layer-opacity: 0.08;
+  --mat-sys-focus-state-layer-opacity: 0.12;
+  --mat-sys-pressed-state-layer-opacity: 0.12;
+  --mat-sys-dragged-state-layer-opacity: 0.16;
   --mat-button-filled-container-color: var(--laranja);
   --mat-button-filled-label-text-color: #fff;
   --mat-button-filled-container-shape: 999px;
