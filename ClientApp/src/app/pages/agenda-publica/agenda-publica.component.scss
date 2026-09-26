@@ -323,9 +323,9 @@
   margin-top: 8px;
 
   &.primary {
-    background: var(--purple-500);
+    background: var(--laranja);
     color: #fff;
-    &:hover:not(:disabled) { background: var(--purple-600); }
+    &:hover:not(:disabled) { background: var(--laranja-escuro); }
     &:disabled { opacity: 0.55; cursor: not-allowed; }
   }
 

@@ -1,73 +1,45 @@
 .login-container {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0 16px 3rem;
   background: var(--bg);
 }
 
-.login-card {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  padding: 36px 40px;
-  width: 100%;
-  max-width: 400px;
-  border: 0.5px solid var(--border-2);
+/* Faixa em gradiente com a marca, e o cartão por cima dela — o mesmo
+   desenho da entrada do ZoomJuris. */
+.hero {
+  margin: 0 -16px;
+  padding: 2.6rem 16px 6.5rem;
+  background: linear-gradient(100deg, #12343c 0%, #1C4C57 45%, #2A8C99 100%);
+  color: #fff;
+  text-align: center;
 
-  @media (max-width: 480px) {
-    padding: 28px 20px;
-    border-radius: var(--radius-md);
-    max-width: 100%;
-    margin: 12px;
-    border: none;
-    box-shadow: none;
-  }
+  h1 { margin: 1.4rem 0 0.3rem; color: #fff; font-size: 2rem; font-weight: 800; letter-spacing: -0.01em; }
+  p { margin: 0; color: #d6e6e9; }
 }
 
-.login-logo {
-  text-align: center;
-  margin-bottom: 28px;
+.hero-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 
-  .logo-icon-wrap {
-    width: 48px;
-    height: 48px;
-    /* Sem fundo nem canto arredondado: a marca é o desenho, e pô-la dentro de
-       um quadrado colorido faz dela um ícone de aplicação, que é outra coisa. */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 10px;
+  .simbolo { width: 38px; height: 38px; color: #fff; }
+  .cruz { stroke: var(--dourado); }
+}
 
-    mat-icon {
-      font-size: 26px;
-      width: 26px;
-      height: 26px;
-      color: var(--purple-500);
-    }
-  }
+.login-card {
+  position: relative;
+  width: min(420px, 100%);
+  margin: -4.5rem auto 0;
+  padding: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--sombra);
 
-  .marca-nome {
-    margin: 0 0 2px;
-    font-size: 1.05rem;
-    line-height: 1;
-    color: var(--body-ink);
-
-    b { font-weight: 700; }
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: -0.02em;
-  }
-
-  p {
-    margin: 4px 0 0;
-    font-size: 0.82rem;
-    color: var(--text-2);
-  }
+  @media (max-width: 480px) { padding: 1.4rem; }
 }
 
 .form-group {
@@ -75,11 +47,9 @@
 
   label {
     display: block;
-    font-size: 0.78rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 500;
     color: var(--text-2);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     margin-bottom: 6px;
   }
 }
@@ -102,8 +72,8 @@
   input {
     width: 100%;
     padding: 10px 42px 10px 38px;
-    border: 0.5px solid var(--border-2);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    border-radius: 12px;
     font-size: 0.9rem;
     font-family: inherit;
     outline: none;
@@ -143,18 +113,18 @@
 
 .login-btn {
   width: 100%;
-  padding: 11px;
-  background: var(--purple-500);
+  padding: 0.7rem 1.2rem;
+  background: var(--laranja);
   color: #fff;
   border: none;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s;
   margin-top: 6px;
 
-  &:hover:not(:disabled) { background: var(--purple-600); }
+  &:hover:not(:disabled) { background: var(--laranja-escuro); }
   &:disabled { opacity: 0.55; cursor: not-allowed; }
 }

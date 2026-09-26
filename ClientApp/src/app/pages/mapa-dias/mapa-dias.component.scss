@@ -17,10 +17,10 @@
 .btn-action {
   appearance: none;
   border: none;
-  border-radius: var(--radius-md, 8px);
-  padding: 8px 16px;
+  border-radius: 999px;
+  padding: 8px 18px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   font-family: inherit;
   white-space: nowrap;
   cursor: pointer;
@@ -31,7 +31,7 @@
 }
 
 .btn-approve {
-  background: var(--purple-500);
+  background: var(--laranja);
   color: #fff;
 }
 
@@ -139,7 +139,7 @@ tr.row-locked td:not(.total-cell) {
   font-size: 0.78rem;
 
   th {
-    background: #1D4E89;
+    background: var(--purple-500);
     color: white;
     padding: 4px 2px;
     text-align: center;
@@ -156,10 +156,10 @@ tr.row-locked td:not(.total-cell) {
       left: 0;
       z-index: 2;
     }
-    &.totals-col { background: #283593; }
+    &.totals-col { background: var(--purple-800); }
     &.totals-col-dias, &.totals-col-ferias { width: 44px; }
     &.totals-col-valor { width: 84px; white-space: nowrap; }
-    &.weekend-header { background: #4A79B0; }
+    &.weekend-header { background: var(--zp-teal-2); }
     &.holiday-header { background: #ad1457; }
   }
 
@@ -191,10 +191,10 @@ tr.row-locked td:not(.total-cell) {
       z-index: 1;
     }
     &.total-cell {
-      background: #E1EAF5;
+      background: var(--purple-50);
       font-weight: 700;
       cursor: default;
-      color: #1D4E89;
+      color: var(--purple-500);
     }
     &.totals-col-valor { white-space: nowrap; }
 
@@ -284,7 +284,7 @@ tr.row-locked td:not(.total-cell) {
   max-width: 90vw;
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 
-  .modal-title { font-size: 1.1rem; font-weight: 700; color: #1D4E89; margin-bottom: 8px; }
+  .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--grafite); margin-bottom: 8px; }
   .modal-desc { font-size: 0.9rem; color: #555; margin-bottom: 16px; }
 
   .form-group {
@@ -296,7 +296,7 @@ tr.row-locked td:not(.total-cell) {
     label { font-size: 0.78rem; font-weight: 600; color: #555; text-transform: uppercase; }
     input {
       padding: 8px 10px;
-      border: 1px solid #C3D3E6;
+      border: 1px solid var(--border-2);
       border-radius: 4px;
       font-size: 0.9rem;
       font-family: inherit;
@@ -322,7 +322,7 @@ tr.row-locked td:not(.total-cell) {
     margin-top: 4px;
     padding-top: 7px;
     font-weight: 700;
-    color: #1D4E89;
+    color: var(--purple-500);
     font-size: 0.94rem;
   }
 

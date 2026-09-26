@@ -8,34 +8,38 @@
       [opened]="!isMobile()"
       class="sidenav">
 
-      <div class="sidebar-logo">
-        <div class="logo-icon-wrap">
-          <svg viewBox="0 0 120 120" width="32" height="32" role="img" aria-label="ZoomPositivo" class="marca-zp">
-            <g transform="translate(60,60)" fill="none" stroke-linecap="round">
-              <circle class="anel" r="44" stroke-width="7" stroke-dasharray="233 43.4" transform="rotate(118)"/>
-              <circle class="anel" r="30" stroke-width="7" stroke-dasharray="162 26.5" transform="rotate(-28)"/>
-              <path class="cruz" d="M-14 0H14M0 -14V14" stroke-width="12"/>
-            </g>
-          </svg>
-        </div>
-        <div class="logo-info">
-          <span class="logo-name">Gestor</span>
-          <span class="logo-marca">ZoomPositivo</span>
-        </div>
-      </div>
+      <!-- Barra lateral no gradiente teal do ZoomJuris: cartão branco com a
+           marca no topo, módulos em branco, o ativo numa pílula branca com a
+           barra dourada, e a pessoa e a assinatura da casa no rodapé. -->
+      <a class="marca" routerLink="/mapa-dias" aria-label="Início" (click)="onNavClick()">
+        <svg class="simbolo" viewBox="0 0 120 120" aria-hidden="true">
+          <g transform="translate(60,60)" fill="none" stroke-linecap="round">
+            <circle class="anel" r="44" stroke-width="6" stroke-dasharray="233 43.4" transform="rotate(118)"/>
+            <circle class="anel" r="30" stroke-width="6" stroke-dasharray="162 26.5" transform="rotate(-28)"/>
+            <path class="cruz" d="M-14 0H14M0 -14V14" stroke-width="11"/>
+          </g>
+        </svg>
+        <span>
+          <span class="nome">Gestor</span>
+          <small>um produto <b>Zoom</b>Positivo</small>
+        </span>
+      </a>
 
       <nav class="sidebar-nav">
-        @for (section of navSections(); track section.label) {
-          <div class="nav-section">
-            <div class="nav-section-label">{{ section.label }}</div>
+        @for (section of navSections(); track section.label; let primeira = $first) {
+          @if (!primeira) { <span class="risca"></span> }
+          <div class="grupo">
+            @if (section.label) {
+              <div class="grupo-cab"><mat-icon>{{ section.icon }}</mat-icon><span>{{ section.label }}</span></div>
+            }
             @for (item of section.items; track item.path) {
-              <a class="nav-item" [routerLink]="item.path" routerLinkActive="active" (click)="onNavClick()">
+              <a class="nav-item" [routerLink]="item.path" routerLinkActive="ativo" (click)="onNavClick()">
                 <mat-icon>{{ item.icon }}</mat-icon>
                 <span>{{ item.label }}</span>
               </a>
               @if (item.children) {
                 @for (sub of item.children; track sub.path) {
-                  <a class="nav-item nav-item-sub" [routerLink]="sub.path" routerLinkActive="active" (click)="onNavClick()">
+                  <a class="nav-item nav-item-sub" [routerLink]="sub.path" routerLinkActive="ativo" (click)="onNavClick()">
                     <mat-icon>{{ sub.icon }}</mat-icon>
                     <span>{{ sub.label }}</span>
                   </a>
@@ -46,19 +50,29 @@
         }
       </nav>
 
-      <div class="sidebar-footer">
-        <div class="sidebar-footer-row">
-          <div class="user-card">
-            <div class="avatar-circle">{{ usernameInitial() }}</div>
-            <div class="user-details">
-              <span class="user-name">{{ auth.currentUser()?.username }}</span>
-              <span class="user-role">{{ auth.currentUser()?.role === 'Admin' ? 'Administrador' : 'Utilizador' }}</span>
-            </div>
-          </div>
-          <button mat-icon-button (click)="auth.logout()" matTooltip="Terminar sessão" class="logout-btn">
-            <mat-icon>logout</mat-icon>
-          </button>
+      <div class="rodape">
+        <div class="quem">
+          <strong>{{ auth.currentUser()?.username }}</strong>
+          <small>{{ auth.currentUser()?.role === 'Admin' ? 'Administrador' : 'Utilizador' }}</small>
         </div>
+        <button class="discreto" type="button" (click)="auth.logout()">Sair</button>
+        <a class="assinatura" href="https://zoompositivo.pt" target="_blank" rel="noopener"
+           [title]="appVersion() ? 'Versão ' + appVersion() : ''"
+           aria-label="Aplicação desenvolvida pela ZoomPositivo — abre em nova janela">
+          <svg class="simbolo mini" viewBox="0 0 120 120" aria-hidden="true">
+            <g transform="translate(60,60)" fill="none" stroke-linecap="round">
+              <circle r="44" stroke="currentColor" stroke-width="6" stroke-dasharray="233 43.4" transform="rotate(118)"/>
+              <circle r="30" stroke="currentColor" stroke-width="6" stroke-dasharray="162 26.5" transform="rotate(-28)"/>
+              <path class="cruz" d="M-14 0H14M0 -14V14" stroke-width="11"/>
+            </g>
+          </svg>
+          <span>
+            ZoomPositivo
+            @if (appVersion()) {
+              <small>v{{ appVersion() }}</small>
+            }
+          </span>
+        </a>
       </div>
 
     </mat-sidenav>
@@ -81,25 +95,6 @@
         <router-outlet />
       </div>
 
-      <footer class="page-footer" [class.has-bottom-nav]="isMobile()">
-        @if (appVersion()) {
-          <span class="app-version">v{{ appVersion() }}</span>
-        }
-        <a class="zp" href="https://zoompositivo.pt" target="_blank" rel="noopener"
-           aria-label="Aplicação desenvolvida pela ZoomPositivo — abre em nova janela">
-          <svg width="18" height="18" viewBox="0 0 120 120" aria-hidden="true">
-            <g transform="translate(60,60)" fill="none" stroke-linecap="round">
-              <circle r="44" stroke="var(--text-2)" stroke-width="7" stroke-dasharray="233 43.4" transform="rotate(118)"/>
-              <circle r="30" stroke="var(--text-2)" stroke-width="7" stroke-dasharray="162 26.5" transform="rotate(-28)"/>
-              <path d="M-14 0H14M0 -14V14" stroke="#C6A04E" stroke-width="12"/>
-            </g>
-          </svg>
-          <span class="zt">
-            <span class="zn"><b>Zoom</b>Positivo</span>
-            <span class="zs">zoompositivo.pt</span>
-          </span>
-        </a>
-      </footer>
     </mat-sidenav-content>
 
     @if (isMobile()) {

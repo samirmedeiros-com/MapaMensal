@@ -2,46 +2,57 @@
 
 /* ── Design tokens ── */
 :root {
-  /* As cores são as de zoompositivo.pt: papel em vez de branco, tinta
-     azul-escura em vez de preto, e o dourado da marca como acento.
+  /* As cores são as do ZoomJuris (marca ZoomPositivo): teal dos anéis,
+     dourado da cruz, laranja da ação, sobre um fundo cinza-azulado claro.
 
-     Os nomes das variáveis ficam como estavam — «purple», «teal», «coral» —
-     de propósito. São usados em duas dezenas de ficheiros e renomeá-los era
-     mexer em tudo para não mudar nada; o que conta é o valor. Onde o nome
-     estorva a leitura, há um nome novo ao lado. */
+     Os nomes das variáveis antigas ficam como estavam — «purple», «teal»,
+     «coral» — de propósito. São usados em duas dezenas de ficheiros e
+     renomeá-los era mexer em tudo para não mudar nada; o que conta é o
+     valor. O acento principal («purple») é agora o teal. */
 
-  /* Papel e tinta */
-  --paper:      #F5F3EE;
-  --ink:        #0A1426;
-  --body-ink:   #28324A;
-  --muted-ink:  #6B7383;
-  --rule:       #DCD7CB;
-  --rule-2:     #C5BFB0;
+  /* Marca */
+  --zp-teal:        #1C4C57;
+  --zp-teal-2:      #237585;
+  --zp-teal-claro:  #eaf2f3;
+  --grad-vertical:  linear-gradient(180deg, #12343c 0%, #1C4C57 55%, #237585 100%);
+  --dourado:        #E0B84A;
+  --laranja:        #D9822B;
+  --laranja-escuro: #c4721f;
+  --tinta-logo:     #0A1426;
+  --grafite:        #263038;
 
-  /* Os quatro acentos do site: dourado (identidade), azul (técnico),
-     verde (o que corre bem) e terracota (risco e limites). */
-  --gold:       #8A6B22;
-  --gold-soft:  #F0E6CC;
+  /* Fundo e tinta */
+  --paper:      #F4F7F8;
+  --ink:        var(--grafite);
+  --body-ink:   var(--grafite);
+  --muted-ink:  #54697A;
+  --rule:       #E3E8EC;
+  --rule-2:     #CFD8DE;
+
+  /* Acentos semânticos: azul (técnico), verde (o que corre bem) e
+     terracota (risco e limites). O dourado da cruz não serve para texto
+     sobre branco; o «gold» de texto é a versão escura. */
+  --gold:       #8A6100;
+  --gold-soft:  #fdf3d7;
   --blue:       #1D4E89;
   --blue-soft:  #E1EAF5;
-  --green:      #12695C;
-  --green-soft: #DCEDE8;
+  --green:      #1f6b3e;
+  --green-soft: #e7f4ec;
   --clay:       #A8451A;
   --clay-soft:  #F8E5DC;
-  --urgent:     #A8331A;
-  --urgent-soft:#F7E2DB;
+  --urgent:     #b3261e;
+  --urgent-soft:#fdecea;
 
-  /* O acento principal é o dourado, e leva texto quase branco por cima —
-     é o que o site faz nos seus próprios botões. */
-  --purple-50:  var(--gold-soft);
-  --purple-200: #C9B37A;
-  --purple-500: var(--gold);
-  --purple-600: #775C1D;
-  --purple-800: #5E4817;
+  /* O acento principal é o teal. */
+  --purple-50:  var(--zp-teal-claro);
+  --purple-200: #9DC3CA;
+  --purple-500: var(--zp-teal);
+  --purple-600: #163F48;
+  --purple-800: #12343c;
 
   --teal-50:    var(--green-soft);
   --teal-500:   var(--green);
-  --teal-800:   #0C4C43;
+  --teal-800:   #16502e;
 
   --coral-50:   var(--urgent-soft);
   --coral-500:  var(--urgent);
@@ -53,31 +64,59 @@
   --green-500:  var(--green);
 
   --bg:         var(--paper);
-  --surface:    #FCFBF8;
-  --surface-2:  #EFEDE6;
+  --surface:    #ffffff;
+  --surface-2:  #F4F7F8;
   --text:       var(--ink);
   --text-2:     var(--muted-ink);
-  --text-3:     #9AA0AC;
+  --text-3:     #8A99A6;
   --border:     var(--rule);
   --border-2:   var(--rule-2);
-  --radius-sm:  6px;
-  --radius-md:  8px;
-  --radius-lg:  12px;
+  --radius-sm:  8px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
+  --sombra:     0 8px 28px rgba(16, 38, 44, 0.10);
+
+  /* A app não inclui um tema do Material: estes tokens são o bastante para
+     os componentes usarem o teal e os botões serem as pílulas do ZoomJuris
+     (laranja na ação principal, contorno teal na secundária). */
+  --mat-sys-primary: var(--zp-teal);
+  --mat-sys-on-primary: #fff;
+  --mat-button-filled-container-color: var(--laranja);
+  --mat-button-filled-label-text-color: #fff;
+  --mat-button-filled-container-shape: 999px;
+  --mat-button-protected-container-color: var(--laranja);
+  --mat-button-protected-label-text-color: #fff;
+  --mat-button-protected-container-shape: 999px;
+  --mat-button-outlined-label-text-color: var(--zp-teal);
+  --mat-button-outlined-outline-color: var(--zp-teal);
+  --mat-button-outlined-container-shape: 999px;
+  --mat-button-text-label-text-color: var(--zp-teal);
+  --mat-button-text-container-shape: 999px;
+  --mat-button-filled-label-text-weight: 700;
+  --mat-button-outlined-label-text-weight: 700;
+  --mat-button-protected-label-text-weight: 700;
+  --mat-button-text-label-text-weight: 600;
+  --mat-progress-bar-active-indicator-color: var(--dourado);
+  --mat-progress-bar-track-color: transparent;
 }
+
+.mat-mdc-unelevated-button:not(:disabled):hover { background-color: var(--laranja-escuro); }
+.mat-mdc-outlined-button { border-width: 2px !important; }
 
 /* A marca da ZoomPositivo. As cores vêm de regras e não de atributos: uma
    variável de CSS dentro de um atributo de apresentação não é lida por todos
    os browsers. */
 .marca-zp { display: block; }
-.marca-zp .anel { stroke: #8A8F98; }
-.marca-zp .cruz { stroke: var(--gold); }
+.marca-zp .anel { stroke: var(--tinta-logo); }
+.marca-zp .cruz { stroke: var(--dourado); }
 
 /* dark mode removido — aplicação usa sempre tema claro */
 
 html, body {
   height: 100%;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
@@ -91,9 +130,9 @@ html, body {
 }
 
 .page-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--grafite);
   margin-bottom: 16px;
   letter-spacing: -0.01em;
 }
@@ -103,7 +142,8 @@ html, body {
   background: var(--surface);
   border-radius: var(--radius-lg);
   padding: 16px;
-  border: 0.5px solid var(--border);
+  border: 1px solid var(--border);
+  box-shadow: var(--sombra);
   margin-bottom: 14px;
   min-width: 0; // impede que uma tabela larga lá dentro alargue a página toda em vez de rolar só dentro do card
 }

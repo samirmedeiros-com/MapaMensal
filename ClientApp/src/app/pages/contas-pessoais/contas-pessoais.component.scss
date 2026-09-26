@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: space-between;
 
-  .page-title { font-size: 1.5rem; font-weight: 600; color: #1D4E89; }
+  .page-title { font-size: 1.5rem; font-weight: 600; color: var(--grafite); }
 }
 
 .checkbox-label {
@@ -34,30 +34,30 @@
 .btn-novo-lancamento {
   appearance: none;
   border: none;
-  border-radius: 8px;
-  background: var(--purple-500);
+  border-radius: 999px;
+  background: var(--laranja);
   color: #fff;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 9px 18px;
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(83, 74, 183, 0.3);
+  box-shadow: none;
   transition: filter 0.15s, box-shadow 0.15s, transform 0.1s;
 
   mat-icon { font-size: 20px; width: 20px; height: 20px; }
 
-  &:hover { filter: brightness(0.94); box-shadow: 0 3px 10px rgba(83, 74, 183, 0.4); }
+  &:hover { filter: brightness(0.94); box-shadow: 0 3px 10px rgba(16, 38, 44, 0.16); }
   &:active { transform: translateY(1px); }
 }
 
 .btn-exportar-pdf {
   appearance: none;
-  border: 1.5px solid var(--purple-500);
-  border-radius: 8px;
+  border: 2px solid var(--purple-500);
+  border-radius: 999px;
   background: #fff;
   color: var(--purple-500);
   display: flex;
@@ -65,7 +65,7 @@
   gap: 6px;
   padding: 8px 16px;
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s;
@@ -114,7 +114,7 @@
   .sc-label { font-size: 0.78rem; font-weight: 600; color: #888; text-transform: uppercase; }
   .sc-value { font-size: 1.15rem; font-weight: 700; color: #222; margin-top: 2px; }
 
-  &.previsto { border-color: #4A79B0; mat-icon { color: #4A79B0; } }
+  &.previsto { border-color: var(--zp-teal-2); mat-icon { color: var(--zp-teal-2); } }
   &.pago     { border-color: #1B6B4C; mat-icon { color: #1B6B4C; } &.neg { border-color: #A8451A; mat-icon { color: #A8451A; } } }
   &.aberto   { border-color: #A8451A; mat-icon { color: #A8451A; } }
   &.entrada  { border-color: #12695C; mat-icon { color: #12695C; } }
@@ -220,7 +220,7 @@
   color: #333;
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 2px solid #E1EAF5;
+  border-bottom: 2px solid var(--purple-50);
 }
 
 .form-grid {
@@ -244,20 +244,20 @@
 
     input, select {
       padding: 8px 10px;
-      border: 1px solid #C3D3E6;
+      border: 1px solid var(--border-2);
       border-radius: 4px;
       font-size: 0.9rem;
       font-family: inherit;
       outline: none;
 
-      &:focus { border-color: #1D4E89; }
+      &:focus { border-color: var(--purple-500); }
     }
   }
 }
 
 .recorrencia-hint {
   font-size: 0.75rem;
-  color: #4A79B0;
+  color: var(--zp-teal-2);
   margin-top: 3px;
 
   &.warn { color: #A8451A; }
@@ -320,7 +320,7 @@
   width: 380px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 
-  .modal-title { font-size: 1.1rem; font-weight: 700; color: #1D4E89; margin-bottom: 4px; }
+  .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--grafite); margin-bottom: 4px; }
   .modal-desc { font-size: 0.95rem; color: #333; &.cat { color: #888; font-size: 0.82rem; margin-bottom: 4px; } }
 
   .form-group {
@@ -332,12 +332,12 @@
     label { font-size: 0.78rem; font-weight: 600; color: #555; text-transform: uppercase; }
     input {
       padding: 8px 10px;
-      border: 1px solid #C3D3E6;
+      border: 1px solid var(--border-2);
       border-radius: 4px;
       font-size: 0.9rem;
       font-family: inherit;
       outline: none;
-      &:focus { border-color: #1D4E89; }
+      &:focus { border-color: var(--purple-500); }
     }
   }
 
@@ -386,14 +386,14 @@
 
   select {
     padding: 6px 10px;
-    border: 1px solid #C3D3E6;
+    border: 1px solid var(--border-2);
     border-radius: 4px;
     font-size: 0.88rem;
     font-family: inherit;
     outline: none;
     min-width: 150px;
 
-    &:focus { border-color: #1D4E89; }
+    &:focus { border-color: var(--purple-500); }
   }
 }
 
@@ -402,7 +402,7 @@
 .chip {
   padding: 4px 12px;
   border-radius: 16px;
-  border: 1.5px solid #C3D3E6;
+  border: 1.5px solid var(--border-2);
   background: white;
   font-size: 0.82rem;
   font-weight: 500;
@@ -411,7 +411,7 @@
   color: #555;
   transition: all 0.15s;
 
-  &.active        { background: #1D4E89; color: white; border-color: #1D4E89; }
+  &.active        { background: var(--purple-500); color: white; border-color: var(--purple-500); }
   &.aberto-chip.active { background: #A8451A; border-color: #A8451A; color: white; }
   &.pago-chip.active   { background: #1B6B4C; border-color: #1B6B4C; color: white; }
   &.entrada-chip.active { background: #12695C; border-color: #12695C; color: white; }
@@ -527,8 +527,8 @@
   }
 
   .recorr-badge {
-    background: #E1EAF5;
-    color: #3949ab;
+    background: var(--purple-50);
+    color: var(--purple-500);
     font-size: 0.72rem;
     font-weight: 700;
     padding: 1px 6px;
@@ -603,7 +603,7 @@
   justify-content: space-between;
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 2px solid #E1EAF5;
+  border-bottom: 2px solid var(--purple-50);
 }
 
 .graficos-grid {

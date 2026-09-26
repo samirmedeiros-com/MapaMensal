@@ -46,7 +46,7 @@
 .m-card-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #1D4E89;
+  color: var(--purple-500);
   margin-bottom: 10px;
 }
 
@@ -122,8 +122,8 @@
   width: 100%;
   appearance: none;
   border: none;
-  border-radius: 10px;
-  background: var(--purple-500);
+  border-radius: 999px;
+  background: var(--laranja);
   color: #fff;
   display: flex;
   align-items: center;

@@ -1,20 +1,20 @@
 <div class="login-container">
-  <div class="login-card">
-    <div class="login-logo">
-      <div class="logo-icon-wrap">
-        <svg viewBox="0 0 120 120" width="48" height="48" role="img" aria-label="ZoomPositivo" class="marca-zp">
-          <g transform="translate(60,60)" fill="none" stroke-linecap="round">
-            <circle class="anel" r="44" stroke-width="7" stroke-dasharray="233 43.4" transform="rotate(118)"/>
-            <circle class="anel" r="30" stroke-width="7" stroke-dasharray="162 26.5" transform="rotate(-28)"/>
-            <path class="cruz" d="M-14 0H14M0 -14V14" stroke-width="12"/>
-          </g>
-        </svg>
-      </div>
-      <p class="marca-nome"><b>Zoom</b>Positivo</p>
-      <h1>Gestor</h1>
-      <p>Inicia sessão para continuar</p>
+  <section class="hero">
+    <div class="hero-marca">
+      <svg class="simbolo" viewBox="0 0 120 120" role="img" aria-label="ZoomPositivo">
+        <g transform="translate(60,60)" fill="none" stroke-linecap="round">
+          <circle r="44" stroke="currentColor" stroke-width="6" stroke-dasharray="233 43.4" transform="rotate(118)"/>
+          <circle r="30" stroke="currentColor" stroke-width="6" stroke-dasharray="162 26.5" transform="rotate(-28)"/>
+          <path class="cruz" d="M-14 0H14M0 -14V14" stroke-width="11"/>
+        </g>
+      </svg>
+      <span>Gestor</span>
     </div>
+    <h1>Entrar</h1>
+    <p>TimeSheet, tarefas, financeiro e agenda.</p>
+  </section>
 
+  <div class="login-card">
     <form (ngSubmit)="login()" #f="ngForm">
       <div class="form-group">
         <label for="username">Utilizador</label>

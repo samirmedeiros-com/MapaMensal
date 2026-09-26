@@ -61,6 +61,7 @@ export class App {
   navSections = computed(() => [
     {
       label: 'Principal',
+      icon: 'wb_sunny',
       items: [
         { path: '/mapa-dias',        icon: 'calendar_month',         label: 'TimeSheet' },
         { path: '/resumo',           icon: 'bar_chart',              label: 'Resumo' },
@@ -73,18 +74,16 @@ export class App {
       ]
     },
     {
-      label: 'Conta',
+      // Sem cabeçalho: como no ZoomJuris, os cadastros que se visitam de vez
+      // em quando ficam por baixo de uma risca, a seguir ao dia a dia.
+      label: '',
+      icon: '',
       items: [
         { path: '/configuracao', icon: 'settings', label: 'Configuração' },
         ...(this.auth.isAdmin() ? [{ path: '/utilizadores', icon: 'manage_accounts', label: 'Utilizadores' }] : [])
       ]
     }
   ]);
-
-  usernameInitial = computed(() => {
-    const name = this.auth.currentUser()?.username ?? '';
-    return name.slice(0, 2).toUpperCase();
-  });
 
   bottomNavItems = [
     { path: '/mapa-dias',       icon: 'calendar_month',         label: 'TimeSheet' },
