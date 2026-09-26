@@ -46,8 +46,16 @@ public class ContasPessoaisController(AppDbContext db, ClaudeService claude, Cur
     [HttpGet("resumo")]
     public async Task<IActionResult> Resumo([FromQuery] string? inicio, [FromQuery] string? fim)
     {
-        // Saldo total: posição de caixa acumulada de sempre (todos os movimentos já pagos/recebidos).
-        var todasRealizadas = await db.ContasPessoais.Where(c => c.Pago).ToListAsync();
+        // Saldo total: a posição de caixa no fim do período filtrado — tudo o que
+        // foi pago/recebido até à data «fim». Somar o histórico inteiro fazia o
+        // cartão ignorar o filtro e mostrar o mesmo valor em qualquer período.
+        var realizadas = db.ContasPessoais.Where(c => c.Pago);
+        if (!string.IsNullOrEmpty(fim))
+        {
+            var d = DateOnly.Parse(fim);
+            realizadas = realizadas.Where(c => c.DataVencimento <= d);
+        }
+        var todasRealizadas = await realizadas.ToListAsync();
         var saldoTotal = todasRealizadas.Where(c => c.Tipo == "Entrada").Sum(c => c.ValorPago ?? 0)
                        - todasRealizadas.Where(c => c.Tipo == "Saida").Sum(c => c.ValorPago ?? 0);
 

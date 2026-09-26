@@ -26,11 +26,11 @@
   <div class="periodo-bar card">
     <div class="filter-group">
       <label>De</label>
-      <input type="date" [ngModel]="filtroInicio()" (ngModelChange)="filtroInicio.set($event)" />
+      <input type="date" [ngModel]="filtroInicio()" (ngModelChange)="mudarInicio($event)" />
     </div>
     <div class="filter-group">
       <label>Até</label>
-      <input type="date" [ngModel]="filtroFim()" (ngModelChange)="filtroFim.set($event)" />
+      <input type="date" [ngModel]="filtroFim()" (ngModelChange)="mudarFim($event)" />
     </div>
     <button mat-stroked-button (click)="aplicarFiltroData()">Aplicar</button>
     <div class="atalhos">
@@ -46,7 +46,7 @@
       <div class="summary-card saldo" [class.neg]="r.saldoTotal < 0">
         <mat-icon>account_balance_wallet</mat-icon>
         <div>
-          <div class="sc-label">Saldo Total</div>
+          <div class="sc-label">Saldo em {{ fimFormatado() }}</div>
           <div class="sc-value">{{ fmt(r.saldoTotal) }} €</div>
         </div>
       </div>

@@ -129,12 +129,37 @@ export class ContasPessoaisComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   loadAll() {
+    if (!this.filtroInicio() || !this.filtroFim()) return;
     this.api.getContasPessoais(this.filtroInicio(), this.filtroFim()).subscribe(c => this.contas.set(c));
     this.refreshResumo();
   }
 
   aplicarFiltroData() {
     this.loadAll();
+  }
+
+  /// Mudar uma data recarrega a lista e os cartões logo: antes só o «Aplicar»
+  /// o fazia, e os cartões ficavam com o período anterior enquanto os campos já
+  /// mostravam outro. Uma data incompleta chega vazia e fica de fora — enviada
+  /// assim, o servidor somava o histórico inteiro.
+  mudarInicio(v: string) {
+    this.filtroInicio.set(v);
+    this.recarregarSeValido();
+  }
+
+  mudarFim(v: string) {
+    this.filtroFim.set(v);
+    this.recarregarSeValido();
+  }
+
+  private recarregarSeValido() {
+    const i = this.filtroInicio(), f = this.filtroFim();
+    if (i && f && i <= f) this.loadAll();
+  }
+
+  fimFormatado() {
+    const [a, m, d] = (this.filtroFim() || '').split('-');
+    return d ? `${d}/${m}/${a}` : '—';
   }
 
   atalhoData(tipo: 'mes-atual' | 'proximo-mes' | 'ano-atual') {
